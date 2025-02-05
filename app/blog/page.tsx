@@ -33,7 +33,8 @@ export default function Blog() {
 
   const fetchBlogPosts = async () => {
     try {
-      const response = await fetch('http://localhost:8080/blog/')
+      const response = await fetch('http://localhost:8080/blog/?page=1&size=20')
+      console.log(response)
       if (!response.ok) {
         throw new Error('Failed to fetch blog posts')
       }

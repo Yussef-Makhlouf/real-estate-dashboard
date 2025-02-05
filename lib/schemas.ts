@@ -1,43 +1,273 @@
-import { Description } from "@radix-ui/react-toast"
+// import * as z from "zod"
+// const validateLanguage = (text: string, lang: 'ar' | 'en') => {
+//   const arabicRegex = /^[\u0600-\u06FF\s]+$/
+//   const englishRegex = /^[A-Za-z\s]+$/
+//   return lang === 'ar' ? arabicRegex.test(text) : englishRegex.test(text)
+// }
+
+// export const blogPostSchema = z.discriminatedUnion('lang', [
+//   z.object({
+//     lang: z.literal('ar'),
+//     title: z.string()
+//       .min(1, "العنوان مطلوب")
+//       .refine(text => validateLanguage(text, 'ar'), {
+//         message: "يجب أن يحتوي النص على حروف عربية فقط"
+//       }),
+//     description: z.string()
+//       .min(1, "المحتوى مطلوب")
+//       .refine(text => validateLanguage(text, 'ar'), {
+//         message: "يجب أن يحتوي النص على حروف عربية فقط"
+//       }),
+//     Keywords: z.array(z.string()).optional(),
+//     image: z.union([z.string().url(), z.instanceof(File)]).optional(),
+//   }),
+//   z.object({
+//     lang: z.literal('en'),
+//     title: z.string()
+//       .min(1, "Title is required")
+//       .refine(text => validateLanguage(text, 'en'), {
+//         message: "Text must contain only English characters"
+//       }),
+//     description: z.string()
+//       .min(1, "Content is required")
+//       .refine(text => validateLanguage(text, 'en'), {
+//         message: "Text must contain only English characters"
+//       }),
+//     Keywords: z.array(z.string()).optional(),
+//     image: z.union([z.string().url(), z.instanceof(File)]).optional(),
+//   })
+// ]);
+
+
+// export const faqSchema = z.object({
+//   question: z.string()
+//     .min(1, "السؤال مطلوب")
+//     .refine(
+//       (text) => validateLanguage(text, 'ar'),
+//       { message: "يجب أن يحتوي السؤال على حروف عربية فقط" }
+//     )
+//     .refine(
+//       (text) => !validateLanguage(text, 'en'),
+//       { message: "Question must contain Arabic text only" }
+//     ),
+//   answer: z.string()
+//     .min(1, "الإجابة مطلوبة")
+//     .refine(
+//       (text) => validateLanguage(text, 'ar'),
+//       { message: "يجب أن تحتوي الإجابة على حروف عربية فقط" }
+//     )
+//     .refine(
+//       (text) => !validateLanguage(text, 'en'),
+//       { message: "Answer must contain Arabic text only" }
+//     ),
+//   keywords: z.array(z.string()),
+//   lang: z.string().min(1),
+// });
+
+// export const reviewSchema = z.object({
+//   name: z.string()
+//     .min(1, "الاسم مطلوب")
+//     .refine(
+//       (text) => validateLanguage(text, 'ar'),
+//       { message: "يجب أن يحتوي الاسم على حروف عربية فقط" }
+//     )
+//     .refine(
+//       (text) => !validateLanguage(text, 'en'),
+//       { message: "Name must contain Arabic text only" }
+//     ),
+//   comment: z.string()
+//     .min(1, "التعليق مطلوب")
+//     .refine(
+//       (text) => validateLanguage(text, 'ar'),
+//       { message: "يجب أن يحتوي التعليق على حروف عربية فقط" }
+//     )
+//     .refine(
+//       (text) => !validateLanguage(text, 'en'),
+//       { message: "Comment must contain Arabic text only" }
+//     ),
+//   rating: z.number().min(1).max(5),
+//   image: z.any().optional(),
+//   lang: z.string().min(1),
+// });
+
+// export const propertySchema = z.object({
+//   title: z.string()
+//     .min(1, "العنوان مطلوب")
+//     .refine(
+//       (text) => validateLanguage(text, 'ar'),
+//       { message: "يجب أن يحتوي العنوان على حروف عربية فقط" }
+//     )
+//     .refine(
+//       (text) => !validateLanguage(text, 'en'),
+//       { message: "Title must contain Arabic text only" }
+//     ),
+//   description: z.string()
+//     .min(1, "الوصف مطلوب")
+//     .refine(
+//       (text) => validateLanguage(text, 'ar'),
+//       { message: "يجب أن يحتوي الوصف على حروف عربية فقط" }
+//     )
+//     .refine(
+//       (text) => !validateLanguage(text, 'en'),
+//       { message: "Description must contain Arabic text only" }
+//     ),
+//   price: z.number().min(0, "السعر يجب أن يكون أكبر من صفر"),
+//   location: z.string().min(1, "الموقع مطلوب"),
+//   type: z.string().min(1, "نوع العقار مطلوب"),
+//   images: z.array(z.any()),
+//   keywords: z.array(z.string()),
+//   lang: z.string().min(1),
+// });
+
+
+
+
+
+
+
+
+
+
 import * as z from "zod"
 
+const validateLanguage = (text: string, lang: 'ar' | 'en') => {
+  const arabicRegex = /^[\u0600-\u06FF\s]+$/
+  const englishRegex = /^[A-Za-z\s]+$/
+  return lang === 'ar' ? arabicRegex.test(text) : englishRegex.test(text)
+}
 
-export const blogPostSchema = z.object({
-  title: z.string().min(1, "العنوان بالعربية مطلوب"),
-  description: z.string().min(1, "المحتوى بالعربية مطلوب"),
-  Keywords: z.array(z.string()).optional(),  // Allow empty keywords
-  image: z.union([z.string().url(), z.instanceof(File)]).optional(), // Supports both URLs and Files
-  // lang: z.string().min(1),
-});
+export const blogPostSchema = z.discriminatedUnion('lang', [
+  z.object({
+    lang: z.literal('ar'),
+    title: z.string()
+      .min(1, "العنوان مطلوب")
+      .refine(text => validateLanguage(text, 'ar'), {
+        message: "يجب أن يحتوي النص على حروف عربية فقط"
+      }),
+    description: z.string()
+      .min(1, "المحتوى مطلوب")
+      .refine(text => validateLanguage(text, 'ar'), {
+        message: "يجب أن يحتوي النص على حروف عربية فقط"
+      }),
+    Keywords: z.array(z.string()).optional(),
+    image: z.union([z.string().url(), z.instanceof(File)]).optional(),
+  }),
+  z.object({
+    lang: z.literal('en'),
+    title: z.string()
+      .min(1, "Title is required")
+      .refine(text => validateLanguage(text, 'en'), {
+        message: "Text must contain only English characters"
+      }),
+    description: z.string()
+      .min(1, "Content is required")
+      .refine(text => validateLanguage(text, 'en'), {
+        message: "Text must contain only English characters"
+      }),
+    Keywords: z.array(z.string()).optional(),
+    image: z.union([z.string().url(), z.instanceof(File)]).optional(),
+  })
+]);
 
+export const faqSchema = z.discriminatedUnion('lang', [
+  z.object({
+    lang: z.literal('ar'),
+    question: z.string()
+      .min(1, "السؤال مطلوب")
+      .refine(text => validateLanguage(text, 'ar'), {
+        message: "يجب أن يحتوي السؤال على حروف عربية فقط"
+      }),
+    answer: z.string()
+      .min(1, "الإجابة مطلوبة")
+      .refine(text => validateLanguage(text, 'ar'), {
+        message: "يجب أن تحتوي الإجابة على حروف عربية فقط"
+      }),
+    keywords: z.array(z.string()),
+  }),
+  z.object({
+    lang: z.literal('en'),
+    question: z.string()
+      .min(1, "Question is required")
+      .refine(text => validateLanguage(text, 'en'), {
+        message: "Question must contain only English characters"
+      }),
+    answer: z.string()
+      .min(1, "Answer is required")
+      .refine(text => validateLanguage(text, 'en'), {
+        message: "Answer must contain only English characters"
+      }),
+    keywords: z.array(z.string()),
+  })
+]);
 
-export const faqSchema = z.object({
-  questionAr: z.string().min(1, "السؤال بالعربية مطلوب"),
-  questionEn: z.string().min(1, "السؤال بالإنجليزية مطلوب"),
-  answerAr: z.string().min(1, "الإجابة بالعربية مطلوبة"),
-  answerEn: z.string().min(1, "الإجابة بالإنجليزية مطلوبة"),
-  keywords: z.array(z.string()),
-  image: z.any().optional(),
-})
+export const reviewSchema = z.discriminatedUnion('lang', [
+  z.object({
+    lang: z.literal('ar'),
+    name: z.string()
+      .min(1, "الاسم مطلوب")
+      .refine(text => validateLanguage(text, 'ar'), {
+        message: "يجب أن يحتوي الاسم على حروف عربية فقط"
+      }),
+    comment: z.string()
+      .min(1, "التعليق مطلوب")
+      .refine(text => validateLanguage(text, 'ar'), {
+        message: "يجب أن يحتوي التعليق على حروف عربية فقط"
+      }),
+    rating: z.number().min(1).max(5),
+    image: z.any().optional(),
+  }),
+  z.object({
+    lang: z.literal('en'),
+    name: z.string()
+      .min(1, "Name is required")
+      .refine(text => validateLanguage(text, 'en'), {
+        message: "Name must contain only English characters"
+      }),
+    comment: z.string()
+      .min(1, "Comment is required")
+      .refine(text => validateLanguage(text, 'en'), {
+        message: "Comment must contain only English characters"
+      }),
+    rating: z.number().min(1).max(5),
+    image: z.any().optional(),
+  })
+]);
 
-export const reviewSchema = z.object({
-  nameAr: z.string().min(1, "الاسم بالعربية مطلوب"),
-  nameEn: z.string().min(1, "الاسم بالإنجليزية مطلوب"),
-  commentAr: z.string().min(1, "التعليق بالعربية مطلوب"),
-  commentEn: z.string().min(1, "التعليق بالإنجليزية مطلوب"),
-  rating: z.number().min(1).max(5),
-  image: z.any().optional(),
-})
-
-export const propertySchema = z.object({
-  titleAr: z.string().min(1, "العنوان بالعربية مطلوب"),
-  titleEn: z.string().min(1, "العنوان بالإنجليزية مطلوب"),
-  descriptionAr: z.string().min(1, "الوصف بالعربية مطلوب"),
-  descriptionEn: z.string().min(1, "الوصف بالإنجليزية مطلوب"),
-  price: z.number().min(0, "السعر يجب أن يكون أكبر من صفر"),
-  location: z.string().min(1, "الموقع مطلوب"),
-  type: z.string().min(1, "نوع العقار مطلوب"),
-  images: z.array(z.any()),
-  keywords: z.array(z.string()),
-})
-
+export const propertySchema = z.discriminatedUnion('lang', [
+  z.object({
+    lang: z.literal('ar'),
+    title: z.string()
+      .min(1, "العنوان مطلوب")
+      .refine(text => validateLanguage(text, 'ar'), {
+        message: "يجب أن يحتوي العنوان على حروف عربية فقط"
+      }),
+    description: z.string()
+      .min(1, "الوصف مطلوب")
+      .refine(text => validateLanguage(text, 'ar'), {
+        message: "يجب أن يحتوي الوصف على حروف عربية فقط"
+      }),
+    price: z.number().min(0, "السعر يجب أن يكون أكبر من صفر"),
+    location: z.string().min(1, "الموقع مطلوب"),
+    type: z.string().min(1, "نوع العقار مطلوب"),
+    images: z.array(z.any()),
+    keywords: z.array(z.string()),
+  }),
+  z.object({
+    lang: z.literal('en'),
+    title: z.string()
+      .min(1, "Title is required")
+      .refine(text => validateLanguage(text, 'en'), {
+        message: "Title must contain only English characters"
+      }),
+    description: z.string()
+      .min(1, "Description is required")
+      .refine(text => validateLanguage(text, 'en'), {
+        message: "Description must contain only English characters"
+      }),
+    price: z.number().min(0, "Price must be greater than zero"),
+    location: z.string().min(1, "Location is required"),
+    type: z.string().min(1, "Property type is required"),
+    images: z.array(z.any()),
+    keywords: z.array(z.string()),
+  })
+]);

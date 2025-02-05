@@ -26,10 +26,35 @@ export default function Login() {
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        // Handle login logic here
-        console.log(values);
+        const response = await fetch('http://localhost:8080/auth/signIn', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: values.email,
+            password: values.password,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Store user data in localStorage
+          localStorage.setItem('token', data.userUpdated.token);
+          // localStorage.setItem('userData', JSON.stringify(data.userUpdated));
+          
+          // Redirect to dashboard or home page
+          router.push('/roles');
+        } else {
+          console.error('Login failed:', data.message);
+          // Handle login error
+        // You can display an error message to the user or perform other actions
+        
+
+        }
       } catch (error) {
-        console.error(error);
+        console.error('Login error:', error);
       } finally {
         setIsLoading(false);
       }
