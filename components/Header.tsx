@@ -17,12 +17,14 @@ export function Header() {
         <h1 className="text-2xl font-bold text-gray-800 hidden md:block">لوحة تحكم العقارات</h1>
       </div>
       <div className="flex-1 mx-4 hidden md:block">
-        <Input
-          type="search"
-          placeholder="بحث..."
-          className="max-w-sm mx-auto"
-          startIcon={<Search className="h-4 w-4 text-gray-400" />}
-        />
+        <div className="relative max-w-sm mx-auto">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            type="search"
+            placeholder="بحث..."
+            className="pl-10"
+          />
+        </div>
       </div>
       <div className="flex items-center space-x-4">
         <Button variant="ghost" size="icon">

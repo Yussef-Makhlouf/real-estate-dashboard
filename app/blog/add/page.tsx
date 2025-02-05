@@ -18,7 +18,7 @@ import type { z } from "zod"
 type FormData = z.infer<typeof blogPostSchema>
 
 export default function AddBlogPost() {
-  const [keywords, setKeywords] = useState<string[]>([])
+  const [Keywords, setKeywords] = useState<string[]>([])
   const [newKeyword, setNewKeyword] = useState("")
 
   const {
@@ -31,24 +31,49 @@ export default function AddBlogPost() {
     resolver: zodResolver(blogPostSchema),
   })
 
-  const onSubmit = (data: FormData) => {
-    console.log("Form data:", data)
-    // Here you would typically send the data to your backend
+  const onSubmit = async (data: FormData) => {
+    try {
+      const formData = new FormData()
+      formData.append('title', data.title)
+      formData.append('description', data.description)
+      formData.append('Keywords', JSON.stringify(data.Keywords || []))
+
+        if (data.image instanceof File) {
+      formData.append("image", data.image)
+    }
+     
+      const response = await fetch('http://localhost:8080/blog/create', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const result = await response.json()
+      
+      if (response.ok) {
+        // Handle success - you can add toast notification or redirect
+        console.log('Blog created successfully:', result)
+      } else {
+        // Handle error
+        console.error('Error creating blog:', result)
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error)
+    }
   }
 
   const addKeyword = () => {
-    if (newKeyword && !keywords.includes(newKeyword)) {
-      const updatedKeywords = [...keywords, newKeyword]
+    if (newKeyword && !Keywords.includes(newKeyword)) {
+      const updatedKeywords = [...Keywords, newKeyword]
       setKeywords(updatedKeywords)
-      setValue("keywords", updatedKeywords)
+      setValue("Keywords", updatedKeywords)
       setNewKeyword("")
     }
   }
 
   const removeKeyword = (keywordToRemove: string) => {
-    const updatedKeywords = keywords.filter((k) => k !== keywordToRemove)
+    const updatedKeywords = Keywords.filter((k) => k !== keywordToRemove)
     setKeywords(updatedKeywords)
-    setValue("keywords", updatedKeywords)
+    setValue("Keywords", updatedKeywords)
   }
 
   return (
@@ -67,17 +92,17 @@ export default function AddBlogPost() {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <label className="block text-sm font-medium">العنوان (بالعربية)</label>
-                      <Input {...register("titleAr")} dir="rtl" className={errors.titleAr ? "border-red-500" : ""} />
-                      {errors.titleAr && <p className="text-red-500 text-sm">{errors.titleAr.message}</p>}
+                      <Input {...register("title")} dir="rtl" className={errors.title ? "border-red-500" : ""} />
+                      {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
                     </div>
                     <div className="space-y-2">
                       <label className="block text-sm font-medium">المحتوى (بالعربية)</label>
                       <RichTextEditor
-                        content={watch("contentAr") || ""}
-                        onChange={(content) => setValue("contentAr", content)}
+                        content={watch("description") || ""}
+                        onChange={(content) => setValue("description", content)}
                         language="ar"
                       />
-                      {errors.contentAr && <p className="text-red-500 text-sm">{errors.contentAr.message}</p>}
+                      {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
                     </div>
                   </div>
                 }
@@ -85,17 +110,17 @@ export default function AddBlogPost() {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <label className="block text-sm font-medium">Title (English)</label>
-                      <Input {...register("titleEn")} dir="ltr" className={errors.titleEn ? "border-red-500" : ""} />
-                      {errors.titleEn && <p className="text-red-500 text-sm">{errors.titleEn.message}</p>}
+                      <Input {...register("title")} dir="ltr" className={errors.title ? "border-red-500" : ""} />
+                      {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
                     </div>
                     <div className="space-y-2">
                       <label className="block text-sm font-medium">Content (English)</label>
                       <RichTextEditor
-                        content={watch("contentEn") || ""}
-                        onChange={(content) => setValue("contentEn", content)}
+                        content={watch("description") || ""}
+                        onChange={(content) => setValue("description", content)}
                         language="en"
                       />
-                      {errors.contentEn && <p className="text-red-500 text-sm">{errors.contentEn.message}</p>}
+                      {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
                     </div>
                   </div>
                 }
@@ -114,7 +139,7 @@ export default function AddBlogPost() {
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {keywords.map((keyword) => (
+                  {Keywords.map((keyword) => (
                     <span
                       key={keyword}
                       className="bg-primary text-primary-foreground px-2 py-1 rounded-md flex items-center gap-1"

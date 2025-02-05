@@ -5,10 +5,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { X, Upload } from "lucide-react"
 
-interface ImageUploadProps {
+
+export interface ImageUploadProps {
+
   onImagesChange: (images: File[]) => void
-  maxImages?: number
+
+  maxImages: number
+
+  initialImages?: string[]
+
 }
+
 
 export function ImageUpload({ onImagesChange, maxImages = 5 }: ImageUploadProps) {
   const [images, setImages] = useState<File[]>([])

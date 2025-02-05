@@ -1,13 +1,15 @@
+import { Description } from "@radix-ui/react-toast"
 import * as z from "zod"
 
+
 export const blogPostSchema = z.object({
-  titleAr: z.string().min(1, "العنوان بالعربية مطلوب"),
-  titleEn: z.string().min(1, "العنوان بالإنجليزية مطلوب"),
-  contentAr: z.string().min(1, "المحتوى بالعربية مطلوب"),
-  contentEn: z.string().min(1, "المحتوى بالإنجليزية مطلوب"),
-  keywords: z.array(z.string()),
-  image: z.any().optional(),
-})
+  title: z.string().min(1, "العنوان بالعربية مطلوب"),
+  description: z.string().min(1, "المحتوى بالعربية مطلوب"),
+  Keywords: z.array(z.string()).optional(),  // Allow empty keywords
+  image: z.union([z.string().url(), z.instanceof(File)]).optional(), // Supports both URLs and Files
+  // lang: z.string().min(1),
+});
+
 
 export const faqSchema = z.object({
   questionAr: z.string().min(1, "السؤال بالعربية مطلوب"),

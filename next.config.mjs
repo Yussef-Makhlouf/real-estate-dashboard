@@ -15,6 +15,7 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    domains: ['ik.imagekit.io'],
   },
   experimental: {
     webpackBuildWorker: true,

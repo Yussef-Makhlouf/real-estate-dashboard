@@ -154,7 +154,7 @@ export function RichTextEditor({
           <AlignRight className="h-4 w-4" />
         </Button>
       </div>
-      <EditorContent editor={editor} className="p-4" />
+      <EditorContent editor={editor} className="p-12" />
     </div>
   )
 }
