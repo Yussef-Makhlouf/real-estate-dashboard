@@ -361,7 +361,7 @@ console.log(formData)
                       <label className="block text-sm font-medium">صورة المقال</label>
                       <ImageUpload onImagesChange={(images) => setValueAr("image", images[0])} maxImages={1} />
                     </div>
-                    <Button type="submit">نشر المقال بالعربية</Button>
+                    <Button type="submit" >نشر المقال بالعربية</Button>
                   </div>
                 </form>
               }

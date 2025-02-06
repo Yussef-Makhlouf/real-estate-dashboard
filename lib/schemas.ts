@@ -131,10 +131,13 @@
 import * as z from "zod"
 
 const validateLanguage = (text: string, lang: 'ar' | 'en') => {
-  const arabicRegex = /^[\u0600-\u06FF\s]+$/
-  const englishRegex = /^[A-Za-z\s]+$/
+  const arabicRegex = /^[\u0600-\u06FF\s،؛؟٠-٩<>\/]+$/;
+  const englishRegex = /^[A-Za-z\s.,!?0-9؟؛،<>\/]+$/;
   return lang === 'ar' ? arabicRegex.test(text) : englishRegex.test(text)
 }
+const stripHtml = (html: string) => {
+  return html.replace(/<[^>]*>?/gm, ''); // إزالة جميع علامات HTML
+};
 
 export const blogPostSchema = z.discriminatedUnion('lang', [
   z.object({
@@ -146,7 +149,7 @@ export const blogPostSchema = z.discriminatedUnion('lang', [
       }),
     description: z.string()
       .min(1, "المحتوى مطلوب")
-      .refine(text => validateLanguage(text, 'ar'), {
+      .refine(text => validateLanguage(stripHtml(text), 'ar'), {
         message: "يجب أن يحتوي النص على حروف عربية فقط"
       }),
     Keywords: z.array(z.string()).optional(),
@@ -161,7 +164,7 @@ export const blogPostSchema = z.discriminatedUnion('lang', [
       }),
     description: z.string()
       .min(1, "Content is required")
-      .refine(text => validateLanguage(text, 'en'), {
+      .refine(text => validateLanguage(stripHtml(text), 'en'), {
         message: "Text must contain only English characters"
       }),
     Keywords: z.array(z.string()).optional(),
