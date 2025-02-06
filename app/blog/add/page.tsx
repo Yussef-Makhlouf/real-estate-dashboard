@@ -305,6 +305,7 @@ console.log(formData)
           </CardHeader>
           <CardContent>
             <TabComponent
+            
               arabicContent={
                 <form onSubmit={handleSubmitAr(onSubmitArabic)} className="space-y-6">
                   <div className="space-y-4">
