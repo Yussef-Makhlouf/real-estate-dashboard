@@ -1,61 +1,80 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Header } from "@/components/Header"
-import { Sidebar } from "@/components/Sidebar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ConfirmDialog } from "@/components/ui/confirm-dialog"
-import Link from "next/link"
-import { Edit, Trash2, Star } from "lucide-react"
 
-const reviews = [
-  {
-    id: 1,
-    nameAr: "أحمد محمد",
-    nameEn: "Ahmed Mohammed",
-    rating: 5,
-    commentAr: "خدمة ممتازة وسريعة في إيجاد العقار المناسب.",
-    commentEn: "Excellent and fast service in finding the right property.",
-    image: "/placeholder.svg?height=100&width=100",
-  },
-  {
-    id: 2,
-    nameAr: "سارة علي",
-    nameEn: "Sarah Ali",
-    rating: 4,
-    commentAr: "تجربة جيدة جدًا، ولكن كان هناك بعض التأخير في الرد.",
-    commentEn: "Very good experience, but there was some delay in response.",
-    image: "/placeholder.svg?height=100&width=100",
-  },
-  {
-    id: 3,
-    nameAr: "خالد عمر",
-    nameEn: "Khalid Omar",
-    rating: 5,
-    commentAr: "أفضل وكالة عقارية تعاملت معها. شكرًا لكم!",
-    commentEn: "The best real estate agency I have dealt with. Thank you!",
-    image: "/placeholder.svg?height=100&width=100",
-  },
-]
+import { useState, useEffect } from "react";
+import { Header } from "@/components/Header";
+import { Sidebar } from "@/components/Sidebar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import Link from "next/link";
+import { Edit, Trash2, Star } from "lucide-react";
+
+// Define the type for a review
+type Review = {
+  Image: {
+    secure_url: string;
+    public_id: string;
+  };
+  lang: string;
+  name: string;
+  country: string;
+  rate: number;
+  description: string;
+  createdBy: string;
+  customId: string;
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export default function Reviews() {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [reviewToDelete, setReviewToDelete] = useState<number | null>(null)
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [reviewToDelete, setReviewToDelete] = useState<string | null>(null);
 
-  const handleDelete = (id: number) => {
-    setReviewToDelete(id)
-    setDeleteDialogOpen(true)
-  }
+  // Fetch reviews from API
+  const fetchReviews = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/review/");
+      const data = await response.json();
+      //  console.log("API Response:", data); // Debugging line
+ 
+      if (data.message === "Done") {
+        const reviewData = Array.isArray(data.reviews) ? data.reviews : [data.review];
+        // console.log(reviewData);
+        
+        setReviews(reviewData);
+      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    }
+  };
 
+
+  
+  useEffect(() => {
+    
+    fetchReviews();
+  }, []);
+
+
+
+  // Handle delete button click
+  const handleDelete = (id: string) => {
+    setReviewToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  // Confirm delete (API call should be added here)
   const confirmDelete = () => {
     if (reviewToDelete) {
-      // Here you would typically make an API call to delete the review
-      console.log("Deleting review:", reviewToDelete)
+      console.log("Deleting review:", reviewToDelete);
+      // TODO: Make an API call to delete the review from the backend
     }
-    setDeleteDialogOpen(false)
-    setReviewToDelete(null)
-  }
+    setDeleteDialogOpen(false);
+    setReviewToDelete(null);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -70,34 +89,37 @@ export default function Reviews() {
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {reviews.map((review) => (
-            <Card key={review.id}>
+            <Card key={review._id}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                    <img src={review.image || "/placeholder.svg"} alt="" className="w-10 h-10 rounded-full" />
+                    <img
+                      src={review.Image.secure_url || "/placeholder.svg"}
+                      alt={review.name}
+                      className="w-10 h-10 rounded-full"
+                    />
                     <div>
-                      <div>{review.nameAr}</div>
-                      <div className="text-sm text-gray-500">{review.nameEn}</div>
+                      <div>{review.name}</div>
+                      <div className="text-sm text-gray-500">{review.country}</div>
                     </div>
                   </div>
                   <div className="flex">
-                    {Array.from({ length: review.rating }).map((_, index) => (
+                    {Array.from({ length: review.rate }).map((_, index) => (
                       <Star key={index} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-right mb-2">{review.commentAr}</p>
-                <p className="text-left text-gray-500 mb-4">{review.commentEn}</p>
+                <p className="text-right mb-2">{review.description}</p>
                 <div className="flex justify-end space-x-2 rtl:space-x-reverse">
-                  <Link href={`/reviews/edit/${review.id}`}>
+                  <Link href={`/reviews/edit/${review._id}`}>
                     <Button variant="outline" size="sm">
                       <Edit className="h-4 w-4 ml-2" />
                       تعديل
                     </Button>
                   </Link>
-                  <Button variant="destructive" size="sm" onClick={() => handleDelete(review.id)}>
+                  <Button variant="destructive" size="sm" onClick={() => handleDelete(review._id)}>
                     <Trash2 className="h-4 w-4 ml-2" />
                     حذف
                   </Button>
@@ -116,6 +138,5 @@ export default function Reviews() {
         />
       </main>
     </div>
-  )
+  );
 }
-
