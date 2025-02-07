@@ -2,6 +2,7 @@ import "./globals.css"
 import { Noto_Kufi_Arabic } from "next/font/google"
 import { SidebarProvider } from "@/components/SidebarProvider"
 import type React from "react"
+import { Toaster } from '@/components/ui/toaster';
 
 const notoKufiArabic = Noto_Kufi_Arabic({ subsets: ["arabic"] })
 
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="ar" dir="rtl">
       <body className={notoKufiArabic.className}>
         <SidebarProvider>{children}</SidebarProvider>
+        <Toaster />
       </body>
     </html>
   )

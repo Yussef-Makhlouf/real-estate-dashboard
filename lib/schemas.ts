@@ -203,6 +203,39 @@ export const faqSchema = z.discriminatedUnion('lang', [
   })
 ]);
 
+// export const reviewSchema = z.discriminatedUnion('lang', [
+//   z.object({
+//     lang: z.literal('ar'),
+//     name: z.string()
+//       .min(1, "الاسم مطلوب")
+//       .refine(text => validateLanguage(text, 'ar'), {
+//         message: "يجب أن يحتوي الاسم على حروف عربية فقط"
+//       }),
+//     comment: z.string()
+//       .min(1, "التعليق مطلوب")
+//       .refine(text => validateLanguage(text, 'ar'), {
+//         message: "يجب أن يحتوي التعليق على حروف عربية فقط"
+//       }),
+//     rating: z.number().min(1).max(5),
+//     image: z.any().optional(),
+//   }),
+//   z.object({
+//     lang: z.literal('en'),
+//     name: z.string()
+//       .min(1, "Name is required")
+//       .refine(text => validateLanguage(text, 'en'), {
+//         message: "Name must contain only English characters"
+//       }),
+//     comment: z.string()
+//       .min(1, "Comment is required")
+//       .refine(text => validateLanguage(text, 'en'), {
+//         message: "Comment must contain only English characters"
+//       }),
+//     rating: z.number().min(1).max(5),
+//     image: z.any().optional(),
+//   })
+// ]);
+
 export const reviewSchema = z.discriminatedUnion('lang', [
   z.object({
     lang: z.literal('ar'),
@@ -211,13 +244,21 @@ export const reviewSchema = z.discriminatedUnion('lang', [
       .refine(text => validateLanguage(text, 'ar'), {
         message: "يجب أن يحتوي الاسم على حروف عربية فقط"
       }),
-    comment: z.string()
+    country: z.string().min(1, "الدولة مطلوبة"),
+    description: z.string()
       .min(1, "التعليق مطلوب")
       .refine(text => validateLanguage(text, 'ar'), {
         message: "يجب أن يحتوي التعليق على حروف عربية فقط"
       }),
-    rating: z.number().min(1).max(5),
-    image: z.any().optional(),
+    rate: z.number().min(1).max(5),
+    image: z.object({
+      secure_url: z.string().url("رابط الصورة غير صحيح"),
+      public_id: z.string().min(1, "معرف الصورة مطلوب")
+    }).optional(),
+    createdBy: z.string().min(1, "معرف المُنشئ مطلوب"),
+    customId: z.string().min(1, "معرف مخصص مطلوب"),
+    createdAt: z.string().datetime(),
+    updatedAt: z.string().datetime(),
   }),
   z.object({
     lang: z.literal('en'),
@@ -226,13 +267,21 @@ export const reviewSchema = z.discriminatedUnion('lang', [
       .refine(text => validateLanguage(text, 'en'), {
         message: "Name must contain only English characters"
       }),
-    comment: z.string()
+    country: z.string().min(1, "Country is required"),
+    description: z.string()
       .min(1, "Comment is required")
       .refine(text => validateLanguage(text, 'en'), {
         message: "Comment must contain only English characters"
       }),
-    rating: z.number().min(1).max(5),
-    image: z.any().optional(),
+    rate: z.number().min(1).max(5),
+    image: z.object({
+      secure_url: z.string().url("Invalid image URL"),
+      public_id: z.string().min(1, "Public ID is required")
+    }).optional(),
+    createdBy: z.string().min(1, "CreatedBy is required"),
+    customId: z.string().min(1, "Custom ID is required"),
+    createdAt: z.string().datetime(),
+    updatedAt: z.string().datetime(),
   })
 ]);
 
