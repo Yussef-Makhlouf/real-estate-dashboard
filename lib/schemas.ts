@@ -182,7 +182,7 @@ export const faqSchema = z.discriminatedUnion('lang', [
       }),
     answer: z.string()
       .min(1, "الإجابة مطلوبة")
-      .refine(text => validateLanguage(text, 'ar'), {
+      .refine(text => validateLanguage(stripHtml(text), 'ar'), {
         message: "يجب أن تحتوي الإجابة على حروف عربية فقط"
       }),
   }),

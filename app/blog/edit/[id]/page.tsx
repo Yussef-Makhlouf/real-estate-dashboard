@@ -1,638 +1,10 @@
-// "use client";
-
-// import { useState, useEffect } from "react";
-// import { useForm } from "react-hook-form";
-// import { zodResolver } from "@hookform/resolvers/zod";
-// import { Loader2, X } from "lucide-react";
-// import { useRouter } from "next/navigation";
-// import { Header } from "@/components/Header";
-// import { Sidebar } from "@/components/Sidebar";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { RichTextEditor } from "@/components/ui/rich-text-editor";
-// import { TabComponent } from "@/components/ui/tab-component";
-// import { ImageUpload } from "@/components/ui/image-upload";
-// import { blogPostSchema } from "@/lib/schemas";
-// import type { z } from "zod";
-
-// type FormData = z.infer<typeof blogPostSchema>;
-// export interface BlogPost {
-//   _id: string;
-//   title: string;
-//   description: string;
-//   Image: {
-//     secure_url: string;
-//   };
-//   createdAt: string;
-//   customId: string;
-// }
-
-// export default function EditBlogPost({ params }: { params: { id: string } }) {
-//   const router = useRouter();
-//   const [keywords, setKeywords] = useState<string[]>([]);
-//   const [newKeyword, setNewKeyword] = useState("");
-//   const [isLoading, setIsLoading] = useState(false);
-
-//   const {
-//     register,
-//     handleSubmit,
-//     setValue,
-//     watch,
-//     formState: { errors },
-//   } = useForm<FormData>({
-//     resolver: zodResolver(blogPostSchema),
-//   });
-
-//   useEffect(() => {
-//     // Fetch existing blog data
-//     const fetchBlogData = async () => {
-//       try {
-//         const response = await fetch(`http://localhost:8080/blog/findone/${params.id}`);
-//         const data = await response.json();
-
-//         // Set form values from API data
-//         setValue("title", data.blog.title);
-//         setValue("description", data.blog.description);
-//         setKeywords(data.blog.Keywords || []);
-//         setValue("image", data.blog.Image.secure_url);
-//       } catch (error) {
-//         console.error("Error fetching blog data:", error);
-//       }
-//     };
-
-//     fetchBlogData();
-//   }, [params.id, setValue]);
-
-//   const onSubmit = async (data: FormData) => {
-//     console.log("Form Data:", data); // Debugging: Log form data
-//     console.log("Validation Errors:", errors); // Debugging: Log validation errors
-//     setIsLoading(true);
-
-//     try {
-//         const formData = new FormData();
-//         formData.append("title", data.title || "");
-//         formData.append("description", data.description || "");
-
-//         // Append keywords
-//         keywords.forEach((keyword) => {
-//             formData.append("Keywords", keyword);
-//         });
-
-//         // Append image if it's a File object
-//         // Handle image upload
-//     if (data.image instanceof File) {
-//       formData.append("image", data.image)
-//     }
-
-//         // Make PUT request to update blog
-//         const response = await fetch(`http://localhost:8080/blog/update/${params.id}`, {
-//             method: "PUT",
-//             body: formData,
-//         });
-
-//         console.log("Server Response Status:", response.status); // Debugging
-
-//         if (!response.ok) {
-//             throw new Error("Failed to update blog");
-//         }
-
-//         const result = await response.json();
-//         console.log("Blog updated successfully:", result);
-
-//         // Redirect to blog list page
-//         setTimeout(() => {
-//             router.push("/blog");
-//             router.refresh();
-//         }, 500);
-//     } catch (error) {
-//         console.error("Error updating blog:", error);
-//     } finally {
-//         setIsLoading(false);
-//     }
-// };
-//   const addKeyword = () => {
-//     if (newKeyword && !keywords.includes(newKeyword)) {
-//       const updatedKeywords = [...keywords, newKeyword];
-//       setKeywords(updatedKeywords);
-//       setValue("Keywords", updatedKeywords); // Ensure this matches the schema key
-//       setNewKeyword("");
-//     }
-//   };
-
-//   const removeKeyword = (keywordToRemove: string) => {
-//     const updatedKeywords = keywords.filter((k) => k !== keywordToRemove);
-//     setKeywords(updatedKeywords);
-//     setValue("Keywords", updatedKeywords); // Ensure this matches the schema key
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gray-100">
-//       <Header />
-//       <Sidebar />
-//       <main className="pt-16 px-4 sm:px-6 lg:px-8" dir="rtl">
-//         <Card>
-//           <CardHeader>
-//             <CardTitle>تعديل المقال</CardTitle>
-//           </CardHeader>
-//           <CardContent>
-//             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-//               <TabComponent
-//                 arabicContent={
-//                   <div className="space-y-4">
-//                     <div className="space-y-2">
-//                       <label className="block text-sm font-medium">العنوان (بالعربية)</label>
-//                       <Input
-//                         {...register("title")}
-//                         dir="rtl"
-//                         className={errors.title ? "border-red-500" : ""}
-//                       />
-//                       {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
-//                     </div>
-//                     <div className="space-y-2">
-//                       <label className="block text-sm font-medium">المحتوى (بالعربية)</label>
-//                       <RichTextEditor
-//                         content={watch("description") || ""}
-//                         onChange={(content) => setValue("description", content)}
-//                         language="ar"
-//                       />
-//                       {errors.description && (
-//                         <p className="text-red-500 text-sm">{errors.description.message}</p>
-//                       )}
-//                     </div>
-//                   </div>
-//                 }
-//                 englishContent={
-//                   <div className="space-y-4">
-//                     <div className="space-y-2">
-//                       <label className="block text-sm font-medium">Title (English)</label>
-//                       <Input
-//                         {...register("title")}
-//                         dir="ltr"
-//                         className={errors.title ? "border-red-500" : ""}
-//                       />
-//                       {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
-//                     </div>
-//                     <div className="space-y-2">
-//                       <label className="block text-sm font-medium">Content (English)</label>
-//                       <RichTextEditor
-//                         content={watch("description") || ""}
-//                         onChange={(content) => setValue("description", content)}
-//                         language="en"
-//                       />
-//                       {errors.description && (
-//                         <p className="text-red-500 text-sm">{errors.description.message}</p>
-//                       )}
-//                     </div>
-//                   </div>
-//                 }
-//               />
-
-//               <div className="space-y-2">
-//                 <label className="block text-sm font-medium">الكلمات المفتاحية</label>
-//                 <div className="flex gap-2">
-//                   <Input
-//                     value={newKeyword}
-//                     onChange={(e) => setNewKeyword(e.target.value)}
-//                     placeholder="أضف كلمة مفتاحية"
-//                   />
-//                   <Button type="button" onClick={addKeyword}>
-//                     إضافة
-//                   </Button>
-//                 </div>
-//                 <div className="flex flex-wrap gap-2 mt-2">
-//                   {keywords.map((keyword) => (
-//                     <span
-//                       key={keyword}
-//                       className="bg-primary text-primary-foreground px-2 py-1 rounded-md flex items-center gap-1"
-//                     >
-//                       {keyword}
-//                       <button
-//                         type="button"
-//                         onClick={() => removeKeyword(keyword)}
-//                         className="hover:text-red-500"
-//                       >
-//                         <X className="h-4 w-4" />
-//                       </button>
-//                     </span>
-//                   ))}
-//                 </div>
-//               </div>
-
-//               <div className="space-y-2">
-//                 <label className="block text-sm font-medium">صورة المقال</label>
-//                 <ImageUpload
-//                   onImagesChange={(images) => setValue("image", images[0])}
-//                   maxImages={1}
-//                   initialImages={[watch("image") as string]}
-//                 />
-//               </div>
-
-//                 <Button type="submit" disabled={isLoading} className="w-full">
-//                 {isLoading ? (
-//                   <>
-//                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-//                   جاري الحفظ...
-//                   </>
-//                 ) : (
-//                   "حفظ التغييرات"
-//                 )}
-//                 </Button>
-
-//             </form>
-//           </CardContent>
-//         </Card>
-//       </main>
-//     </div>
-//   );
-// }
-"use client"
-
-import { useState, useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2, X } from "lucide-react"
-import { useParams, useRouter } from "next/navigation"
-import { Header } from "@/components/Header"
-import { Sidebar } from "@/components/Sidebar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { TabComponent } from "@/components/ui/tab-component"
-import { ImageUpload } from "@/components/ui/image-upload"
-import { blogPostSchema } from "@/lib/schemas"
-import { useToast } from "@/components/ui/use-toast"
-import type { z } from "zod"
-
-type FormData = z.infer<typeof blogPostSchema>
-
-export default function EditBlogPost() {
-  const params = useParams()
-  const router = useRouter()
-  const { toast } = useToast()
-  const [keywordsAr, setKeywordsAr] = useState<string[]>([])
-  const [keywordsEn, setKeywordsEn] = useState<string[]>([])
-  const [newKeywordAr, setNewKeywordAr] = useState("")
-  const [newKeywordEn, setNewKeywordEn] = useState("")
-  const [isLoadingAr, setIsLoadingAr] = useState(false)
-  const [isLoadingEn, setIsLoadingEn] = useState(false)
-
-  const {
-    register: registerAr,
-    handleSubmit: handleSubmitAr,
-    setValue: setValueAr,
-    watch: watchAr,
-    formState: { errors: errorsAr },
-  } = useForm<FormData>({
-    resolver: zodResolver(blogPostSchema),
-    defaultValues: { lang: 'ar' }
-  })
-
-  const {
-    register: registerEn,
-    handleSubmit: handleSubmitEn,
-    setValue: setValueEn,
-    watch: watchEn,
-    formState: { errors: errorsEn },
-  } = useForm<FormData>({
-    resolver: zodResolver(blogPostSchema),
-    defaultValues: { lang: 'en' }
-  })
-
-  useEffect(() => {
-    const fetchBlogData = async () => {
-      try {
-        const response = await fetch(`http://localhost:8080/blog/findOne/${params.id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        })
-        const data = await response.json()
-  console.log(data)
-        // Handle Arabic data
-        if (data.blog.lang === 'ar') {
-          setValueAr('title', data.blog.title)
-          setValueAr('description', data.blog.description)
-          setValueAr('image', data.blog.Image?.secure_url)
-          setKeywordsAr(data.blog.Keywords || [])
-        }
-  
-        // Handle English data
-        if (data.blog.lang === 'en') {
-          setValueEn('title', data.blog.title)
-          setValueEn('description', data.blog.description)
-          setValueEn('image', data.blog.Image?.secure_url)
-          setKeywordsEn(data.blog.Keywords || [])
-        }
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "خطأ",
-          description: "حدث خطأ أثناء جلب بيانات المقال"
-        })
-      }
-    }
-  
-    fetchBlogData()
-  }, [params.id, setValueAr, setValueEn, toast])
-  
-
-  const onSubmitArabic = async (data: FormData) => {
-    setIsLoadingAr(true)
-    try {
-      const formData = new FormData()
-      formData.append('title', data.title)
-      formData.append('description', data.description)
-      formData.append('Keywords', JSON.stringify(keywordsAr))
-      formData.append('lang', 'ar')
-      
-      if (data.image instanceof File) {
-        formData.append('image', data.image)
-      } else if (typeof data.image === 'string') {
-        formData.append('imageUrl', data.image)
-      }
-  
-      const response = await fetch(`http://localhost:8080/blog/update/${params.id}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData,
-      })
-  
-      const result = await response.json()
-      if (!response.ok) throw new Error(result.message)
-  
-      toast({
-        title: "تم التحديث",
-        description: "تم تحديث النسخة العربية بنجاح"
-      })
-      
-      router.push('/blog')
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "خطأ",
-        description: "حدث خطأ أثناء تحديث النسخة العربية"
-      })
-    } finally {
-      setIsLoadingAr(false)
-    }
-  }
-  
-  const onSubmitEnglish = async (data: FormData) => {
-    setIsLoadingEn(true)
-    try {
-      const formData = new FormData()
-      formData.append('title', data.title || '')
-      formData.append('description', data.description || '')
-      formData.append('lang', 'en')
-      
-      // Handle keywords as a string array
-      keywordsEn.forEach(keyword => {
-        formData.append('Keywords[]', keyword)
-      })
-      
-      // Handle image upload
-      if (data.image instanceof File) {
-        formData.append('image', data.image)
-      } else if (typeof data.image === 'string' && data.image) {
-        formData.append('currentImage', data.image)
-      }
-  
-      const response = await fetch(`http://localhost:8080/blog/update/${params.id}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData,
-      })
-  
-      const result = await response.json()
-      console.log('Update response:', result)
-  
-      toast({
-        title: "Success",
-        description: "English version updated successfully"
-      })
-      
-      router.push('/blog')
-    } catch (error) {
-      console.error('Update error:', error)
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update English version"
-      })
-    } finally {
-      setIsLoadingEn(false)
-    }
-  }
-  
-  return (
-    <div className="min-h-screen bg-gray-100">
-      <Header />
-      <Sidebar />
-      <main className="pt-16 px-4 sm:px-6 lg:px-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>تعديل المقال</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TabComponent
-              arabicContent={
-                <form onSubmit={handleSubmitAr(onSubmitArabic)} className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">العنوان (بالعربية)</label>
-                      <Input
-                        {...registerAr("title")}
-                        dir="rtl"
-                        className={errorsAr.title ? "border-red-500" : ""}
-                      />
-                      {errorsAr.title && <p className="text-red-500 text-sm">{errorsAr.title.message}</p>}
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">المحتوى (بالعربية)</label>
-                      <RichTextEditor
-                        content={watchAr("description") || ""}
-                        onChange={(content) => setValueAr("description", content)}
-                        language="ar"
-                      />
-                      {errorsAr.description && <p className="text-red-500 text-sm">{errorsAr.description.message}</p>}
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">الكلمات المفتاحية (عربي)</label>
-                      <div className="flex gap-2">
-                        <Input
-                          value={newKeywordAr}
-                          onChange={(e) => setNewKeywordAr(e.target.value)}
-                          placeholder="أضف كلمة مفتاحية"
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault()
-                              if (newKeywordAr && !keywordsAr.includes(newKeywordAr)) {
-                                setKeywordsAr([...keywordsAr, newKeywordAr])
-                                setNewKeywordAr("")
-                              }
-                            }
-                          }}
-                        />
-                        <Button 
-                          type="button" 
-                          onClick={() => {
-                            if (newKeywordAr && !keywordsAr.includes(newKeywordAr)) {
-                              setKeywordsAr([...keywordsAr, newKeywordAr])
-                              setNewKeywordAr("")
-                            }
-                          }}
-                        >
-                          إضافة
-                        </Button>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {keywordsAr.map((keyword) => (
-                          <span
-                            key={keyword}
-                            className="bg-primary text-primary-foreground px-2 py-1 rounded-md flex items-center gap-1"
-                          >
-                            {keyword}
-                            <button
-                              type="button"
-                              onClick={() => setKeywordsAr(keywordsAr.filter(k => k !== keyword))}
-                              className="hover:text-red-500"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">صورة المقال</label>
-                      <ImageUpload
-                        onImagesChange={(images) => setValueAr("image", images[0])}
-                        maxImages={1}
-                        initialImages={[watchAr("image") as string]}
-                      />
-                    </div>
-                    <Button type="submit" disabled={isLoadingAr} className="w-full">
-                      {isLoadingAr ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          جاري الحفظ...
-                        </>
-                      ) : (
-                        "حفظ النسخة العربية"
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              }
-              englishContent={
-                <form onSubmit={handleSubmitEn(onSubmitEnglish)} className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">Title (English)</label>
-                      <Input
-                        {...registerEn("title")}
-                        dir="ltr"
-                        className={errorsEn.title ? "border-red-500" : ""}
-                      />
-                      {errorsEn.title && <p className="text-red-500 text-sm">{errorsEn.title.message}</p>}
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">Content (English)</label>
-                      <RichTextEditor
-                        content={watchEn("description") || ""}
-                        onChange={(content) => setValueEn("description", content)}
-                        language="en"
-                      />
-                      {errorsEn.description && <p className="text-red-500 text-sm">{errorsEn.description.message}</p>}
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">Keywords (English)</label>
-                      <div className="flex gap-2">
-                        <Input
-                          value={newKeywordEn}
-                          onChange={(e) => setNewKeywordEn(e.target.value)}
-                          placeholder="Add keyword"
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault()
-                              if (newKeywordEn && !keywordsEn.includes(newKeywordEn)) {
-                                setKeywordsEn([...keywordsEn, newKeywordEn])
-                                setNewKeywordEn("")
-                              }
-                            }
-                          }}
-                        />
-                        <Button 
-                          type="button" 
-                          onClick={() => {
-                            if (newKeywordEn && !keywordsEn.includes(newKeywordEn)) {
-                              setKeywordsEn([...keywordsEn, newKeywordEn])
-                              setNewKeywordEn("")
-                            }
-                          }}
-                        >
-                          Add
-                        </Button>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {keywordsEn.map((keyword) => (
-                          <span
-                            key={keyword}
-                            className="bg-primary text-primary-foreground px-2 py-1 rounded-md flex items-center gap-1"
-                          >
-                            {keyword}
-                            <button
-                              type="button"
-                              onClick={() => setKeywordsEn(keywordsEn.filter(k => k !== keyword))}
-                              className="hover:text-red-500"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">Article Image</label>
-                      <ImageUpload
-                        onImagesChange={(images) => setValueEn("image", images[0])}
-                        maxImages={1}
-                        initialImages={[watchEn("image") as string]}
-                      />
-                    </div>
-                    <Button type="submit" disabled={isLoadingEn} className="w-full">
-                      {isLoadingEn ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        "Save English Version"
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              }
-            />
-          </CardContent>
-        </Card>
-      </main>
-    </div>
-  )
-}
 
 // "use client"
 
 // import { useState, useEffect } from "react"
 // import { useForm } from "react-hook-form"
 // import { zodResolver } from "@hookform/resolvers/zod"
-// import { X } from "lucide-react"
+// import { Loader2, X } from "lucide-react"
 // import { useParams, useRouter } from "next/navigation"
 // import { Header } from "@/components/Header"
 // import { Sidebar } from "@/components/Sidebar"
@@ -643,18 +15,21 @@ export default function EditBlogPost() {
 // import { TabComponent } from "@/components/ui/tab-component"
 // import { ImageUpload } from "@/components/ui/image-upload"
 // import { blogPostSchema } from "@/lib/schemas"
+// import { useToast } from "@/components/ui/use-toast"
 // import type { z } from "zod"
 
 // type FormData = z.infer<typeof blogPostSchema>
 
 // export default function EditBlogPost() {
 //   const params = useParams()
-//   const id = params.id
-
 //   const router = useRouter()
-//   const [Keywords, setKeywords] = useState<string[]>([])
-//   const [newKeyword, setNewKeyword] = useState("")
-//   const [activeTab, setActiveTab] = useState<'ar' | 'en'>('ar')
+//   const { toast } = useToast()
+//   const [keywordsAr, setKeywordsAr] = useState<string[]>([])
+//   const [keywordsEn, setKeywordsEn] = useState<string[]>([])
+//   const [newKeywordAr, setNewKeywordAr] = useState("")
+//   const [newKeywordEn, setNewKeywordEn] = useState("")
+//   const [isLoadingAr, setIsLoadingAr] = useState(false)
+//   const [isLoadingEn, setIsLoadingEn] = useState(false)
 
 //   const {
 //     register: registerAr,
@@ -664,9 +39,7 @@ export default function EditBlogPost() {
 //     formState: { errors: errorsAr },
 //   } = useForm<FormData>({
 //     resolver: zodResolver(blogPostSchema),
-//     defaultValues: {
-//       lang: 'ar'
-//     }
+//     defaultValues: { lang: 'ar' }
 //   })
 
 //   const {
@@ -677,101 +50,139 @@ export default function EditBlogPost() {
 //     formState: { errors: errorsEn },
 //   } = useForm<FormData>({
 //     resolver: zodResolver(blogPostSchema),
-//     defaultValues: {
-//       lang: 'en'
-//     }
+//     defaultValues: { lang: 'en' }
 //   })
 
-//   // جلب بيانات المدونة الحالية
 //   useEffect(() => {
-//     const fetchBlogPost = async () => {
+//     const fetchBlogData = async () => {
 //       try {
-//         const response = await fetch(`http://localhost:8080/blog/findOne/${id}`, {
+//         const response = await fetch(`http://localhost:8080/blog/findOne/${params.id}`, {
 //           headers: {
 //             Authorization: `Bearer ${localStorage.getItem('token')}`
 //           }
 //         })
 //         const data = await response.json()
-
-//         if (response.ok) {
-//           // تعيين القيم الافتراضية للنموذج
-//           setValueAr('title', data.title)
-//           setValueAr('description', data.description)
-//           setValueAr('image', data.image)
-//           setKeywords(data.Keywords || [])
-
-//           setValueEn('title', data.title)
-//           setValueEn('description', data.description)
-//           setValueEn('image', data.image)
+//   console.log(data)
+//         // Handle Arabic data
+//         if (data.blog.lang === 'ar') {
+//           setValueAr('title', data.blog.title)
+//           setValueAr('description', data.blog.description)
+//           setValueAr('image', data.blog.Image?.secure_url)
+//           setKeywordsAr(data.blog.Keywords || [])
+//         }
+  
+//         // Handle English data
+//         if (data.blog.lang === 'en') {
+//           setValueEn('title', data.blog.title)
+//           setValueEn('description', data.blog.description)
+//           setValueEn('image', data.blog.Image?.secure_url)
+//           setKeywordsEn(data.blog.Keywords || [])
 //         }
 //       } catch (error) {
-//         console.error('Error fetching blog post:', error)
+//         toast({
+//           variant: "destructive",
+//           title: "خطأ",
+//           description: "حدث خطأ أثناء جلب بيانات المقال"
+//         })
 //       }
 //     }
-
-//     fetchBlogPost()
-//   }, [id, setValueAr, setValueEn])
+  
+//     fetchBlogData()
+//   }, [params.id, setValueAr, setValueEn, toast])
+  
 
 //   const onSubmitArabic = async (data: FormData) => {
+//     setIsLoadingAr(true)
 //     try {
 //       const formData = new FormData()
 //       formData.append('title', data.title)
 //       formData.append('description', data.description)
-//       formData.append('Keywords', JSON.stringify(Keywords))
+//       formData.append('Keywords', JSON.stringify(keywordsAr))
 //       formData.append('lang', 'ar')
       
 //       if (data.image instanceof File) {
 //         formData.append('image', data.image)
+//       } else if (typeof data.image === 'string') {
+//         formData.append('imageUrl', data.image)
 //       }
-
-//       const response = await fetch(`http://localhost:8080/blog/update/${id}`, {
+  
+//       const response = await fetch(`http://localhost:8080/blog/update/${params.id}`, {
 //         method: 'PUT',
 //         headers: {
 //           Authorization: `Bearer ${localStorage.getItem('token')}`
 //         },
 //         body: formData,
 //       })
-
+  
 //       const result = await response.json()
-//       if (response.ok) {
-//         console.log('Arabic blog updated successfully:', result)
-//         router.push('/blog') // إعادة التوجيه بعد التعديل
-//       }
+//       if (!response.ok) throw new Error(result.message)
+  
+//       toast({
+//         title: "تم التحديث",
+//         description: "تم تحديث النسخة العربية بنجاح"
+//       })
+      
+//       router.push('/blog')
 //     } catch (error) {
-//       console.error('Error:', error)
+//       toast({
+//         variant: "destructive",
+//         title: "خطأ",
+//         description: "حدث خطأ أثناء تحديث النسخة العربية"
+//       })
+//     } finally {
+//       setIsLoadingAr(false)
 //     }
 //   }
-
+  
 //   const onSubmitEnglish = async (data: FormData) => {
+//     setIsLoadingEn(true)
 //     try {
 //       const formData = new FormData()
-//       formData.append('title', data.title)
-//       formData.append('description', data.description)
-//       formData.append('Keywords', JSON.stringify(Keywords))
+//       formData.append('title', data.title || '')
+//       formData.append('description', data.description || '')
 //       formData.append('lang', 'en')
       
+//       // Handle keywords as a string array
+//       keywordsEn.forEach(keyword => {
+//         formData.append('Keywords[]', keyword)
+//       })
+      
+//       // Handle image upload
 //       if (data.image instanceof File) {
 //         formData.append('image', data.image)
+//       } else if (typeof data.image === 'string' && data.image) {
+//         formData.append('currentImage', data.image)
 //       }
-
-//       const response = await fetch(`http://localhost:8080/blog/update/${id}`, {
+  
+//       const response = await fetch(`http://localhost:8080/blog/update/${params.id}`, {
 //         method: 'PUT',
 //         headers: {
 //           Authorization: `Bearer ${localStorage.getItem('token')}`
 //         },
 //         body: formData,
 //       })
-
+  
 //       const result = await response.json()
-//       if (response.ok) {
-//         console.log('English blog updated successfully:', result)
-//         router.push('/blog') // إعادة التوجيه بعد التعديل
-//       }
+//       console.log('Update response:', result)
+  
+//       toast({
+//         title: "Success",
+//         description: "English version updated successfully"
+//       })
+      
+//       router.push('/blog')
 //     } catch (error) {
-//       console.error('Error:', error)
+//       console.error('Update error:', error)
+//       toast({
+//         variant: "destructive",
+//         title: "Error",
+//         description: "Failed to update English version"
+//       })
+//     } finally {
+//       setIsLoadingEn(false)
 //     }
 //   }
-
+  
 //   return (
 //     <div className="min-h-screen bg-gray-100">
 //       <Header />
@@ -788,7 +199,11 @@ export default function EditBlogPost() {
 //                   <div className="space-y-4">
 //                     <div className="space-y-2">
 //                       <label className="block text-sm font-medium">العنوان (بالعربية)</label>
-//                       <Input {...registerAr("title")} dir="rtl" />
+//                       <Input
+//                         {...registerAr("title")}
+//                         dir="rtl"
+//                         className={errorsAr.title ? "border-red-500" : ""}
+//                       />
 //                       {errorsAr.title && <p className="text-red-500 text-sm">{errorsAr.title.message}</p>}
 //                     </div>
 //                     <div className="space-y-2">
@@ -800,33 +215,45 @@ export default function EditBlogPost() {
 //                       />
 //                       {errorsAr.description && <p className="text-red-500 text-sm">{errorsAr.description.message}</p>}
 //                     </div>
-//                     <div className="mt-6 space-y-2">
-//                       <label className="block text-sm font-medium">الكلمات المفتاحية</label>
+//                     <div className="space-y-2">
+//                       <label className="block text-sm font-medium">الكلمات المفتاحية (عربي)</label>
 //                       <div className="flex gap-2">
 //                         <Input
-//                           value={newKeyword}
-//                           onChange={(e) => setNewKeyword(e.target.value)}
+//                           value={newKeywordAr}
+//                           onChange={(e) => setNewKeywordAr(e.target.value)}
 //                           placeholder="أضف كلمة مفتاحية"
+//                           onKeyPress={(e) => {
+//                             if (e.key === 'Enter') {
+//                               e.preventDefault()
+//                               if (newKeywordAr && !keywordsAr.includes(newKeywordAr)) {
+//                                 setKeywordsAr([...keywordsAr, newKeywordAr])
+//                                 setNewKeywordAr("")
+//                               }
+//                             }
+//                           }}
 //                         />
-//                         <Button type="button" onClick={() => {
-//                           if (newKeyword && !Keywords.includes(newKeyword)) {
-//                             setKeywords([...Keywords, newKeyword])
-//                             setNewKeyword("")
-//                           }
-//                         }}>
+//                         <Button 
+//                           type="button" 
+//                           onClick={() => {
+//                             if (newKeywordAr && !keywordsAr.includes(newKeywordAr)) {
+//                               setKeywordsAr([...keywordsAr, newKeywordAr])
+//                               setNewKeywordAr("")
+//                             }
+//                           }}
+//                         >
 //                           إضافة
 //                         </Button>
 //                       </div>
 //                       <div className="flex flex-wrap gap-2 mt-2">
-//                         {Keywords.map((keyword) => (
+//                         {keywordsAr.map((keyword) => (
 //                           <span
 //                             key={keyword}
 //                             className="bg-primary text-primary-foreground px-2 py-1 rounded-md flex items-center gap-1"
 //                           >
 //                             {keyword}
-//                             <button 
-//                               type="button" 
-//                               onClick={() => setKeywords(Keywords.filter(k => k !== keyword))}
+//                             <button
+//                               type="button"
+//                               onClick={() => setKeywordsAr(keywordsAr.filter(k => k !== keyword))}
 //                               className="hover:text-red-500"
 //                             >
 //                               <X className="h-4 w-4" />
@@ -837,9 +264,23 @@ export default function EditBlogPost() {
 //                     </div>
 //                     <div className="space-y-2">
 //                       <label className="block text-sm font-medium">صورة المقال</label>
-//                       <ImageUpload onImagesChange={(images) => setValueAr("image", images[0])} maxImages={1} />
+//                       <ImageUpload
+//                       language="ar"
+//                         onImagesChange={(images) => setValueAr("image", images[0])}
+//                         maxImages={1}
+//                         initialImages={[watchAr("image") as string]}
+//                       />
 //                     </div>
-//                     <Button type="submit">تحديث المقال بالعربية</Button>
+//                     <Button type="submit" disabled={isLoadingAr} className="w-full">
+//                       {isLoadingAr ? (
+//                         <>
+//                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//                           جاري الحفظ...
+//                         </>
+//                       ) : (
+//                         "حفظ النسخة العربية"
+//                       )}
+//                     </Button>
 //                   </div>
 //                 </form>
 //               }
@@ -848,7 +289,11 @@ export default function EditBlogPost() {
 //                   <div className="space-y-4">
 //                     <div className="space-y-2">
 //                       <label className="block text-sm font-medium">Title (English)</label>
-//                       <Input {...registerEn("title")} dir="ltr" />
+//                       <Input
+//                         {...registerEn("title")}
+//                         dir="ltr"
+//                         className={errorsEn.title ? "border-red-500" : ""}
+//                       />
 //                       {errorsEn.title && <p className="text-red-500 text-sm">{errorsEn.title.message}</p>}
 //                     </div>
 //                     <div className="space-y-2">
@@ -861,10 +306,71 @@ export default function EditBlogPost() {
 //                       {errorsEn.description && <p className="text-red-500 text-sm">{errorsEn.description.message}</p>}
 //                     </div>
 //                     <div className="space-y-2">
-//                       <label className="block text-sm font-medium">Article Image</label>
-//                       <ImageUpload onImagesChange={(images) => setValueEn("image", images[0])} maxImages={1} />
+//                       <label className="block text-sm font-medium">Keywords (English)</label>
+//                       <div className="flex gap-2">
+//                         <Input
+//                           value={newKeywordEn}
+//                           onChange={(e) => setNewKeywordEn(e.target.value)}
+//                           placeholder="Add keyword"
+//                           onKeyPress={(e) => {
+//                             if (e.key === 'Enter') {
+//                               e.preventDefault()
+//                               if (newKeywordEn && !keywordsEn.includes(newKeywordEn)) {
+//                                 setKeywordsEn([...keywordsEn, newKeywordEn])
+//                                 setNewKeywordEn("")
+//                               }
+//                             }
+//                           }}
+//                         />
+//                         <Button 
+//                           type="button" 
+//                           onClick={() => {
+//                             if (newKeywordEn && !keywordsEn.includes(newKeywordEn)) {
+//                               setKeywordsEn([...keywordsEn, newKeywordEn])
+//                               setNewKeywordEn("")
+//                             }
+//                           }}
+//                         >
+//                           Add
+//                         </Button>
+//                       </div>
+//                       <div className="flex flex-wrap gap-2 mt-2">
+//                         {keywordsEn.map((keyword) => (
+//                           <span
+//                             key={keyword}
+//                             className="bg-primary text-primary-foreground px-2 py-1 rounded-md flex items-center gap-1"
+//                           >
+//                             {keyword}
+//                             <button
+//                               type="button"
+//                               onClick={() => setKeywordsEn(keywordsEn.filter(k => k !== keyword))}
+//                               className="hover:text-red-500"
+//                             >
+//                               <X className="h-4 w-4" />
+//                             </button>
+//                           </span>
+//                         ))}
+//                       </div>
 //                     </div>
-//                     <Button type="submit">Update in English</Button>
+//                     <div className="space-y-2">
+//                       <label className="block text-sm font-medium">Article Image</label>
+//                       <ImageUpload
+//                       language="en"
+//                         onImagesChange={(images) => setValueEn("image", images[0])}
+//                         maxImages={1}
+//                         initialImages={[watchEn("image") as string]}
+//                       />
+//                     </div>
+//                     <Button type="submit" disabled={isLoadingEn} className="w-full">
+//                       {isLoadingEn ? (
+//                         <>
+//                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//                           Saving...
+//                         </>
+//                       ) : (
+//                         "Save English Version"
+//                       )}
+//                     </Button>
 //                   </div>
 //                 </form>
 //               }
@@ -875,3 +381,217 @@ export default function EditBlogPost() {
 //     </div>
 //   )
 // }
+"use client"
+
+import { useReducer, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { X, Loader2 } from "lucide-react"
+import { Header } from "@/components/Header"
+import { Sidebar } from "@/components/Sidebar"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import { TabComponent } from "@/components/ui/tab-component"
+import { ImageUpload } from "@/components/ui/image-upload"
+import { blogPostSchema } from "@/lib/schemas"
+import { toast } from "react-hot-toast"
+import { useRouter, useParams } from 'next/navigation';
+import type { z } from "zod"
+
+type FormData = z.infer<typeof blogPostSchema>
+
+type State = {
+  keywords: { ar: string[]; en: string[] }
+  newKeyword: { ar: string; en: string }
+  isLoading: { ar: boolean; en: boolean }
+}
+
+type Action =
+  | { type: "SET_KEYWORDS"; lang: "ar" | "en"; value: string[] }
+  | { type: "SET_NEW_KEYWORD"; lang: "ar" | "en"; value: string }
+  | { type: "SET_LOADING"; lang: "ar" | "en"; value: boolean }
+
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case "SET_KEYWORDS":
+      return { ...state, keywords: { ...state.keywords, [action.lang]: action.value } }
+    case "SET_NEW_KEYWORD":
+      return { ...state, newKeyword: { ...state.newKeyword, [action.lang]: action.value } }
+    case "SET_LOADING":
+      return { ...state, isLoading: { ...state.isLoading, [action.lang]: action.value } }
+    default:
+      return state
+  }
+}
+
+export default function EditBlogPost() {
+  const [state, dispatch] = useReducer(reducer, {
+    keywords: { ar: [], en: [] },
+    newKeyword: { ar: "", en: "" },
+    isLoading: { ar: false, en: false },
+  })
+
+  const router = useRouter()
+  const params = useParams()
+
+  const forms = {
+    ar: useForm<FormData>({ resolver: zodResolver(blogPostSchema), defaultValues: { lang: "ar" } }),
+    en: useForm<FormData>({ resolver: zodResolver(blogPostSchema), defaultValues: { lang: "en" } }),
+  }
+
+  useEffect(() => {
+    const fetchBlogData = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/blog/findOne/${params.id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        })
+        const data = await response.json()
+
+        if (data.blog.lang === 'ar') {
+          forms.ar.setValue('title', data.blog.title)
+          forms.ar.setValue('description', data.blog.description)
+          dispatch({ type: "SET_KEYWORDS", lang: "ar", value: data.blog.Keywords || [] })
+        }
+
+        if (data.blog.lang === 'en') {
+          forms.en.setValue('title', data.blog.title)
+          forms.en.setValue('description', data.blog.description)
+          dispatch({ type: "SET_KEYWORDS", lang: "en", value: data.blog.Keywords || [] })
+        }
+      } catch (error) {
+        toast.error("Error fetching blog data")
+      }
+    }
+
+    fetchBlogData()
+  }, [params.id])
+
+  const onSubmit = async (data: FormData, lang: "ar" | "en") => {
+    dispatch({ type: "SET_LOADING", lang, value: true })
+    try {
+      const formData = new FormData()
+      formData.append("title", data.title)
+      formData.append("description", data.description)
+      formData.append("Keywords", JSON.stringify(state.keywords[lang]))
+      formData.append("lang", lang)
+
+      const response = await fetch(`http://localhost:8080/blog/update/${params.id}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        body: formData,
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.message)
+
+      toast.success("Blog updated successfully")
+      router.push("/blog")
+    } catch (error) {
+      toast.error("Error updating blog")
+    } finally {
+      dispatch({ type: "SET_LOADING", lang, value: false })
+    }
+  }
+
+  const renderForm = (lang: "ar" | "en") => (
+    <form onSubmit={forms[lang].handleSubmit((data) => onSubmit(data, lang))} className="space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">{lang === "ar" ? "العنوان (بالعربية)" : "Title (English)"}</label>
+          <Input
+            {...forms[lang].register("title")}
+            dir={lang === "ar" ? "rtl" : "ltr"}
+            className={forms[lang].formState.errors.title ? "border-red-500" : ""}
+          />
+          {forms[lang].formState.errors.title && (
+            <p className="text-red-500 text-sm">{forms[lang].formState.errors.title.message}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">
+            {lang === "ar" ? "المحتوى (بالعربية)" : "Content (English)"}
+          </label>
+          <RichTextEditor
+            content={forms[lang].watch("description") || ""}
+            onChange={(content) => forms[lang].setValue("description", content)}
+            language={lang}
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">
+            {lang === "ar" ? "الكلمات المفتاحية (عربي)" : "Keywords (English)"}
+          </label>
+          <div className="flex gap-2">
+            <Input
+              value={state.newKeyword[lang]}
+              onChange={(e) =>
+                dispatch({ type: "SET_NEW_KEYWORD", lang, value: e.target.value })
+              }
+              placeholder={lang === "ar" ? "أضف كلمة مفتاحية" : "Add keyword"}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              
+              className="text-sm  px-4 "
+              onClick={() => {
+                if (state.newKeyword[lang] && !state.keywords[lang].includes(state.newKeyword[lang])) {
+                  dispatch({
+                    type: "SET_KEYWORDS",
+                    lang,
+                    value: [...state.keywords[lang], state.newKeyword[lang]],
+                  })
+                  dispatch({ type: "SET_NEW_KEYWORD", lang, value: "" })
+                }
+              }}
+            >
+              {lang === "ar" ? "إضافة" : "Add"}
+            </Button>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">
+            {lang === "ar" ? "صورة المقال" : "Article Image"}
+          </label>
+          <ImageUpload
+            language={lang}
+            onImagesChange={(images) => forms[lang].setValue("image", images[0])}
+            maxImages={1}
+            initialImages={[forms[lang].watch("image") as string]}
+          />
+        </div>
+        <Button  type="submit" disabled={state.isLoading[lang]} className="w-full ">
+          {state.isLoading[lang] ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {lang === "ar" ? "جاري الحفظ..." : "Saving..."}
+            </>
+          ) : (
+            lang === "ar" ? "حفظ النسخة العربية" : "Save English Version"
+          )}
+        </Button>
+      </div>
+    </form>
+  )
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Header />
+      <Sidebar />
+      <main className="pt-16 px-4 sm:px-6 lg:px-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>تعديل المقال</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TabComponent
+              arabicContent={renderForm("ar")}
+              englishContent={renderForm("en")}
+            />
+          </CardContent>
+        </Card>
+      </main>
+    </div>
+  )
+}
