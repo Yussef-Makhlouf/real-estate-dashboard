@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
-
 import { cn } from "@/lib/utils"
 
 const Tabs = TabsPrimitive.Root
@@ -14,7 +13,9 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
+      "inline-flex h-14 items-center justify-center rounded-xl bg-zinc-50/40 p-2",
+      "backdrop-blur-sm backdrop-saturate-150",
+      "dark:bg-zinc-900/40",
       className
     )}
     {...props}
@@ -29,7 +30,16 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+      "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-5 py-2.5",
+      "text-sm font-medium transition-all duration-300",
+      "text-zinc-600 hover:text-zinc-900",
+      "dark:text-zinc-400 dark:hover:text-zinc-100",
+      "focus-visible:outline-none",
+      "disabled:pointer-events-none disabled:opacity-50",
+      "data-[state=active]:bg-white data-[state=active]:text-indigo-600",
+      "data-[state=active]:shadow-[0_2px_20px_rgba(0,0,0,0.04)]",
+      "dark:data-[state=active]:bg-zinc-800 dark:data-[state=active]:text-indigo-400",
+      "transform transition-transform",
       className
     )}
     {...props}
@@ -44,7 +54,10 @@ const TabsContent = React.forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      "mt-6 rounded-xl",
+      "animate-in zoom-in-95 duration-300 ease-out",
+      "focus-visible:outline-none",
+      "data-[state=active]:animate-in data-[state=active]:fade-in-0",
       className
     )}
     {...props}

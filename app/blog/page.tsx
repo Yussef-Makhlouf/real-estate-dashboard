@@ -93,7 +93,7 @@ export default function Blog() {
   }
 
   const BlogGrid = ({ posts }: { posts: BlogPost[] }) => (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" dir="rtl">
       {posts.map((post) => (
         <Card key={post._id} className="overflow-hidden">
           <img

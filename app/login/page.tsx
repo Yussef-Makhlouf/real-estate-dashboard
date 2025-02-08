@@ -1,134 +1,178 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import Image from 'next/image';
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Eye, EyeOff, Mail, Lock } from "lucide-react"
+import Link from "next/link"
+import { useToast } from "@/components/ui/use-toast"
+import { motion } from "framer-motion"
+import { useFormik } from 'formik'
+import * as Yup from 'yup'
+
+const validationSchema = Yup.object({
+  email: Yup.string()
+    .email('البريد الإلكتروني غير صالح')
+    .required('البريد الإلكتروني مطلوب'),
+  password: Yup.string()
+    .min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل')
+    .required('كلمة المرور مطلوبة')
+})
 
 export default function Login() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter()
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+    const formik = useFormik({
+      initialValues: {
+        email: '',
+        password: '',
+      },
+      validationSchema,
+      onSubmit: async (values) => {
+        setIsLoading(true)
+        try {
+          const response = await fetch('http://localhost:8080/auth/signIn', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(values),
+          })
 
-  const formik = useFormik({
-    initialValues: {
-      email: '',
-      password: ''
-    },
-    validationSchema: Yup.object({
-      email: Yup.string()
-        .email('البريد الإلكتروني غير صحيح')
-        .required('البريد الإلكتروني مطلوب'),
-      password: Yup.string()
-        .min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل')
-        .required('كلمة المرور مطلوبة')
-    }),
-    onSubmit: async (values) => {
-      setIsLoading(true);
-      try {
-        const response = await fetch('http://localhost:8080/auth/signIn', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: values.email,
-            password: values.password,
-          }),
-        });
+          const data = await response.json()
 
-        const data = await response.json();
-
-        if (response.ok) {
-          // Store user data in localStorage
-          localStorage.setItem('token', data.userUpdated.token);
-          // localStorage.setItem('userData', JSON.stringify(data.userUpdated));
-          
-          // Redirect to dashboard or home page
-          router.push('/roles');
-        } else {
-          console.error('Login failed:', data.message);
-          // Handle login error
-        // You can display an error message to the user or perform other actions
-        
-
+          if (response.ok) {
+            document.cookie = `auth-token=${data.token}; path=/`
+            toast({
+              title: "تم تسجيل الدخول بنجاح",
+              description: "مرحباً بك في لوحة التحكم",
+              variant: "default",
+            })
+            router.push('/')
+          } else {
+            toast({
+              title: "خطأ في تسجيل الدخول",
+              description: data.message || "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+              variant: "destructive",
+            })
+          }
+        } catch (error) {
+          toast({
+            title: "خطأ في الاتصال",
+            description: "يرجى المحاولة مرة أخرى",
+            variant: "destructive",
+          })
+        } finally {
+          setIsLoading(false)
         }
-      } catch (error) {
-        console.error('Login error:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  });
-
+      },
+    })
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <Image
-            className="mx-auto h-12 w-auto"
-            src="/logo.svg"
-            alt="Logo"
-            width={48}
-            height={48}
-          />
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            تسجيل الدخول
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="البريد الإلكتروني"
-                {...formik.getFieldProps('email')}
-              />
-              {formik.touched.email && formik.errors.email && (
-                <div className="text-red-500 text-sm">{formik.errors.email}</div>
-              )}
-            </div>
-            <div>
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="كلمة المرور"
-                {...formik.getFieldProps('password')}
-              />
-              {formik.touched.password && formik.errors.password && (
-                <div className="text-red-500 text-sm">{formik.errors.password}</div>
-              )}
-            </div>
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-100 to-gray-200 p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        <Card className="border-0 shadow-xl">
+          <CardHeader className="space-y-3 text-center">
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+              مرحباً بك
+            </CardTitle>
+            <CardDescription className="text-gray-500">
+              قم بتسجيل الدخول للوصول إلى لوحة التحكم
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={formik.handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <div className="relative">
+                  <Mail className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
+                  <Input
+                    placeholder="البريد الإلكتروني"
+                    className={`pr-10 py-6 ${
+                      formik.touched.email && formik.errors.email ? 'border-red-500' : ''
+                    }`}
+                    {...formik.getFieldProps('email')}
+                  />
+                </div>
+                {formik.touched.email && formik.errors.email && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-red-500 text-sm"
+                  >
+                    {formik.errors.email}
+                  </motion.div>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <div className="relative">
+                  <Lock className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="كلمة المرور"
+                    className={`pr-10 py-6 ${
+                      formik.touched.password && formik.errors.password ? 'border-red-500' : ''
+                    }`}
+                    {...formik.getFieldProps('password')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute left-3 top-3 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+                {formik.touched.password && formik.errors.password && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-red-500 text-sm"
+                  >
+                    {formik.errors.password}
+                  </motion.div>
+                )}
+              </div>
 
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <button
-                type="button"
-                onClick={() => router.push('/reset-password')}
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+              <div className="flex items-center justify-between text-sm">
+                <Link 
+                  href="/reset-password" 
+                  className="text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  هل نسيت كلمة المرور؟
+                </Link>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full py-6 text-lg bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 transition-all duration-300"
+                disabled={isLoading}
               >
-                نسيت كلمة المرور؟
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              {isLoading ? 'جاري التحميل...' : 'تسجيل الدخول'}
-            </button>
-          </div>
-        </form>
-      </div>
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 border-t-2 border-white rounded-full animate-spin" />
+                    <span>جاري تسجيل الدخول...</span>
+                  </div>
+                ) : (
+                  "تسجيل الدخول"
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
-  );
+  )
 }
