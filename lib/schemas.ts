@@ -130,11 +130,27 @@
 
 import * as z from "zod"
 
-const validateLanguage = (text: string, lang: 'ar' | 'en') => {
-  const arabicRegex = /^[\u0600-\u06FF\s،؛؟٠-٩<>\/]+$/;
-  const englishRegex = /^[A-Za-z\s.,!?0-9؟؛،<>\/]+$/;
-  return lang === 'ar' ? arabicRegex.test(text) : englishRegex.test(text)
-}
+// const validateLanguage = (text: string, lang: 'ar' | 'en') => {
+//   const cleanedText = stripHtml(text);
+//   const arabicRegex = /^[\u0600-\u06FF\s،؛؟٠-٩<>\/]+$/;
+//   const englishRegex = /^[A-Za-z\s.,!?0-9؟؛،<>\/]+$/;
+//   return lang === 'ar' ? arabicRegex.test(text) : englishRegex.test(text)
+// }
+
+const validateLanguage = (html: string, lang: 'ar' | 'en') => {
+  const cleanedText = stripHtml(html); // تنظيف النص أولاً
+  
+  if (lang === 'ar') {
+    // توسيع النمط ليشمل كافة الحروف العربية وعلامات التشكيل
+    const arabicRegex = /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s،؛؟ء-ي٠-٩]*$/;
+    return arabicRegex.test(cleanedText);
+  }
+  
+  // النمط الإنجليزي
+  const englishRegex = /^[A-Za-z\s.,!?0-9]*$/;
+  return englishRegex.test(cleanedText);
+};
+
 const stripHtml = (html: string) => {
   return html.replace(/<[^>]*>?/gm, ''); // إزالة جميع علامات HTML
 };
@@ -149,8 +165,8 @@ export const blogPostSchema = z.discriminatedUnion('lang', [
       }),
     description: z.string()
       .min(1, "المحتوى مطلوب")
-      .refine(text => validateLanguage(stripHtml(text), 'ar'), {
-        message: "يجب أن يحتوي النص على حروف عربية فقط"
+      .refine(text => validateLanguage(text,"ar"), { // سيتم تنظيفه تلقائيًا
+        message: "يجب أن يحتوي التعليق على حروف عربية فقط (بدون تنسيق)"
       }),
     Keywords: z.array(z.string()).optional(),
     image: z.union([z.string().url(), z.instanceof(File)]).optional(),
@@ -255,10 +271,10 @@ export const reviewSchema = z.discriminatedUnion('lang', [
       secure_url: z.string().url("رابط الصورة غير صحيح"),
       public_id: z.string().min(1, "معرف الصورة مطلوب")
     }).optional(),
-    createdBy: z.string().min(1, "معرف المُنشئ مطلوب"),
-    customId: z.string().min(1, "معرف مخصص مطلوب"),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    // createdBy: z.string().min(1, "معرف المُنشئ مطلوب"),
+    // customId: z.string().min(1, "معرف مخصص مطلوب"),
+    // createdAt: z.string().datetime(),
+    // updatedAt: z.string().datetime(),
   }),
   z.object({
     lang: z.literal('en'),
@@ -278,10 +294,10 @@ export const reviewSchema = z.discriminatedUnion('lang', [
       secure_url: z.string().url("Invalid image URL"),
       public_id: z.string().min(1, "Public ID is required")
     }).optional(),
-    createdBy: z.string().min(1, "CreatedBy is required"),
-    customId: z.string().min(1, "Custom ID is required"),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    // createdBy: z.string().min(1, "CreatedBy is required"),
+    // customId: z.string().min(1, "Custom ID is required"),
+    // createdAt: z.string().datetime(),
+    // updatedAt: z.string().datetime(),
   })
 ]);
 

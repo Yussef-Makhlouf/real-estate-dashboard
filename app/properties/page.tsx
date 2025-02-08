@@ -19,24 +19,7 @@ const properties = [
     price: 2500000,
     image: "/placeholder.svg?height=200&width=300",
   },
-  {
-    id: 2,
-    titleAr: "شقة حديثة في وسط المدينة",
-    titleEn: "Modern Apartment in City Center",
-    type: "شقة",
-    location: "جدة",
-    price: 800000,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: 3,
-    titleAr: "مكتب تجاري في برج مرموق",
-    titleEn: "Commercial Office in Prestigious Tower",
-    type: "مكتب",
-    location: "الدمام",
-    price: 1500000,
-    image: "/placeholder.svg?height=200&width=300",
-  },
+ 
 ]
 
 export default function Properties() {
