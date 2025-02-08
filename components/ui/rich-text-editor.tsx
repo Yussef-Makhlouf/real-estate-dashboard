@@ -24,6 +24,7 @@ interface RichTextEditorProps {
   onChange: (content: string) => void
   placeholder?: string
   language: "ar" | "en"
+  dir?: "rtl" | "ltr"; 
 }
 
 export function RichTextEditor({

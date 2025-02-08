@@ -198,10 +198,9 @@ export const faqSchema = z.discriminatedUnion('lang', [
       }),
     answer: z.string()
       .min(1, "الإجابة مطلوبة")
-      .refine(text => validateLanguage(text, 'ar'), {
+      .refine(text => validateLanguage(stripHtml(text), 'ar'), {
         message: "يجب أن تحتوي الإجابة على حروف عربية فقط"
       }),
-    keywords: z.array(z.string()),
   }),
   z.object({
     lang: z.literal('en'),
@@ -215,7 +214,6 @@ export const faqSchema = z.discriminatedUnion('lang', [
       .refine(text => validateLanguage(text, 'en'), {
         message: "Answer must contain only English characters"
       }),
-    keywords: z.array(z.string()),
   })
 ]);
 
@@ -260,6 +258,7 @@ export const reviewSchema = z.discriminatedUnion('lang', [
       .refine(text => validateLanguage(text, 'ar'), {
         message: "يجب أن يحتوي الاسم على حروف عربية فقط"
       }),
+   
     country: z.string().min(1, "الدولة مطلوبة"),
     description: z.string()
       .min(1, "التعليق مطلوب")
@@ -283,6 +282,7 @@ export const reviewSchema = z.discriminatedUnion('lang', [
       .refine(text => validateLanguage(text, 'en'), {
         message: "Name must contain only English characters"
       }),
+   
     country: z.string().min(1, "Country is required"),
     description: z.string()
       .min(1, "Comment is required")
@@ -300,6 +300,7 @@ export const reviewSchema = z.discriminatedUnion('lang', [
     // updatedAt: z.string().datetime(),
   })
 ]);
+
 
 export const propertySchema = z.discriminatedUnion('lang', [
   z.object({

@@ -278,7 +278,8 @@ export default function AddReview() {
                 <label className="block text-sm font-medium text-gray-700">
                   صورة المراجعة
                 </label>
-                <ImageUpload
+                <ImageUpload 
+                 language={lang}
                   onImagesChange={(images) => setImage(images[0])}
                   maxImages={1}
                 />

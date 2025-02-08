@@ -149,13 +149,13 @@
 //     </div>
 //   )
 // }
-
 "use client"
 
-import { useState } from "react"
+import { useReducer } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { X } from "lucide-react"
+import { X, Loader2 } from "lucide-react"
+import { Dispatch } from "react"
 import { Header } from "@/components/Header"
 import { Sidebar } from "@/components/Sidebar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -164,89 +164,174 @@ import { Input } from "@/components/ui/input"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { TabComponent } from "@/components/ui/tab-component"
 import { faqSchema } from "@/lib/schemas"
+import { toast } from "react-hot-toast"
+import { useRouter } from 'next/navigation';
 import type { z } from "zod"
 
 type FormData = z.infer<typeof faqSchema>
 
+type State = {
+  keywords: { ar: string[]; en: string[] }
+  newKeyword: { ar: string; en: string }
+  isLoading: { ar: boolean; en: boolean }
+}
+type Action =
+  | { type: "SET_KEYWORDS"; lang: "ar" | "en"; value: string[] }
+  | { type: "SET_NEW_KEYWORD"; lang: "ar" | "en"; value: string }
+  | { type: "SET_LOADING"; lang: "ar" | "en"; value: boolean }
+
+interface FormProps {
+  lang: "ar" | "en"
+  forms: { ar: any; en: any }
+  onSubmit: (data: FormData, lang: "ar" | "en") => Promise<void>
+  state: State
+  dispatch: Dispatch<Action>
+}
+
+const Form = ({ lang, forms, onSubmit, state, dispatch }: FormProps) => {
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = forms[lang]
+
+  const addKeyword = () => {
+    if (state.newKeyword[lang] && !state.keywords[lang].includes(state.newKeyword[lang])) {
+      const updatedKeywords = [...state.keywords[lang], state.newKeyword[lang]]
+      dispatch({ type: "SET_KEYWORDS", lang, value: updatedKeywords })
+      dispatch({ type: "SET_NEW_KEYWORD", lang, value: "" })
+    }
+  }
+
+  const removeKeyword = (keywordToRemove: string) => {
+    const updatedKeywords = state.keywords[lang].filter((k) => k !== keywordToRemove)
+    dispatch({ type: "SET_KEYWORDS", lang, value: updatedKeywords })
+  }
+
+  return (
+    <form onSubmit={handleSubmit((data: FormData) => onSubmit(data, lang))} className="space-y-4">
+      <div className="space-y-2">
+        <label className="block text-sm font-medium">
+          {lang === "ar" ? "السؤال (بالعربية)" : "Question (English)"}
+        </label>
+        <Input
+          {...register("question")}
+          dir={lang === "ar" ? "rtl" : "ltr"}
+          className={errors.question ? "border-red-500" : ""}
+        />
+        {errors.question && <p className="text-red-500 text-sm">{errors.question.message}</p>}
+      </div>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium">
+          {lang === "ar" ? "الإجابة (بالعربية)" : "Answer (English)"}
+        </label>
+        <RichTextEditor
+          content={watch("answer") || ""}
+          onChange={(content) => setValue("answer", content)}
+          language={lang}
+
+        />
+        {errors.answer && <p className="text-red-500 text-sm">{errors.answer.message}</p>}
+      </div>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium">
+          {lang === "ar" ? "الكلمات المفتاحية" : "Keywords"}
+        </label>
+        <div className="flex gap-2">
+          <Input
+            value={state.newKeyword[lang]}
+            onChange={(e) => dispatch({ type: "SET_NEW_KEYWORD", lang, value: e.target.value })}
+            placeholder={lang === "ar" ? "أضف كلمة مفتاحية" : "Add keyword"}
+          />
+          <Button type="button" onClick={addKeyword}>
+            {lang === "ar" ? "إضافة" : "Add"}
+          </Button>
+        </div>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {state.keywords[lang].map((keyword) => (
+            <span
+              key={keyword}
+              className="bg-primary text-primary-foreground px-2 py-1 rounded-md flex items-center gap-1"
+            >
+              {keyword}
+              <button type="button" onClick={() => removeKeyword(keyword)} className="hover:text-red-500">
+                <X className="h-4 w-4" />
+              </button>
+            </span>
+          ))}
+        </div>
+      </div>
+      <Button type="submit" disabled={state.isLoading[lang]}>
+        {state.isLoading[lang] ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {lang === "ar" ? "جاري الإضافة..." : "Adding..."}
+          </>
+        ) : (
+          lang === "ar" ? "إضافة السؤال" : "Add Question"
+        )}
+      </Button>
+    </form>
+  )
+}
+
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case "SET_KEYWORDS":
+      return { ...state, keywords: { ...state.keywords, [action.lang]: action.value } }
+    case "SET_NEW_KEYWORD":
+      return { ...state, newKeyword: { ...state.newKeyword, [action.lang]: action.value } }
+    case "SET_LOADING":
+      return { ...state, isLoading: { ...state.isLoading, [action.lang]: action.value } }
+    default:
+      return state
+  }
+}
+
 export default function AddFAQ() {
-  const [keywords, setKeywords] = useState<string[]>([])
-  const [newKeyword, setNewKeyword] = useState("")
-
-  const {
-    register: registerAr,
-    handleSubmit: handleSubmitAr,
-    setValue: setValueAr,
-    watch: watchAr,
-    formState: { errors: errorsAr },
-  } = useForm<FormData>({
-    resolver: zodResolver(faqSchema),
-    defaultValues: {
-      lang: 'ar'
-    }
+  const [state, dispatch] = useReducer(reducer, {
+    keywords: { ar: [], en: [] },
+    newKeyword: { ar: "", en: "" },
+    isLoading: { ar: false, en: false },
   })
 
-  const {
-    register: registerEn,
-    handleSubmit: handleSubmitEn,
-    setValue: setValueEn,
-    watch: watchEn,
-    formState: { errors: errorsEn },
-  } = useForm<FormData>({
-    resolver: zodResolver(faqSchema),
-    defaultValues: {
-      lang: 'en'
-    }
-  })
+  const router = useRouter()
 
-  const onSubmitArabic = async (data: FormData) => {
-    try {
-      const formData = new FormData()
-      formData.append('question', data.question)
-      formData.append('answer', data.answer)
-      formData.append('keywords', JSON.stringify(keywords))
-      formData.append('lang', 'ar')
-
-      const response = await fetch('http://localhost:8080/question/create', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData,
-      })
-
-      const result = await response.json()
-      if (response.ok) {
-        console.log('Arabic FAQ created successfully:', result)
-      }
-    } catch (error) {
-      console.error('Error:', error)
-    }
+  const forms = {
+    ar: useForm<FormData>({ resolver: zodResolver(faqSchema), defaultValues: { lang: "ar" } }),
+    en: useForm<FormData>({ resolver: zodResolver(faqSchema), defaultValues: { lang: "en" } }),
   }
 
-  const onSubmitEnglish = async (data: FormData) => {
+  const onSubmit = async (data: FormData, lang: "ar" | "en") => {
+    dispatch({ type: "SET_LOADING", lang, value: true })
     try {
-      const formData = new FormData()
-      formData.append('question', data.question)
-      formData.append('answer', data.answer)
-      formData.append('keywords', JSON.stringify(keywords))
-      formData.append('lang', 'en')
-
-      const response = await fetch('http://localhost:8080/question/create', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData,
-      })
-
-      const result = await response.json()
-      if (response.ok) {
-        console.log('English FAQ created successfully:', result)
+      const requestData = {
+        lang: lang,
+        question: data.question,
+        answer: data.answer,
+        keywords: state.keywords[lang]
       }
+  
+      const response = await fetch("http://localhost:8080/question/create", {
+        method: "POST",
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify(requestData)
+      })
+  
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to create question")
+      }
+  
+      toast.success(lang === "ar" ? "تم إضافة السؤال بنجاح" : "Question added successfully")
+      router.push("/faq")
     } catch (error) {
-      console.error('Error:', error)
+      console.error('API Error:', error)
+      toast.error(lang === "ar" ? "حدث خطأ أثناء إضافة السؤال" : "Error adding question")
+    } finally {
+      dispatch({ type: "SET_LOADING", lang, value: false })
     }
   }
+  
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -255,89 +340,13 @@ export default function AddFAQ() {
       <main className="pt-16 px-4 sm:px-6 lg:px-8">
         <Card>
           <CardHeader>
-            <CardTitle>إضافة سؤال جديد</CardTitle>
+            <CardTitle>إضافة سؤال شائع</CardTitle>
           </CardHeader>
           <CardContent>
             <TabComponent
-              arabicContent={
-                <form onSubmit={handleSubmitAr(onSubmitArabic)} className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">السؤال (بالعربية)</label>
-                      <Input {...registerAr("question")} dir="rtl" />
-                      {errorsAr.question && <p className="text-red-500 text-sm">{errorsAr.question.message}</p>}
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">الإجابة (بالعربية)</label>
-                      <RichTextEditor
-                        content={watchAr("answer") || ""}
-                        onChange={(content) => setValueAr("answer", content)}
-                        language="ar"
-                      />
-                      {errorsAr.answer && <p className="text-red-500 text-sm">{errorsAr.answer.message}</p>}
-                    </div>
-                    <Button type="submit">نشر السؤال بالعربية</Button>
-                  </div>
-                </form>
-              }
-              englishContent={
-                <form onSubmit={handleSubmitEn(onSubmitEnglish)} className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">Question (English)</label>
-                      <Input {...registerEn("question")} dir="ltr" />
-                      {errorsEn.question && <p className="text-red-500 text-sm">{errorsEn.question.message}</p>}
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">Answer (English)</label>
-                      <RichTextEditor
-                        content={watchEn("answer") || ""}
-                        onChange={(content) => setValueEn("answer", content)}
-                        language="en"
-                      />
-                      {errorsEn.answer && <p className="text-red-500 text-sm">{errorsEn.answer.message}</p>}
-                    </div>
-                    <Button type="submit">Publish in English</Button>
-                  </div>
-                </form>
-              }
+              arabicContent={<Form lang="ar" forms={forms} onSubmit={onSubmit} state={state} dispatch={dispatch} />}
+              englishContent={<Form lang="en" forms={forms} onSubmit={onSubmit} state={state} dispatch={dispatch} />}
             />
-
-            <div className="mt-6 space-y-2">
-              <label className="block text-sm font-medium">الكلمات المفتاحية</label>
-              <div className="flex gap-2">
-                <Input
-                  value={newKeyword}
-                  onChange={(e) => setNewKeyword(e.target.value)}
-                  placeholder="أضف كلمة مفتاحية"
-                />
-                <Button type="button" onClick={() => {
-                  if (newKeyword && !keywords.includes(newKeyword)) {
-                    setKeywords([...keywords, newKeyword])
-                    setNewKeyword("")
-                  }
-                }}>
-                  إضافة
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {keywords.map((keyword) => (
-                  <span
-                    key={keyword}
-                    className="bg-primary text-primary-foreground px-2 py-1 rounded-md flex items-center gap-1"
-                  >
-                    {keyword}
-                    <button 
-                      type="button" 
-                      onClick={() => setKeywords(keywords.filter(k => k !== keyword))}
-                      className="hover:text-red-500"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
           </CardContent>
         </Card>
       </main>

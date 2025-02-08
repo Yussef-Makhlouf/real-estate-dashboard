@@ -50,7 +50,7 @@ export default function ResetPassword() {
         });
         // عرض رسالة النجاح
         toast.success(response.data.message);
-        // router.push('/login');
+        router.push('/login');
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
           // عرض رسالة الخطأ

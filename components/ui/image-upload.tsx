@@ -1,76 +1,68 @@
-"use client"
+import { useState, useCallback } from "react"
+import { useDropzone } from "react-dropzone"
+import { Button } from "./button"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { X, Upload } from "lucide-react"
-
-
-export interface ImageUploadProps {
-
-  onImagesChange: (images: File[]) => void
-
+interface ImageUploadProps {
+  onImagesChange: (files: File[]) => void
   maxImages: number
-
+  language: "ar" | "en"
   initialImages?: string[]
-
 }
 
+export function ImageUpload({ onImagesChange, maxImages, language }: ImageUploadProps) {
+  const [files, setFiles] = useState<File[]>([])
 
-export function ImageUpload({ onImagesChange, maxImages = 5 }: ImageUploadProps) {
-  const [images, setImages] = useState<File[]>([])
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const newFiles = acceptedFiles.slice(0, maxImages - files.length)
+      setFiles((prevFiles) => [...prevFiles, ...newFiles])
+      onImagesChange([...files, ...newFiles])
+    },
+    [files, maxImages, onImagesChange],
+  )
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newImages = Array.from(e.target.files)
-      const updatedImages = [...images, ...newImages].slice(0, maxImages)
-      setImages(updatedImages)
-      onImagesChange(updatedImages)
-    }
-  }
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': [] } })
 
   const removeImage = (index: number) => {
-    const updatedImages = images.filter((_, i) => i !== index)
-    setImages(updatedImages)
-    onImagesChange(updatedImages)
+    const newFiles = files.filter((_, i) => i !== index)
+    setFiles(newFiles)
+    onImagesChange(newFiles)
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center space-x-4">
-        <Button asChild variant="outline">
-          <label htmlFor="image-upload" className="cursor-pointer">
-            <Upload className="w-4 h-4 mr-2" />
-            اختر الصور
-          </label>
-        </Button>
-        <Input
-          id="image-upload"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleImageChange}
-          className="hidden"
-        />
-        <span className="text-sm text-gray-500">
-          {images.length}/{maxImages} صور مختارة
-        </span>
+    <div>
+      <div
+        {...getRootProps()}
+        className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer"
+      >
+        <input {...getInputProps()} />
+        {isDragActive ? (
+          <p>{language === "ar" ? "أفلت الصورة هنا" : "Drop the image here"}</p>
+        ) : (
+          <p>
+            {language === "ar"
+              ? "اسحب وأفلت الصورة هنا، أو انقر للاختيار"
+              : "Drag and drop image here, or click to select"}
+          </p>
+        )}
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {images.map((image, index) => (
-          <div key={index} className="relative group">
+      <div className="mt-4 flex flex-wrap gap-2">
+        {files.map((file, index) => (
+          <div key={index} className="relative">
             <img
-              src={URL.createObjectURL(image) || "/placeholder.svg"}
-              alt={`Uploaded image ${index + 1}`}
-              className="w-full h-32 object-cover rounded-lg"
+              src={URL.createObjectURL(file) || "/placeholder.svg"}
+              alt={`Uploaded ${index + 1}`}
+              className="w-20 h-20 object-cover rounded-md"
             />
-            <button
+            <Button
               type="button"
+              variant="destructive"
+              size="sm"
+              className="absolute top-0 right-0 rounded-full"
               onClick={() => removeImage(index)}
-              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <X className="w-4 h-4" />
-            </button>
+              X
+            </Button>
           </div>
         ))}
       </div>
