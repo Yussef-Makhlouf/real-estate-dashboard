@@ -38,10 +38,39 @@ export function Sidebar() {
 
   const isUserManagementActive = userManagementItems.some(item => pathname === item.href)
 
-  const handleLogout = () => {
-    // هنا يمكنك إضافة منطق تسجيل الخروج مثل مسح التوكن
-    router.push('/login')
-  }
+
+  const handleLogout = async () => {
+    const token = localStorage.getItem('token'); // الحصول على التوكن
+  
+    if (!token) {
+      console.warn("لا يوجد توكن لتسجيل الخروج!");
+      return;
+    }
+  
+    try {
+      const response = await fetch("http://localhost:8080/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      });
+  
+      const result = await response.json();
+      console.log("نتيجة الطلب:", result);
+  
+      if (response.ok) {
+        // ✅ مسح التوكن من localStorage عند نجاح تسجيل الخروج
+        localStorage.removeItem("token");
+        router.push("/login"); // إعادة التوجيه لصفحة تسجيل الدخول
+      } else {
+        console.error("فشل تسجيل الخروج:", result.message);
+      }
+    } catch (error) {
+      console.error("خطأ في الاتصال بالخادم:", error);
+    }
+  };
+  
 
   return (
     <>

@@ -1,135 +1,147 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { useFormik } from "formik"
-import * as Yup from "yup"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
-import { motion } from "framer-motion"
-import { Mail } from "lucide-react"
-import Link from "next/link"
-
-const validationSchema = Yup.object({
-  email: Yup.string()
-    .email("البريد الإلكتروني غير صالح")
-    .required("البريد الإلكتروني مطلوب"),
-})
+import { useState, useEffect } from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { useSearchParams } from 'next/navigation';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 export default function ResetPassword() {
-  const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
+  const searchParams = useSearchParams();
+  const email = searchParams.get('email'); // استخراج البريد الإلكتروني من الاستعلام
+  const [isLoading, setIsLoading] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [canResend, setCanResend] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (timer > 0) {
+      const interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else {
+      setCanResend(true);
+    }
+  }, [timer]);
 
   const formik = useFormik({
     initialValues: {
-      email: "",
+      code: '',
+      newPassword: ''
     },
-    validationSchema,
+    validationSchema: Yup.object({
+      code: Yup.string()
+        .matches(/^[0-9]{6}$/, 'يجب إدخال 6 أرقام')
+        .required('الرمز مطلوب'),
+      newPassword: Yup.string()
+        .min(6, 'يجب أن تكون كلمة المرور 6 أحرف على الأقل')
+        .required('كلمة المرور مطلوبة')
+    }),
     onSubmit: async (values) => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        const response = await fetch("/api/reset-password", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        })
-
-        if (response.ok) {
-          toast({
-            title: "تم إرسال رابط إعادة التعيين",
-            description: "يرجى التحقق من بريدك الإلكتروني",
-            variant: "default",
-          })
-        } else {
-          toast({
-            title: "حدث خطأ",
-            description: "يرجى المحاولة مرة أخرى",
-            variant: "destructive",
-          })
-        }
+        const response = await axios.post('http://localhost:8080/auth/reset/', {
+          verificationCode: values.code,
+          newPassword: values.newPassword,
+          email: email, // استخدم البريد الإلكتروني المستخرج
+        });
+        // عرض رسالة النجاح
+        toast.success(response.data.message);
+        router.push('/login');
       } catch (error) {
-        toast({
-          title: "خطأ في الاتصال",
-          description: "يرجى المحاولة مرة أخرى لاحقاً",
-          variant: "destructive",
-        })
+        if (axios.isAxiosError(error) && error.response) {
+          // عرض رسالة الخطأ
+          toast.error(error.response.data.error || 'حدث خطأ يرجى المحاولة مرة أخرى');
+        } else {
+          toast.error('حدث خطأ في الاتصال بالخادم');
+        }
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    },
-  })
+    }
+  });
+
+  const handleResendCode = async () => {
+    if (!canResend) return;
+    setIsLoading(true);
+    try {
+      // هنا يمكنك إضافة منطق إعادة إرسال الرمز
+      setTimer(60);
+      setCanResend(false);
+      toast.info('تم إرسال الرمز مرة أخرى إلى بريدك الإلكتروني.');
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-100 to-gray-200 p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
-        <Card className="border-0 shadow-xl">
-          <CardHeader className="space-y-3 text-center">
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-              إعادة تعيين كلمة المرور
-            </CardTitle>
-            <CardDescription className="text-gray-500">
-              أدخل بريدك الإلكتروني لإرسال رابط إعادة التعيين
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={formik.handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <div className="relative">
-                  <Mail className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
-                  <Input
-                    placeholder="البريد الإلكتروني"
-                    className={`pr-10 py-6 ${
-                      formik.touched.email && formik.errors.email ? "border-red-500" : ""
-                    }`}
-                    {...formik.getFieldProps("email")}
-                  />
-                </div>
-                {formik.touched.email && formik.errors.email && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-red-500 text-sm"
-                  >
-                    {formik.errors.email}
-                  </motion.div>
-                )}
-              </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            إعادة تعيين كلمة المرور
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            أدخل الرمز المكون من 6 أرقام الذي تم إرساله إلى بريدك الإلكتروني
+          </p>
+        </div>
+        <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit}>
+          <div>
+            <input
+              id="code"
+              type="text"
+              maxLength={6}
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="أدخل الرمز"
+              {...formik.getFieldProps('code')}
+            />
+            {formik.touched.code && formik.errors.code && (
+              <div className="text-red-500 text-sm">{formik.errors.code}</div>
+            )}
+          </div>
 
-              <Button
-                type="submit"
-                className="w-full py-6 text-lg bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 transition-all duration-300"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-t-2 border-white rounded-full animate-spin" />
-                    <span>جاري الإرسال...</span>
-                  </div>
-                ) : (
-                  "إرسال رابط إعادة التعيين"
-                )}
-              </Button>
+          <div>
+            <input
+              id="newPassword"
+              type="password"
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="أدخل كلمة المرور الجديدة"
+              {...formik.getFieldProps('newPassword')}
+            />
+            {formik.touched.newPassword && formik.errors.newPassword && (
+              <div className="text-red-500 text-sm">{formik.errors.newPassword}</div>
+            )}
+          </div>
 
-              <div className="text-center">
-                <Link
-                  href="/login"
-                  className="text-blue-600 hover:text-blue-800 transition-colors text-sm"
-                >
-                  العودة إلى تسجيل الدخول
-                </Link>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </motion.div>
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              {isLoading ? 'جاري التحقق...' : 'ارسل '}
+            </button>
+          </div>
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={handleResendCode}
+              disabled={!canResend || isLoading}
+              className="font-medium text-indigo-600 hover:text-indigo-500"
+            >
+              {timer > 0 
+                ? `إعادة إرسال الرمز بعد ${timer} ثانية` 
+                : 'إعادة إرسال الرمز'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-  )
+  );
 }

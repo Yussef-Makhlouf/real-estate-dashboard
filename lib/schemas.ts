@@ -284,3 +284,68 @@ export const propertySchema = z.discriminatedUnion('lang', [
     keywords: z.array(z.string()),
   })
 ]);
+
+export const categorySchema = z.discriminatedUnion('lang', [
+  z.object({
+    lang: z.literal('ar'),
+    title: z.string()
+      .min(1, "العنوان مطلوب")
+      .refine(text => validateLanguage(text, 'ar'), {
+        message: "يجب أن يحتوي العنوان على حروف عربية فقط"
+      }),
+    area: z.number().min(0, "المساحة مطلوبة"),
+    location: z.string()
+      .min(1, "الموقع مطلوب")
+      .refine(text => validateLanguage(text, 'ar'), {
+        message: "يجب أن يحتوي الموقع على حروف عربية فقط"
+      }),
+    description: z.string()
+      .min(1, "الوصف مطلوب")
+      .refine(text => validateLanguage(stripHtml(text), 'ar'), {
+        message: "يجب أن يحتوي النص على حروف عربية فقط"
+      }),
+    image: z.instanceof(File, { message: "الصورة مطلوبة" })
+      .refine(file => file.size > 0, { message: "حجم الصورة غير صالح" })
+      .refine(file => file.type.startsWith('image/'), { 
+        message: "يجب أن يكون الملف صورة" 
+      }),
+      coordinates: z.object({
+        latitude: z.number({
+          required_error: "خط العرض مطلوب",
+          invalid_type_error: "يجب أن يكون رقمًا"
+        }),
+        longitude: z.number({
+          required_error: "خط الطول مطلوب",
+          invalid_type_error: "يجب أن يكون رقمًا"
+        })
+      })
+  }),
+  z.object({
+    lang: z.literal('en'),
+    title: z.string()
+      .min(1, "Title is required")
+      .refine(text => validateLanguage(text, 'en'), {
+        message: "Title must contain only English characters"
+      }),
+    area: z.number().min(0, "Area is required"),
+    location: z.string()
+      .min(1, "Location is required")
+      .refine(text => validateLanguage(text, 'en'), {
+        message: "Location must contain only English characters"
+      }),
+    description: z.string()
+      .min(1, "Description is required")
+      .refine(text => validateLanguage(stripHtml(text), 'en'), {
+        message: "Text must contain only English characters"
+      }),
+    image: z.instanceof(File, { message: "Image is required" })
+      .refine(file => file.size > 0, { message: "Invalid image size" })
+      .refine(file => file.type.startsWith('image/'), { 
+        message: "File must be an image" 
+      }),
+    coordinates: z.object({
+      latitude: z.number().refine(val => val !== undefined, { message: "Latitude is required" }),
+  longitude: z.number().refine(val => val !== undefined, { message: "Longitude is required" })
+    }),
+  })
+]);
