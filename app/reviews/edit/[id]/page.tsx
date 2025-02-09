@@ -115,71 +115,43 @@ export default function EditReview({ params }: { params: { id: string } }) {
   const router = useRouter()
   const [reviewData, setReviewData] = useState<any>(null)
 
-  const formHandler = (lang: "ar" | "en") =>
-    useForm<FormData>({
-      resolver: zodResolver(reviewSchema),
-      defaultValues: { 
-        lang,
-        name: reviewData?.name || '',
-        country: reviewData?.country || '',
-        description: reviewData?.description || '',
-        rate: reviewData?.rate || 0,
-      }
-    })
-
-  const [forms, setForms] = useState<Record<"ar" | "en", ReturnType<typeof useForm<FormData>>>>({
-    ar: formHandler("ar"),
-    en: formHandler("en")
+  // Initialize forms at component level
+  const arForm = useForm<FormData>({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: { lang: 'ar' }
   })
+
+  const enForm = useForm<FormData>({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: { lang: 'en' }
+  })
+
+  const forms = { ar: arForm, en: enForm }
   useEffect(() => {
     const fetchReview = async () => {
-      try {
-        const token = localStorage.getItem("token")
-        const response = await fetch(`http://localhost:8080/review/${params.id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        
-        if (!response.ok) throw new Error("Failed to fetch review")
-        
-        const review = await response.json()
-        setReviewData(review)
-        
-        // تحديث النماذج بعد استلام البيانات مباشرة
-        const arForm = formHandler("ar")
-        const enForm = formHandler("en")
-        
-        arForm.reset({
-          lang: 'ar',
+      const token = localStorage.getItem("token")
+      const response = await fetch(`http://localhost:8080/review/${params.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const data = await response.json()
+      const review = data.review
+  
+      // Set data only for the matching language form
+      const targetForm = forms[review.lang as 'ar' | 'en']
+      if (targetForm) {
+        targetForm.reset({
+          lang: review.lang,
           name: review.name,
           country: review.country,
           description: review.description,
-          rate: Number(review.rate),
-          image: review.image
-        })
-  
-        enForm.reset({
-          lang: 'en',
-          name: review.name,
-          country: review.country,
-          description: review.description,
-          rate: Number(review.rate),
-          image: review.image
-        })
-  
-        setForms({ ar: arForm, en: enForm })
-  
-      } catch (error) {
-        console.error("Error fetching review:", error)
-        toast({
-          title: "Error",
-          description: "Failed to load review data",
-          variant: "destructive"
+          rate: review.rate,
+          image: review.Image
         })
       }
     }
-  
     fetchReview()
-  }, [params.id])
+  }, [])
+  
   
 
   const onSubmit = async (data: FormData, lang: "ar" | "en") => {
