@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Image from 'next/image';
-import { toast } from "react-toastify";
-import axios from 'axios';
 
 export default function Login() {
   const router = useRouter();
@@ -42,49 +40,26 @@ export default function Login() {
         const data = await response.json();
 
         if (response.ok) {
+          // Store user data in localStorage
           localStorage.setItem('token', data.userUpdated.token);
-          toast.success("Login successful!");
-          setTimeout(() => {
-            router.push('/roles');
-          }, 1000);
+          // localStorage.setItem('userData', JSON.stringify(data.userUpdated));
+          
+          // Redirect to dashboard or home page
+          router.push('/roles');
         } else {
           console.error('Login failed:', data.message);
-          toast.error("Login failed. Please try again.");
+          // Handle login error
+        // You can display an error message to the user or perform other actions
+        
+
         }
       } catch (error) {
         console.error('Login error:', error);
-        toast.error("Login failed. Please try again.");
       } finally {
         setIsLoading(false);
       }
     }
   });
-
-  async function handleForget(email: string) {
-    try {
-      const response = await axios.post(
-        'http://localhost:8080/auth/sendEmail',
-        { email },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      toast.success("تم إرسال رابط استعادة كلمة المرور!");
-      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Server Error:", error.response?.data);
-        toast.error(error.response?.data?.message || "حدث خطأ في الخادم");
-      } else {
-        console.error("Request Failed:", error);
-        toast.error("حدث خطأ في الاتصال بالخادم");
-      }
-      throw error;
-    }
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -133,9 +108,9 @@ export default function Login() {
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <button 
-                type="button" 
-                onClick={() => handleForget(formik.values.email)} 
+              <button
+                type="button"
+                onClick={() => router.push('/reset-password')}
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
                 نسيت كلمة المرور؟
