@@ -16,7 +16,9 @@ export const userSchema = z.object({
     .email("البريد الإلكتروني غير صالح"),
   phone: z.string()
     .regex(saudiPhoneRegex, "يجب إدخال رقم هاتف سعودي صالح"),
-  role: z.enum(["admin", "supervisor"], {
+  verificationCode: z.string()
+  ,  
+  role: z.enum(["Admin", "SuperAdmin"], {
     required_error: "يرجى اختيار نوع المستخدم",
   }),
   password: z.string()
@@ -24,3 +26,4 @@ export const userSchema = z.object({
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 
       "كلمة المرور يجب أن تحتوي على حروف كبيرة وصغيرة وأرقام ورموز خاصة")
 })
+

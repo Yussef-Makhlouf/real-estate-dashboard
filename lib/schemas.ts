@@ -139,6 +139,8 @@ const stripHtml = (html: string) => {
   return html.replace(/<[^>]*>?/gm, ''); // إزالة جميع علامات HTML
 };
 
+
+
 export const blogPostSchema = z.discriminatedUnion('lang', [
   z.object({
     lang: z.literal('ar'),
@@ -201,7 +203,6 @@ export const faqSchema = z.discriminatedUnion('lang', [
   })
 ]);
 
-
 export const reviewSchema = z.discriminatedUnion('lang', [
   z.object({
     lang: z.literal('ar'),
@@ -247,7 +248,6 @@ export const reviewSchema = z.discriminatedUnion('lang', [
     updatedAt: z.string().optional(),
   })
 ]);
-
 
 export const propertySchema = z.discriminatedUnion('lang', [
   z.object({
