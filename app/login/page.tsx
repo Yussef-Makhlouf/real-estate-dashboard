@@ -1,16 +1,16 @@
-'use client';
-
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import Image from 'next/image';
-import { toast } from "react-toastify";
-import axios from 'axios';
+"use client"
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useFormik } from 'formik'
+import * as Yup from 'yup'
+import Image from 'next/image'
+import { toast } from "react-toastify"
+import axios from 'axios'
+import { Loader2, Mail, Lock, ArrowRight } from 'lucide-react'
 
 export default function Login() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
 
   const formik = useFormik({
     initialValues: {
@@ -26,7 +26,7 @@ export default function Login() {
         .required('كلمة المرور مطلوبة')
     }),
     onSubmit: async (values) => {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
         const response = await fetch('http://localhost:8080/auth/signIn', {
           method: 'POST',
@@ -37,33 +37,36 @@ export default function Login() {
             email: values.email,
             password: values.password,
           }),
-        });
+        })
 
-        const data = await response.json();
+        const data = await response.json()
 
         if (response.ok) {
-          document.cookie = `auth-token=${data.token } ; path=/`;
-          localStorage.setItem('token', data.userUpdated.token);
-
-          toast.success("Login successful!");
+          document.cookie = `auth-token=${data.token}; path=/`
+          localStorage.setItem('token', data.userUpdated.token)
+          toast.success("تم تسجيل الدخول بنجاح!")
           setTimeout(() => {
-            router.push('/roles');
-          }, 1000);
+            router.push('/roles')
+          }, 1000)
         } else {
-          console.error('Login failed:', data.message);
-          toast.error("Login failed. Please try again.");
+          toast.error("فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.")
         }
-      } catch (error) {        console.error('Login error:', error);
-        toast.error("Login failed. Please try again.");
+      } catch (error) {
+        toast.error("حدث خطأ في تسجيل الدخول. يرجى المحاولة مرة أخرى.")
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
-  });
+  })
 
   async function handleForget(email: string) {
+    if (!email) {
+      toast.error("يرجى إدخال البريد الإلكتروني أولاً")
+      return
+    }
+
     try {
-      const response = await axios.post(
+      await axios.post(
         'http://localhost:8080/auth/sendEmail',
         { email },
         {
@@ -71,90 +74,122 @@ export default function Login() {
             'Content-Type': 'application/json',
           },
         }
-      );
-      toast.success("تم إرسال رابط استعادة كلمة المرور!");
-      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
-      return response.data;
+      )
+      toast.success("تم إرسال رابط استعادة كلمة المرور!")
+      router.push(`/reset-password?email=${encodeURIComponent(email)}`)
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error("Server Error:", error.response?.data);
-        toast.error(error.response?.data?.message || "حدث خطأ في الخادم");
+        toast.error(error.response?.data?.message || "حدث خطأ في الخادم")
       } else {
-        console.error("Request Failed:", error);
-        toast.error("حدث خطأ في الاتصال بالخادم");
+        toast.error("حدث خطأ في الاتصال بالخادم")
       }
-      throw error;
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <Image
-            className="mx-auto h-12 w-auto"
-            src="/logo.svg"
-            alt="Logo"
-            width={48}
-            height={48}
-          />
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            تسجيل الدخول
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="البريد الإلكتروني"
-                {...formik.getFieldProps('email')}
+    <div className="min-h-screen flex flex-col justify-center bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10 space-y-8">
+          <div className="text-center">
+            <div className="relative w-20 h-20 mx-auto">
+              <Image
+                src="/logo.svg"
+                alt="Logo"
+                fill
+                className="object-contain"
+                priority
               />
-              {formik.touched.email && formik.errors.email && (
-                <div className="text-red-500 text-sm">{formik.errors.email}</div>
-              )}
             </div>
-            <div>
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="كلمة المرور"
-                {...formik.getFieldProps('password')}
-              />
-              {formik.touched.password && formik.errors.password && (
-                <div className="text-red-500 text-sm">{formik.errors.password}</div>
-              )}
-            </div>
+            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+              تسجيل الدخول
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              أدخل بياناتك للوصول إلى لوحة التحكم
+            </p>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <button 
-                type="button" 
-                onClick={() => handleForget(formik.values.email)} 
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+          <form className="space-y-6" onSubmit={formik.handleSubmit}>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  البريد الإلكتروني
+                </label>
+                <div className="mt-1 relative">
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    className={`appearance-none block w-full pr-10 py-3 border ${
+                      formik.touched.email && formik.errors.email 
+                        ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                        : 'border-gray-300 focus:ring-primary focus:border-primary'
+                    } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm`}
+                    placeholder="أدخل بريدك الإلكتروني"
+                    {...formik.getFieldProps('email')}
+                  />
+                </div>
+                {formik.touched.email && formik.errors.email && (
+                  <p className="mt-2 text-sm text-red-600">{formik.errors.email}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  كلمة المرور
+                </label>
+                <div className="mt-1 relative">
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="password"
+                    type="password"
+                    autoComplete="current-password"
+                    className={`appearance-none block w-full pr-10 py-3 border ${
+                      formik.touched.password && formik.errors.password 
+                        ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                        : 'border-gray-300 focus:ring-primary focus:border-primary'
+                    } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm`}
+                    placeholder="أدخل كلمة المرور"
+                    {...formik.getFieldProps('password')}
+                  />
+                </div>
+                {formik.touched.password && formik.errors.password && (
+                  <p className="mt-2 text-sm text-red-600">{formik.errors.password}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => handleForget(formik.values.email)}
+                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
               >
                 نسيت كلمة المرور؟
               </button>
             </div>
-          </div>
 
-          <div>
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'جاري التحميل...' : 'تسجيل الدخول'}
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  تسجيل الدخول
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </>
+              )}
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
-  );
+  )
 }

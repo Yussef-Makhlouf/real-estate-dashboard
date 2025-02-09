@@ -4,6 +4,7 @@ import { Menu, Bell, User, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSidebar } from "./SidebarProvider"
+import Link from "next/link"
 
 export function Header() {
   const { toggle } = useSidebar()
@@ -27,12 +28,22 @@ export function Header() {
         </div>
       </div>
       <div className="flex items-center space-x-4">
-        <Button variant="ghost" size="icon">
-          <Bell className="h-6 w-6" />
-        </Button>
-        <Button variant="ghost" size="icon">
-          <User className="h-6 w-6" />
-        </Button>
+
+ 
+<div className="flex items-center space-x-4">
+<Link href="/notifications">
+  <Button variant="ghost" size="icon">
+    <Bell className="h-6 w-6" />
+  </Button>
+</Link>
+  <Link href="/users/settings">
+    <Button variant="ghost" size="icon" className="hover:bg-gray-100">
+      <User className="h-6 w-6" />
+      <span className="sr-only">إعدادات المستخدم</span>
+    </Button>
+  </Link>
+</div>
+
       </div>
     </header>
   )
