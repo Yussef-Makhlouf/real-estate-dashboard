@@ -10,6 +10,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import Link from "next/link";
 import { Edit, Trash2, Star } from "lucide-react";
 import { useRouter } from 'next/navigation'
+import { toast } from "react-toastify";
 // Define the type for a review
 type Review = {
   Image: {
@@ -39,11 +40,11 @@ export default function Reviews() {
       const response = await fetch("http://localhost:8080/review/");
       const data = await response.json();
       //  console.log("API Response:", data); // Debugging line
- 
+
       if (data.message === "Done") {
         const reviewData = Array.isArray(data.reviews) ? data.reviews : [data.review];
         // console.log(reviewData);
-        
+
         setReviews(reviewData);
       }
     } catch (error) {
@@ -52,33 +53,49 @@ export default function Reviews() {
   };
 
 
-  
+
   useEffect(() => {
-          fetchReviews();
-        }, []);
+    fetchReviews();
+  }, []);
 
-        // Handle delete button click
-              const router = useRouter();
+  // Handle delete button click
+  const router = useRouter();
 
-              const handleDelete = (id: string) => {
-                setReviewToDelete(id);
-                setDeleteDialogOpen(true);
-              };
+  const handleDelete = (id: string) => {
+    setReviewToDelete(id);
+    setDeleteDialogOpen(true);
+  };
 
-              // Handle edit button click
-              const handleEdit = (id: string) => {
-                router.push(`/reviews/edit/${id}`);
-              };
+  // Handle edit button click
+  const handleEdit = (id: string) => {
+    router.push(`/reviews/edit/${id}`);
+  };
 
   // Confirm delete (API call should be added here)
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (reviewToDelete) {
-      console.log("Deleting review:", reviewToDelete);
-      // TODO: Make an API call to delete the review from the backend
+      try {
+        const token = localStorage.getItem('token')
+        const response = await fetch(`http://localhost:8080/review/delete/${reviewToDelete}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+  
+        if (!response.ok) throw new Error("فشل في حذف الرأي")
+  
+        // Success case
+        toast.success("تم حذف الرأي بنجاح")
+        fetchReviews() // Refresh the reviews list
+      } catch (error) {
+        toast.error("فشل في حذف الرأي")
+      }
+      setDeleteDialogOpen(false)
+      setReviewToDelete(null)
     }
-    setDeleteDialogOpen(false);
-    setReviewToDelete(null);
-  };
+  }
+  
 
   return (
     <div className="min-h-screen bg-gray-100">

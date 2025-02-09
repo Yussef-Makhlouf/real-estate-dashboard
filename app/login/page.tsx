@@ -42,7 +42,9 @@ export default function Login() {
         const data = await response.json();
 
         if (response.ok) {
+          document.cookie = `auth-token=${data.token } ; path=/`;
           localStorage.setItem('token', data.userUpdated.token);
+
           toast.success("Login successful!");
           setTimeout(() => {
             router.push('/roles');
@@ -51,8 +53,7 @@ export default function Login() {
           console.error('Login failed:', data.message);
           toast.error("Login failed. Please try again.");
         }
-      } catch (error) {
-        console.error('Login error:', error);
+      } catch (error) {        console.error('Login error:', error);
         toast.error("Login failed. Please try again.");
       } finally {
         setIsLoading(false);
