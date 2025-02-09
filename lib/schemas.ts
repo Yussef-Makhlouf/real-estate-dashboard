@@ -210,19 +210,19 @@ export const reviewSchema = z.discriminatedUnion('lang', [
       .refine(text => validateLanguage(text, 'ar'), {
         message: "يجب أن يحتوي الاسم على حروف عربية فقط"
       }),
+   
     country: z.string().min(1, "الدولة مطلوبة"),
     description: z.string()
       .min(1, "التعليق مطلوب")
-      .refine(text => validateLanguage(text, 'ar'), {
-        message: "يجب أن يحتوي التعليق على حروف عربية فقط"
+      .refine(text => validateLanguage(stripHtml(text), 'ar'), {
+        message: "يجب أن يحتوي النص على حروف عربية فقط"
       }),
     rate: z.number().min(1).max(5),
-    image: z.object({
-      secure_url: z.string().url(),
-      public_id: z.string()
-    }).optional(),
-    createdAt: z.string().optional(),
-    updatedAt: z.string().optional(),
+    image: z.union([z.string().url(), z.instanceof(File)]).optional(),
+    // createdBy: z.string().min(1, "معرف المُنشئ مطلوب"),
+    // customId: z.string().min(1, "معرف مخصص مطلوب"),
+    // createdAt: z.string().datetime(),
+    // updatedAt: z.string().datetime(),
   }),
   z.object({
     lang: z.literal('en'),
@@ -231,24 +231,21 @@ export const reviewSchema = z.discriminatedUnion('lang', [
       .refine(text => validateLanguage(text, 'en'), {
         message: "Name must contain only English characters"
       }),
+   
     country: z.string().min(1, "Country is required"),
     description: z.string()
-      .min(1, "Comment is required")
-      .refine(text => validateLanguage(text, 'en'), {
-        message: "Comment must contain only English characters"
+      .min(1, "comment is required")
+      .refine(text => validateLanguage(stripHtml(text), 'en'), {
+        message: "Text must contain only English characters"
       }),
     rate: z.number().min(1).max(5),
-    customId: z.string().optional(),
-    image: z.object({
-      secure_url: z.string().url(),
-      public_id: z.string()
-    }).optional(),
-    createdAt: z.string().optional(),
-    updatedAt: z.string().optional(),
+    image: z.union([z.string().url(), z.instanceof(File)]).optional(),
+    // createdBy: z.string().min(1, "CreatedBy is required"),
+    // customId: z.string().min(1, "Custom ID is required"),
+    // createdAt: z.string().datetime(),
+    // updatedAt: z.string().datetime(),
   })
 ]);
-
-
 export const propertySchema = z.discriminatedUnion('lang', [
   z.object({
     lang: z.literal('ar'),

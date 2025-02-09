@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import Link from "next/link";
 import { Edit, Trash2, Star } from "lucide-react";
-
+import { useRouter } from 'next/navigation'
 // Define the type for a review
 type Review = {
   Image: {
@@ -54,17 +54,21 @@ export default function Reviews() {
 
   
   useEffect(() => {
-    
-    fetchReviews();
-  }, []);
+          fetchReviews();
+        }, []);
 
+        // Handle delete button click
+              const router = useRouter();
 
+              const handleDelete = (id: string) => {
+                setReviewToDelete(id);
+                setDeleteDialogOpen(true);
+              };
 
-  // Handle delete button click
-  const handleDelete = (id: string) => {
-    setReviewToDelete(id);
-    setDeleteDialogOpen(true);
-  };
+              // Handle edit button click
+              const handleEdit = (id: string) => {
+                router.push(`/reviews/edit/${id}`);
+              };
 
   // Confirm delete (API call should be added here)
   const confirmDelete = () => {
