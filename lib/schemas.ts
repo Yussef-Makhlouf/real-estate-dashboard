@@ -131,15 +131,22 @@
 import * as z from "zod"
 
 const validateLanguage = (text: string, lang: 'ar' | 'en') => {
+  const cleanedText = stripHtml(text);
   const arabicRegex = /^[\u0600-\u06FF\s،؛؟٠-٩<>\/]+$/;
   const englishRegex = /^[A-Za-z\s.,!?0-9؟؛،<>\/]+$/;
   return lang === 'ar' ? arabicRegex.test(text) : englishRegex.test(text)
 }
+
+// // 
+// const validateLanguage = (text: string, lang: 'ar' | 'en') => {
+//   const arabicRegex = /^[\u0600-\u06FF\s0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+//   const englishRegex = /^[A-Za-z\s0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+//   return lang === 'ar' ? arabicRegex.test(text) : englishRegex.test(text);
+// };
+
 const stripHtml = (html: string) => {
   return html.replace(/<[^>]*>?/gm, ''); // إزالة جميع علامات HTML
 };
-
-
 
 export const blogPostSchema = z.discriminatedUnion('lang', [
   z.object({
@@ -151,8 +158,8 @@ export const blogPostSchema = z.discriminatedUnion('lang', [
       }),
     description: z.string()
       .min(1, "المحتوى مطلوب")
-      .refine(text => validateLanguage(stripHtml(text), 'ar'), {
-        message: "يجب أن يحتوي النص على حروف عربية فقط"
+      .refine(text => validateLanguage(text,"ar"), { // سيتم تنظيفه تلقائيًا
+        message: "يجب أن يحتوي التعليق على حروف عربية فقط (بدون تنسيق)"
       }),
     Keywords: z.array(z.string()).optional(),
     image: z.union([z.string().url(), z.instanceof(File)]).optional(),
@@ -203,6 +210,39 @@ export const faqSchema = z.discriminatedUnion('lang', [
   })
 ]);
 
+// export const reviewSchema = z.discriminatedUnion('lang', [
+//   z.object({
+//     lang: z.literal('ar'),
+//     name: z.string()
+//       .min(1, "الاسم مطلوب")
+//       .refine(text => validateLanguage(text, 'ar'), {
+//         message: "يجب أن يحتوي الاسم على حروف عربية فقط"
+//       }),
+//     comment: z.string()
+//       .min(1, "التعليق مطلوب")
+//       .refine(text => validateLanguage(text, 'ar'), {
+//         message: "يجب أن يحتوي التعليق على حروف عربية فقط"
+//       }),
+//     rating: z.number().min(1).max(5),
+//     image: z.any().optional(),
+//   }),
+//   z.object({
+//     lang: z.literal('en'),
+//     name: z.string()
+//       .min(1, "Name is required")
+//       .refine(text => validateLanguage(text, 'en'), {
+//         message: "Name must contain only English characters"
+//       }),
+//     comment: z.string()
+//       .min(1, "Comment is required")
+//       .refine(text => validateLanguage(text, 'en'), {
+//         message: "Comment must contain only English characters"
+//       }),
+//     rating: z.number().min(1).max(5),
+//     image: z.any().optional(),
+//   })
+// ]);
+
 export const reviewSchema = z.discriminatedUnion('lang', [
   z.object({
     lang: z.literal('ar'),
@@ -211,6 +251,7 @@ export const reviewSchema = z.discriminatedUnion('lang', [
       .refine(text => validateLanguage(text, 'ar'), {
         message: "يجب أن يحتوي الاسم على حروف عربية فقط"
       }),
+   
     country: z.string().min(1, "الدولة مطلوبة"),
     description: z.string()
       .min(1, "التعليق مطلوب")
@@ -219,11 +260,13 @@ export const reviewSchema = z.discriminatedUnion('lang', [
       }),
     rate: z.number().min(1).max(5),
     image: z.object({
-      secure_url: z.string().url(),
-      public_id: z.string()
+      secure_url: z.string().url("رابط الصورة غير صحيح"),
+      public_id: z.string().min(1, "معرف الصورة مطلوب")
     }).optional(),
-    createdAt: z.string().optional(),
-    updatedAt: z.string().optional(),
+    // createdBy: z.string().min(1, "معرف المُنشئ مطلوب"),
+    // customId: z.string().min(1, "معرف مخصص مطلوب"),
+    // createdAt: z.string().datetime(),
+    // updatedAt: z.string().datetime(),
   }),
   z.object({
     lang: z.literal('en'),
@@ -232,6 +275,7 @@ export const reviewSchema = z.discriminatedUnion('lang', [
       .refine(text => validateLanguage(text, 'en'), {
         message: "Name must contain only English characters"
       }),
+   
     country: z.string().min(1, "Country is required"),
     description: z.string()
       .min(1, "Comment is required")
@@ -239,15 +283,17 @@ export const reviewSchema = z.discriminatedUnion('lang', [
         message: "Comment must contain only English characters"
       }),
     rate: z.number().min(1).max(5),
-    customId: z.string().optional(),
     image: z.object({
-      secure_url: z.string().url(),
-      public_id: z.string()
+      secure_url: z.string().url("Invalid image URL"),
+      public_id: z.string().min(1, "Public ID is required")
     }).optional(),
-    createdAt: z.string().optional(),
-    updatedAt: z.string().optional(),
+    // createdBy: z.string().min(1, "CreatedBy is required"),
+    // customId: z.string().min(1, "Custom ID is required"),
+    // createdAt: z.string().datetime(),
+    // updatedAt: z.string().datetime(),
   })
 ]);
+
 
 export const propertySchema = z.discriminatedUnion('lang', [
   z.object({
@@ -285,5 +331,71 @@ export const propertySchema = z.discriminatedUnion('lang', [
     type: z.string().min(1, "Property type is required"),
     images: z.array(z.any()),
     keywords: z.array(z.string()),
+  })
+]);
+
+
+export const categorySchema = z.discriminatedUnion('lang', [
+  z.object({
+    lang: z.literal('ar'),
+    title: z.string()
+      .min(1, "العنوان مطلوب")
+      .refine(text => validateLanguage(text, 'ar'), {
+        message: "يجب أن يحتوي العنوان على حروف عربية فقط"
+      }),
+    area: z.number().min(0, "المساحة مطلوبة"),
+    location: z.string()
+      .min(1, "الموقع مطلوب")
+      .refine(text => validateLanguage(text, 'ar'), {
+        message: "يجب أن يحتوي الموقع على حروف عربية فقط"
+      }),
+    description: z.string()
+      .min(1, "الوصف مطلوب")
+      .refine(text => validateLanguage(text, 'ar'), {
+        message: "يجب أن يحتوي الوصف على حروف عربية فقط"
+      }),
+    image: z.instanceof(File, { message: "الصورة مطلوبة" })
+      .refine(file => file.size > 0, { message: "حجم الصورة غير صالح" })
+      .refine(file => file.type.startsWith('image/'), { 
+        message: "يجب أن يكون الملف صورة" 
+      }),
+      coordinates: z.object({
+        latitude: z.number({
+          required_error: "خط العرض مطلوب",
+          invalid_type_error: "يجب أن يكون رقمًا"
+        }),
+        longitude: z.number({
+          required_error: "خط الطول مطلوب",
+          invalid_type_error: "يجب أن يكون رقمًا"
+        })
+      })
+  }),
+  z.object({
+    lang: z.literal('en'),
+    title: z.string()
+      .min(1, "Title is required")
+      .refine(text => validateLanguage(text, 'en'), {
+        message: "Title must contain only English characters"
+      }),
+    area: z.number().min(0, "Area is required"),
+    location: z.string()
+      .min(1, "Location is required")
+      .refine(text => validateLanguage(text, 'en'), {
+        message: "Location must contain only English characters"
+      }),
+    description: z.string()
+      .min(1, "Description is required")
+      .refine(text => validateLanguage(text, 'en'), {
+        message: "Description must contain only English characters"
+      }),
+    image: z.instanceof(File, { message: "Image is required" })
+      .refine(file => file.size > 0, { message: "Invalid image size" })
+      .refine(file => file.type.startsWith('image/'), { 
+        message: "File must be an image" 
+      }),
+    coordinates: z.object({
+      latitude: z.number().refine(val => val !== undefined, { message: "Latitude is required" }),
+  longitude: z.number().refine(val => val !== undefined, { message: "Longitude is required" })
+    }),
   })
 ]);

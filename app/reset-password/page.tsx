@@ -3,11 +3,18 @@
 import { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useSearchParams } from 'next/navigation';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 export default function ResetPassword() {
+  const searchParams = useSearchParams();
+  const email = searchParams.get('email'); // استخراج البريد الإلكتروني من الاستعلام
   const [isLoading, setIsLoading] = useState(false);
   const [timer, setTimer] = useState(0);
   const [canResend, setCanResend] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (timer > 0) {
@@ -22,20 +29,35 @@ export default function ResetPassword() {
 
   const formik = useFormik({
     initialValues: {
-      code: ''
+      code: '',
+      newPassword: ''
     },
     validationSchema: Yup.object({
       code: Yup.string()
         .matches(/^[0-9]{6}$/, 'يجب إدخال 6 أرقام')
-        .required('الرمز مطلوب')
+        .required('الرمز مطلوب'),
+      newPassword: Yup.string()
+        .min(6, 'يجب أن تكون كلمة المرور 6 أحرف على الأقل')
+        .required('كلمة المرور مطلوبة')
     }),
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        // Handle verification logic here
-        console.log(values);
+        const response = await axios.post('http://localhost:8080/auth/reset/', {
+          verificationCode: values.code,
+          newPassword: values.newPassword,
+          email: email, // استخدم البريد الإلكتروني المستخرج
+        });
+        // عرض رسالة النجاح
+        toast.success(response.data.message);
+        router.push('/login');
       } catch (error) {
-        console.error(error);
+        if (axios.isAxiosError(error) && error.response) {
+          // عرض رسالة الخطأ
+          toast.error(error.response.data.error || 'حدث خطأ يرجى المحاولة مرة أخرى');
+        } else {
+          toast.error('حدث خطأ في الاتصال بالخادم');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -46,9 +68,10 @@ export default function ResetPassword() {
     if (!canResend) return;
     setIsLoading(true);
     try {
-      // Handle resend code logic here
+      // هنا يمكنك إضافة منطق إعادة إرسال الرمز
       setTimer(60);
       setCanResend(false);
+      toast.info('تم إرسال الرمز مرة أخرى إلى بريدك الإلكتروني.');
     } catch (error) {
       console.error(error);
     } finally {
@@ -79,6 +102,19 @@ export default function ResetPassword() {
             />
             {formik.touched.code && formik.errors.code && (
               <div className="text-red-500 text-sm">{formik.errors.code}</div>
+            )}
+          </div>
+
+          <div>
+            <input
+              id="newPassword"
+              type="password"
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="أدخل كلمة المرور الجديدة"
+              {...formik.getFieldProps('newPassword')}
+            />
+            {formik.touched.newPassword && formik.errors.newPassword && (
+              <div className="text-red-500 text-sm">{formik.errors.newPassword}</div>
             )}
           </div>
 

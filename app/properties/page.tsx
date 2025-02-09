@@ -1,114 +1,192 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import axios from "axios"
 import { Header } from "@/components/Header"
 import { Sidebar } from "@/components/Sidebar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import Link from "next/link"
-import { Edit, Trash2, Home, MapPin, DollarSign } from "lucide-react"
+import { Edit, Trash2, Home, MapPin, DollarSign, Globe } from "lucide-react"
 
-const properties = [
-  {
-    id: 1,
-    titleAr: "فيلا فاخرة مع حمام سباحة",
-    titleEn: "Luxury Villa with Swimming Pool",
-    type: "فيلا",
-    location: "الرياض",
-    price: 2500000,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: 2,
-    titleAr: "شقة حديثة في وسط المدينة",
-    titleEn: "Modern Apartment in City Center",
-    type: "شقة",
-    location: "جدة",
-    price: 800000,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: 3,
-    titleAr: "مكتب تجاري في برج مرموق",
-    titleEn: "Commercial Office in Prestigious Tower",
-    type: "مكتب",
-    location: "الدمام",
-    price: 1500000,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-]
+interface Category {
+  _id: string
+  title: string
+  location: string
+  area: number
+  description: string
+  Image: { secure_url: string }
+  coordinates: { latitude: number; longitude: number }
+  lang: 'ar' | 'en'
+}
 
 export default function Properties() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [propertyToDelete, setPropertyToDelete] = useState<number | null>(null)
+  const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [selectedLang, setSelectedLang] = useState<'all' | 'ar' | 'en'>('all')
 
-  const handleDelete = (id: number) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/category/", {
+          params: { page: 1, size: 9 }
+        })
+        setCategories(response.data.category)
+      } catch (err) {
+        setError("فشل في جلب البيانات")
+        console.error("Error fetching data:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  const filteredCategories = categories.filter(cat => 
+    selectedLang === 'all' ? true : cat.lang === selectedLang
+  )
+
+  const handleDelete = (id: string) => {
     setPropertyToDelete(id)
     setDeleteDialogOpen(true)
   }
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (propertyToDelete) {
-      // Here you would typically make an API call to delete the property
-      console.log("Deleting property:", propertyToDelete)
+      try {
+        await axios.delete(`http://localhost:8080/category/delete/${propertyToDelete}`)
+        setCategories(prev => prev.filter(cat => cat._id !== propertyToDelete))
+      } catch (err) {
+        console.error("Error deleting category:", err)
+      }
     }
     setDeleteDialogOpen(false)
     setPropertyToDelete(null)
   }
+
+  if (loading) return <div className="text-center py-8">جاري التحميل...</div>
+  if (error) return <div className="text-red-500 text-center py-8">{error}</div>
 
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
       <Sidebar />
       <main className="pt-16 px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <h2 className="text-2xl font-semibold">العقارات</h2>
-          <Link href="/properties/add">
-            <Button>إضافة عقار جديد</Button>
-          </Link>
+          
+          <div className="flex gap-2 items-center">
+            <div className="flex border rounded-lg bg-white p-1">
+              <Button 
+                variant={selectedLang === 'all' ? 'default' : 'ghost'} 
+                size="sm"
+                onClick={() => setSelectedLang('all')}
+              >
+                الكل
+              </Button>
+              <Button 
+                variant={selectedLang === 'ar' ? 'default' : 'ghost'} 
+                size="sm"
+                onClick={() => setSelectedLang('ar')}
+              >
+                العربية
+              </Button>
+              <Button 
+                variant={selectedLang === 'en' ? 'default' : 'ghost'} 
+                size="sm"
+                onClick={() => setSelectedLang('en')}
+              >
+                English
+              </Button>
+            </div>
+            
+            <Link href="/properties/add">
+              <Button>إضافة عقار جديد</Button>
+            </Link>
+          </div>
         </div>
+
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {properties.map((property) => (
-            <Card key={property.id} className="overflow-hidden">
-              <img
-                src={property.image || "/placeholder.svg"}
-                alt={property.titleAr}
-                className="w-full h-48 object-cover"
-              />
+          {filteredCategories.map((category) => (
+            <Card 
+              key={category._id} 
+              className="overflow-hidden"
+              dir={category.lang === 'ar' ? 'rtl' : 'ltr'}
+            >
+              <div className="relative">
+                <img
+                  src={category.Image.secure_url}
+                  alt={category.title}
+                  className="w-full h-48 object-cover"
+                />
+                <span className="absolute top-2 right-2 bg-white/80 px-2 py-1 rounded-full text-sm flex items-center gap-1">
+                  <Globe className="w-4 h-4" />
+                  {category.lang}
+                </span>
+              </div>
+              
               <CardHeader>
                 <CardTitle>
                   <div className="flex flex-col space-y-1">
-                    <span className="text-lg">{property.titleAr}</span>
-                    <span className="text-sm text-gray-500">{property.titleEn}</span>
+                    <span className="text-lg font-bold">{category.title}</span>
+                    <span className="text-sm text-gray-500">
+                      {category.location}
+                    </span>
                   </div>
                 </CardTitle>
               </CardHeader>
+
               <CardContent>
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center">
                     <Home className="w-4 h-4 mr-2" />
-                    <span>{property.type}</span>
+                    <span>
+                      {category.lang === 'ar' ? 'المساحة:' : 'Area:'} 
+                      <span className="font-semibold ml-1">
+                        {category.area.toLocaleString()} م²
+                      </span>
+                    </span>
                   </div>
+
                   <div className="flex items-center">
                     <MapPin className="w-4 h-4 mr-2" />
-                    <span>{property.location}</span>
+                    <span>
+                      {category.lang === 'ar' ? 'الإحداثيات:' : 'Coordinates:'}
+                      <span className="font-semibold ml-1">
+                        {category.coordinates.latitude.toFixed(4)}, 
+                        {category.coordinates.longitude.toFixed(4)}
+                      </span>
+                    </span>
                   </div>
-                  <div className="flex items-center">
-                    <DollarSign className="w-4 h-4 mr-2" />
-                    <span>{property.price.toLocaleString()} ريال</span>
+
+                  <div className="flex items-start">
+                    <DollarSign className="w-4 h-4 mr-2 mt-1" />
+                    <span className="flex-1">
+                      {category.lang === 'ar' ? 'الوصف:' : 'Description:'}
+                      <p className="text-gray-600 mt-1">{category.description}</p>
+                    </span>
                   </div>
                 </div>
-                <div className="flex justify-end space-x-2">
-                  <Link href={`/properties/edit/${property.id}`}>
+
+                <div className="flex justify-end gap-2">
+                  <Link href={`/properties/edit/${category._id}`}>
                     <Button variant="outline" size="sm">
                       <Edit className="h-4 w-4 ml-2" />
-                      تعديل
+                      {category.lang === 'ar' ? 'تعديل' : 'Edit'}
                     </Button>
                   </Link>
-                  <Button variant="destructive" size="sm" onClick={() => handleDelete(property.id)}>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDelete(category._id)}
+                  >
                     <Trash2 className="h-4 w-4 ml-2" />
-                    حذف
+                    {category.lang === 'ar' ? 'حذف' : 'Delete'}
                   </Button>
                 </div>
               </CardContent>
@@ -120,11 +198,14 @@ export default function Properties() {
           open={deleteDialogOpen}
           onOpenChange={setDeleteDialogOpen}
           onConfirm={confirmDelete}
-          title="تأكيد الحذف"
-          description="هل أنت متأكد من حذف هذا العقار؟ لا يمكن التراجع عن هذا الإجراء."
+          title={categories.find(c => c._id === propertyToDelete)?.lang === 'ar' 
+            ? "تأكيد الحذف" 
+            : "Confirm Delete"}
+          description={categories.find(c => c._id === propertyToDelete)?.lang === 'ar' 
+            ? "هل أنت متأكد من حذف هذا العقار؟ لا يمكن التراجع عن هذا الإجراء." 
+            : "Are you sure you want to delete this property? This action cannot be undone."}
         />
       </main>
     </div>
   )
 }
-
