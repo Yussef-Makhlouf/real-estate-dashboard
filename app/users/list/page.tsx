@@ -1,8 +1,7 @@
 "use client"
-
 import { Header } from "@/components/Header"
 import { Sidebar } from "@/components/Sidebar"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import {
@@ -24,20 +23,41 @@ interface User {
   middleName: string
   lastName: string
   email: string
-  phone: string
-  role: "admin" | "supervisor"
+  phoneNumber: string
+  role: "Admin" | "SuperAdmin"
 }
 
 function UsersListContent() {
   const [users, setUsers] = useState<User[]>([])
   const [searchQuery, setSearchQuery] = useState("")
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        const response = await fetch("http://localhost:8080/auth/users", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        const data = await response.json()
+        if (data.message) {
+          setUsers(data.user) // Use data.user instead of data.users
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error)
+      }
+    }
+  
+    fetchUsers()
+  }, [])
+  
   const filteredUsers = users.filter(user => 
-    user.firstName.includes(searchQuery) ||
-    user.email.includes(searchQuery) ||
-    user.phone.includes(searchQuery)
+    user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.phoneNumber.includes(searchQuery) // Use phoneNumber instead of phone
   )
-
+  
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -85,14 +105,14 @@ function UsersListContent() {
                           {`${user.firstName} ${user.middleName} ${user.lastName}`}
                         </TableCell>
                         <TableCell className="hidden sm:table-cell">{user.email}</TableCell>
-                        <TableCell className="hidden md:table-cell">{user.phone}</TableCell>
+                        <TableCell className="hidden md:table-cell">{user.phoneNumber}</TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 rounded-full text-sm whitespace-nowrap ${
-                            user.role === 'admin' 
+                            user.role === 'Admin' 
                               ? 'bg-blue-100 text-blue-800' 
                               : 'bg-green-100 text-green-800'
                           }`}>
-                            {user.role === 'admin' ? 'مدير' : 'مشرف'}
+                            {user.role === 'Admin' ? 'مدير' : 'مشرف'}
                           </span>
                         </TableCell>
                         <TableCell>

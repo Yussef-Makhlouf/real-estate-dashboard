@@ -14,13 +14,16 @@ export const userSchema = z.object({
     .max(50, "الاسم الأخير طويل جداً"),
   email: z.string()
     .email("البريد الإلكتروني غير صالح"),
-  phone: z.string()
+  phoneNumber: z.string()
     .regex(saudiPhoneRegex, "يجب إدخال رقم هاتف سعودي صالح"),
-  role: z.enum(["admin", "supervisor"], {
+  role: z.enum(["Admin", "SuperAdmin"], {
     required_error: "يرجى اختيار نوع المستخدم",
   }),
+  verificationCode: z.string(),
   password: z.string()
     .min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل")
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 
-      "كلمة المرور يجب أن تحتوي على حروف كبيرة وصغيرة وأرقام ورموز خاصة")
+      "كلمة المرور يجب أن تحتوي على حروف كبيرة وصغيرة وأرقام ورموز خاصة"),
+
+
 })
