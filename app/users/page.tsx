@@ -42,14 +42,32 @@ export default function UsersPage() {
   })
 
   const generatePassword = () => {
-    const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*"
-    let password = ""
-    for (let i = 0; i < 12; i++) {
-      password += chars[Math.floor(Math.random() * chars.length)]
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz'
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    const numbers = '0123456789'
+    const symbols = '@$!%*?&'
+  
+    let password = ''
+    // ضمان وجود حرف صغير
+    password += lowercase[Math.floor(Math.random() * lowercase.length)]
+    // ضمان وجود حرف كبير
+    password += uppercase[Math.floor(Math.random() * uppercase.length)]
+    // ضمان وجود رقم
+    password += numbers[Math.floor(Math.random() * numbers.length)]
+    // ضمان وجود رمز خاص
+    password += symbols[Math.floor(Math.random() * symbols.length)]
+  
+    // إكمال باقي الأحرف عشوائياً
+    const allChars = lowercase + uppercase + numbers + symbols
+    for (let i = password.length; i < 12; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)]
     }
+  
+    // خلط الأحرف
+    password = password.split('').sort(() => Math.random() - 0.5).join('')
+  
     form.setValue("password", password)
   }
-
   const onSubmit = (data) => {
     console.log(data)
     toast({
