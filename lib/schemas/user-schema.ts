@@ -27,3 +27,18 @@ export const userSchema = z.object({
 
 
 })
+
+
+export const userEditSchema = z.object({
+  firstName: z.string()
+    .min(2, "الاسم الأول يجب أن يكون أكثر من حرفين")
+    .max(50, "الاسم الأول طويل جداً"),
+  middleName: z.string()
+    .min(2, "الاسم الأوسط يجب أن يكون أكثر من حرفين")
+    .max(50, "الاسم الأوسط طويل جداً"),
+  lastName: z.string()
+    .min(2, "الاسم الأخير يجب أن يكون أكثر من حرفين")
+    .max(50, "الاسم الأخير طويل جداً"),
+  phoneNumber: z.string()
+    .regex(saudiPhoneRegex, "يجب إدخال رقم هاتف سعودي صالح"),
+});

@@ -17,7 +17,7 @@ import {
 
 const menuItems = [
   { name: "لوحة التحكم", icon: Home, href: "/" },
-  { name: "العقارات", icon: Building, href: "/properties" },
+  { name: "العقارات", icon: Building, href: "/category" },
   { name: "الأسئلة الشائعة", icon: FileQuestion, href: "/faq" },
   { name: "آراء العملاء", icon: Star, href: "/reviews" },
   { name: "المدونة", icon: BookOpen, href: "/blog" },
@@ -40,11 +40,11 @@ export function Sidebar() {
 
 
   const handleLogout = async () => {
-    const token = localStorage.getItem('token'); // الحصول على التوكن
+    const token = localStorage.getItem('token')
   
     if (!token) {
-      console.warn("لا يوجد توكن لتسجيل الخروج!");
-      return;
+      console.warn("لا يوجد توكن لتسجيل الخروج!")
+      return
     }
   
     try {
@@ -54,22 +54,24 @@ export function Sidebar() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ token }),
-      });
+      })
   
-      const result = await response.json();
-      console.log("نتيجة الطلب:", result);
+      const result = await response.json()
+      console.log("نتيجة الطلب:", result)
   
       if (response.ok) {
-        // ✅ مسح التوكن من localStorage عند نجاح تسجيل الخروج
-        localStorage.removeItem("token");
-        router.push("/login"); // إعادة التوجيه لصفحة تسجيل الدخول
+        // Remove token from both localStorage and cookies
+        localStorage.removeItem("token")
+        document.cookie = "auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+        router.push("/login")
       } else {
-        console.error("فشل تسجيل الخروج:", result.message);
+        console.error("فشل تسجيل الخروج:", result.message)
       }
     } catch (error) {
-      console.error("خطأ في الاتصال بالخادم:", error);
+      console.error("خطأ في الاتصال بالخادم:", error)
     }
-  };
+  }
+  
   
 
   return (
