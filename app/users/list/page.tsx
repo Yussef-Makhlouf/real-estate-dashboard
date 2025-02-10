@@ -18,7 +18,7 @@ import Link from "next/link"
 import { SidebarProvider } from "@/components/SidebarProvider"
 
 interface User {
-  id: string
+  _id: string
   firstName: string
   middleName: string
   lastName: string
@@ -34,15 +34,14 @@ function UsersListContent() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const token = localStorage.getItem("token")
         const response = await fetch("http://localhost:8080/auth/users", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
         })
         const data = await response.json()
+        
         if (data.message) {
-          setUsers(data.user) // Use data.user instead of data.users
+          setUsers(data.users) // Use data.user instead of data.users
+          console.log(data.users);
+          
         }
       } catch (error) {
         console.error("Error fetching users:", error)
@@ -100,7 +99,7 @@ function UsersListContent() {
                   </TableHeader>
                   <TableBody>
                     {filteredUsers.map((user) => (
-                      <TableRow key={user.id}>
+                      <TableRow key={user._id}>
                         <TableCell className="font-medium">
                           {`${user.firstName} ${user.middleName} ${user.lastName}`}
                         </TableCell>

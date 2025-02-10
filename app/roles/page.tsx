@@ -11,7 +11,7 @@ import Link from "next/link"
 import { SidebarProvider } from "@/components/SidebarProvider"
 
 interface User {
-  id: string
+  _id: string
   firstName: string
   middleName: string
   lastName: string
@@ -166,7 +166,7 @@ function UsersListContent() {
                     </TableHeader>
                     <TableBody>
                       {filteredUsers.map((user) => (
-                        <TableRow key={user.id} className="hover:bg-gray-50">
+                        <TableRow key={user._id} className="hover:bg-gray-50">
                           <TableCell className="font-medium">
                             <div className="flex items-center space-x-3 rtl:space-x-reverse">
                               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">

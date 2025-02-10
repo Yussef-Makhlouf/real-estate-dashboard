@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { userSchema } from "@/lib/schemas/user-schema"
+import { userEditSchema, userSchema } from "@/lib/schemas/user-schema"
 import { Header } from "@/components/Header"
 import { Sidebar } from "@/components/Sidebar"
 import { SidebarProvider } from "@/components/SidebarProvider"
@@ -20,7 +20,7 @@ export default function UserSettings() {
   const [userData, setUserData] = useState<any>(null)
 
   const form = useForm({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(userEditSchema),
     defaultValues: {
       firstName: "",
       middleName: "",
@@ -41,30 +41,40 @@ export default function UserSettings() {
   const fetchUserData = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch("http://localhost:8080/auth/user", {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      if (!token) {
+        throw new Error('No token found')
+      }
+      const response = await fetch(`http://localhost:8080/auth/getOne`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
       const data = await response.json()
+      console.log(data);
+      console.log(data.user);
+      
       if (response.ok) {
-        setUserData(data)
+        setUserData(data.user)
         form.reset({
-          firstName: data.firstName,
-          middleName: data.middleName,
-          lastName: data.lastName,
-          email: data.email,
-          phoneNumber: data.phoneNumber,
-          role: data.role,
-          department: data.department,
-          location: data.location,
-          joinDate: data.joinDate,
+          firstName: data.user.firstName,
+          middleName: data.user.middleName,
+          lastName: data.user.lastName,
+          email: data.user.email,
+          phoneNumber: data.user.phoneNumber,
+          role: data.user.role,
+          joinDate: data.user.createdAt,
         })
+      } else {
+        throw new Error(data.message || 'Failed to fetch user data')
       }
     } catch (error) {
-      toast.error("فشل في تحميل بيانات المستخدم")
+      console.error('Error fetching user data:', error)
     }
   }
 
   const onSubmit = async (data:any) => {
+    
     setIsLoading(true)
     try {
       const token = localStorage.getItem('token')
@@ -76,7 +86,9 @@ export default function UserSettings() {
         },
         body: JSON.stringify(data),
       })
-
+      
+      console.log(data);
+      
       if (!response.ok) throw new Error()
       toast.success("تم تحديث البيانات بنجاح")
     } catch (error) {
