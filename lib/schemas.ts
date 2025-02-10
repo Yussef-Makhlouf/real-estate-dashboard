@@ -131,44 +131,136 @@
 import * as z from "zod"
 
 const validateLanguage = (text: string, lang: 'ar' | 'en') => {
-  const arabicRegex = /^[\u0600-\u06FF\s،؛؟٠-٩<>\/]+$/;
-  const englishRegex = /^[A-Za-z\s.,!?0-9؟؛،<>\/]+$/;
-  return lang === 'ar' ? arabicRegex.test(text) : englishRegex.test(text)
+  const arabicRegex = /^[\u0600-\u06FF\s0-9.,!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`؟،؛\d\u0660-\u0669]+$/u;
+  const englishRegex = /^[A-Za-z\s0-9.,!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]+$/;
+  
+  // نتجاهل التحقق إذا كان النص يحتوي على HTML أو روابط
+  if (text.includes('<') || text.includes('http') || text.includes('www.')) {
+    return true;
+  }
+  
+  return lang === 'ar' ? arabicRegex.test(text) : englishRegex.test(text);
+
+ 
 }
 const stripHtml = (html: string) => {
   return html.replace(/<[^>]*>?/gm, ''); // إزالة جميع علامات HTML
 };
+// أولاً نعدل دالة التحقق من اللغة لتكون أكثر مرونة
+
 
 export const blogPostSchema = z.discriminatedUnion('lang', [
   z.object({
     lang: z.literal('ar'),
     title: z.string()
       .min(1, "العنوان مطلوب")
+      .max(200, "العنوان طويل جداً")
       .refine(text => validateLanguage(text, 'ar'), {
-        message: "يجب أن يحتوي النص على حروف عربية فقط"
+        message: "يجب أن يحتوي العنوان على نص صحيح"
       }),
+    
     description: z.string()
       .min(1, "المحتوى مطلوب")
-      .refine(text => validateLanguage(stripHtml(text), 'ar'), {
-        message: "يجب أن يحتوي النص على حروف عربية فقط"
+      .refine(text => text.length > 0, {
+        message: "المحتوى لا يمكن أن يكون فارغاً"
       }),
+    
+    excerpt: z.string()
+      .max(500, "الملخص طويل جداً")
+      .optional(),
+    
     Keywords: z.array(z.string()).optional(),
-    image: z.union([z.string().url(), z.instanceof(File)]).optional(),
+    
+    category: z.string().optional(),
+    
+    tags: z.array(z.string()).optional(),
+    
+    image: z.union([
+      z.string().url(),
+      z.instanceof(File),
+      z.null()
+    ]).optional(),
+    
+    status: z.enum(['draft', 'published', 'archived'])
+      .default('draft'),
+    
+    author: z.object({
+      name: z.string(),
+      bio: z.string().optional(),
+      avatar: z.string().url().optional()
+    }).optional(),
+    
+    meta: z.object({
+      views: z.number().default(0),
+      likes: z.number().default(0),
+      readTime: z.number().optional(),
+      seoTitle: z.string().optional(),
+      seoDescription: z.string().optional()
+    }).optional(),
+    
+    publishedAt: z.date().optional(),
+    updatedAt: z.date().optional(),
+    
+    allowComments: z.boolean().default(true),
+    
+    featured: z.boolean().default(false)
   }),
+  
+  // نفس المخطط للغة الإنجليزية
   z.object({
     lang: z.literal('en'),
     title: z.string()
       .min(1, "Title is required")
+      .max(200, "Title is too long")
       .refine(text => validateLanguage(text, 'en'), {
-        message: "Text must contain only English characters"
+        message: "Title must contain valid text"
       }),
+    
     description: z.string()
       .min(1, "Content is required")
-      .refine(text => validateLanguage(stripHtml(text), 'en'), {
-        message: "Text must contain only English characters"
+      .refine(text => text.length > 0, {
+        message: "Content cannot be empty"
       }),
+    
+    excerpt: z.string()
+      .max(500, "Excerpt is too long")
+      .optional(),
+    
     Keywords: z.array(z.string()).optional(),
-    image: z.union([z.string().url(), z.instanceof(File)]).optional(),
+    
+    category: z.string().optional(),
+    
+    tags: z.array(z.string()).optional(),
+    
+    image: z.union([
+      z.string().url(),
+      z.instanceof(File),
+      z.null()
+    ]).optional(),
+    
+    status: z.enum(['draft', 'published', 'archived'])
+      .default('draft'),
+    
+    author: z.object({
+      name: z.string(),
+      bio: z.string().optional(),
+      avatar: z.string().url().optional()
+    }).optional(),
+    
+    meta: z.object({
+      views: z.number().default(0),
+      likes: z.number().default(0),
+      readTime: z.number().optional(),
+      seoTitle: z.string().optional(),
+      seoDescription: z.string().optional()
+    }).optional(),
+    
+    publishedAt: z.date().optional(),
+    updatedAt: z.date().optional(),
+    
+    allowComments: z.boolean().default(true),
+    
+    featured: z.boolean().default(false)
   })
 ]);
 

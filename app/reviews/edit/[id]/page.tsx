@@ -50,13 +50,14 @@ const Form = ({ lang, forms, onSubmit, state, dispatch }: {
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "التعليق" : "Comment"}</label>
           <RichTextEditor
-            content={watch("description") || ""}
-            onChange={(content) => setValue("description", content)}
+            content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
+            onChange={(content) => setValue("description", content.replace(/<[^>]*>/g, ''))}
             language={lang}
           />
+
           {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
         </div>
-        
+
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "التقييم" : "Rating"}</label>
           <div className="flex items-center space-x-1">
@@ -135,7 +136,7 @@ export default function EditReview({ params }: { params: { id: string } }) {
       })
       const data = await response.json()
       const review = data.review
-  
+
       // Set data only for the matching language form
       const targetForm = forms[review.lang as 'ar' | 'en']
       if (targetForm) {
@@ -151,8 +152,8 @@ export default function EditReview({ params }: { params: { id: string } }) {
     }
     fetchReview()
   }, [])
-  
-  
+
+
 
   const onSubmit = async (data: FormData, lang: "ar" | "en") => {
     dispatch({ type: "SET_LOADING", lang, value: true })
@@ -161,7 +162,7 @@ export default function EditReview({ params }: { params: { id: string } }) {
       formData.append("lang", lang)
       formData.append("name", data.name)
       formData.append("country", data.country)
-      formData.append("description", data.description)
+      formData.append("description", data.description.replace(/<[^>]*>/g, ''))
       formData.append("rate", String(data.rate))
 
       if (data.image instanceof File) {

@@ -222,11 +222,11 @@ const Form = ({ lang, forms, onSubmit, state, dispatch }: FormProps) => {
           {lang === "ar" ? "الإجابة (بالعربية)" : "Answer (English)"}
         </label>
         <RichTextEditor
-          content={watch("answer") || ""}
-          onChange={(content) => setValue("answer", content)}
-          language={lang}
+  content={watch("answer")?.replace(/<[^>]*>/g, '') || ""}
+  onChange={(content) => setValue("answer", content.replace(/<[^>]*>/g, ''))}
+  language={lang}
+/>
 
-        />
         {errors.answer && <p className="text-red-500 text-sm">{errors.answer.message}</p>}
       </div>
       <div className="space-y-2">

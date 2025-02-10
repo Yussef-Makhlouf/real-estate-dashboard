@@ -436,15 +436,12 @@ export default function EditFAQ() {
               {lang === "ar" ? "الإجابة (بالعربية)" : "Answer (English)"}
             </label>
            
-<RichTextEditor
-  content={watch("answer") || ""}
-  placeholder="اكتب محتوى السؤال هنا..."
-  onChange={(content) => {
-    setValue("answer", content)
-  }}
+            <RichTextEditor
+  content={watch("answer")?.replace(/<[^>]*>/g, '') || ""}
+  onChange={(content) => setValue("answer", content.replace(/<[^>]*>/g, ''))}
   language={lang}
-  dir={lang === "ar" ? "rtl" : "ltr"}
 />
+
             {errors.answer && <p className="text-red-500 text-sm">{errors.answer.message}</p>}
           </div>
 

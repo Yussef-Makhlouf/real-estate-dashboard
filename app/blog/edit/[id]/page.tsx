@@ -446,51 +446,84 @@ export default function EditBlogPost() {
       try {
         const response = await fetch(`http://localhost:8080/blog/findOne/${params.id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        const data = await response.json()
-
-        if (data.blog.lang === 'ar') {
-          forms.ar.setValue('title', data.blog.title)
-          forms.ar.setValue('description', data.blog.description)
-          dispatch({ type: "SET_KEYWORDS", lang: "ar", value: data.blog.Keywords || [] })
-        }
-
-        if (data.blog.lang === 'en') {
-          forms.en.setValue('title', data.blog.title)
-          forms.en.setValue('description', data.blog.description)
-          dispatch({ type: "SET_KEYWORDS", lang: "en", value: data.blog.Keywords || [] })
+        });
+        const data = await response.json();
+        
+        // Handle blog data for both languages
+        if (data.blog) {
+          const blogData = Array.isArray(data.blog) ? data.blog : [data.blog];
+          
+          blogData.forEach((blog: any) => {
+            if (blog.lang === 'ar') {
+              forms.ar.reset({
+                title: blog.title,
+                description: blog.description?.replace(/<[^>]*>/g, ''),
+                image: blog.image,
+                lang: 'ar'
+              });
+              dispatch({ 
+                type: "SET_KEYWORDS", 
+                lang: "ar", 
+                value: Array.isArray(blog.Keywords) ? blog.Keywords : blog.Keywords?.split(',') || [] 
+              });
+            } else if (blog.lang === 'en') {
+              forms.en.reset({
+                title: blog.title,
+                description: blog.description?.replace(/<[^>]*>/g, ''),
+                image: blog.image,
+                lang: 'en'
+              });
+              dispatch({ 
+                type: "SET_KEYWORDS", 
+                lang: "en", 
+                value: Array.isArray(blog.Keywords) ? blog.Keywords : blog.Keywords?.split(',') || [] 
+               
+              });
+            }
+          });
         }
       } catch (error) {
-        toast.error("Error fetching blog data")
+        console.error('Error fetching blog:', error);
+        toast.error("Error fetching blog data");
       }
+    };
+  
+    if (params.id) {
+      fetchBlogData();
     }
-
-    fetchBlogData()
-  }, [params.id])
-
+  }, [params.id]);
+  
+  // In the onSubmit function, modify how keywords are handled:
   const onSubmit = async (data: FormData, lang: "ar" | "en") => {
-    dispatch({ type: "SET_LOADING", lang, value: true })
+    dispatch({ type: "SET_LOADING", lang, value: true });
     try {
-      const formData = new FormData()
-      formData.append("title", data.title)
-      formData.append("description", data.description)
-      formData.append("Keywords", JSON.stringify(state.keywords[lang]))
-      formData.append("lang", lang)
-
+      const formData = new FormData();
+      formData.append("title", data.title.trim());
+      formData.append("description", data.description.replace(/<[^>]*>/g, '').trim());
+      formData.append("Keywords", state.keywords[lang].join(','));
+      formData.append("lang", lang);
+      if (data.image instanceof File) {
+        formData.append("image", data.image);
+      } else if (typeof data.image === "string" && data.image.startsWith("http")) {
+        formData.append("imageUrl", data.image); // Send existing image URL
+      }
+  
+  
       const response = await fetch(`http://localhost:8080/blog/update/${params.id}`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         body: formData,
-      })
-      const result = await response.json()
-      if (!response.ok) throw new Error(result.message)
-
-      toast.success("Blog updated successfully")
-      router.push("/blog")
+      });
+  
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message);
+  
+      toast.success(lang === "ar" ? "تم تحديث المقال بنجاح" : "Blog updated successfully");
+      router.push("/blog");
     } catch (error) {
-      toast.error("Error updating blog")
+      toast.error(lang === "ar" ? "حدث خطأ أثناء التحديث" : "Error updating blog");
     } finally {
-      dispatch({ type: "SET_LOADING", lang, value: false })
+      dispatch({ type: "SET_LOADING", lang, value: false });
     }
   }
 
@@ -513,10 +546,11 @@ export default function EditBlogPost() {
             {lang === "ar" ? "المحتوى (بالعربية)" : "Content (English)"}
           </label>
           <RichTextEditor
-            content={forms[lang].watch("description") || ""}
-            onChange={(content) => forms[lang].setValue("description", content)}
-            language={lang}
-          />
+  content={forms[lang].watch("description")?.replace(/<[^>]*>/g, '') || ""}
+  onChange={(content) => forms[lang].setValue("description", content.replace(/<[^>]*>/g, ''))}
+  language={lang}
+/>
+
         </div>
         <div className="space-y-2">
           <label className="block text-sm font-medium">
@@ -548,19 +582,49 @@ export default function EditBlogPost() {
             >
               {lang === "ar" ? "إضافة" : "Add"}
             </Button>
+            
           </div>
+          <div className="flex flex-wrap gap-2 mt-2">
+  {state.keywords[lang].map((keyword, index) => (
+    <span
+      key={index}
+      className="bg-primary text-primary-foreground px-2 py-1 rounded-md flex items-center gap-1"
+    >
+      {keyword}
+      <button
+        type="button"
+        onClick={() => {
+          dispatch({
+            type: "SET_KEYWORDS",
+            lang,
+            value: state.keywords[lang].filter((_, i) => i !== index)
+          });
+        }}
+        className="hover:text-red-500"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </span>
+  ))}
+</div>
         </div>
         <div className="space-y-2">
-          <label className="block text-sm font-medium">
-            {lang === "ar" ? "صورة المقال" : "Article Image"}
-          </label>
-          <ImageUpload
-            language={lang}
-            onImagesChange={(images) => forms[lang].setValue("image", images[0])}
-            maxImages={1}
-            initialImages={[forms[lang].watch("image") as string]}
-          />
-        </div>
+  <label className="block text-sm font-medium">
+    {lang === "ar" ? "صورة المقال" : "Article Image"}
+  </label>
+  <ImageUpload
+    language={lang}
+    onImagesChange={(images) => forms[lang].setValue("image", images[0])}
+    maxImages={1}
+    initialImages={[
+      forms[lang].watch("image") 
+        ? `http://localhost:8080/uploads/${forms[lang].watch("image")}` 
+        : ""
+    ]}
+
+  />
+</div>
+
         <Button  type="submit" disabled={state.isLoading[lang]} className="w-full ">
           {state.isLoading[lang] ? (
             <>
