@@ -53,8 +53,10 @@ const Form = ({ lang, forms, onSubmit, state, dispatch }: FormProps) => {
           <label className="block text-sm font-medium">{lang === "ar" ? "المحتوى (بالعربية)" : "Content (English)"}</label>
           <RichTextEditor
   content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
+  
   onChange={(content) => setValue("description", content.replace(/<[^>]*>/g, ''))}
   language={lang}
+
 />
           {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
         </div>

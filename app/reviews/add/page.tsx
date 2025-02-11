@@ -13,7 +13,8 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { TabComponent } from "@/components/ui/tab-component"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { reviewSchema } from "@/lib/schemas"
-import { toast } from "react-hot-toast"
+import toast, { Toaster } from 'react-hot-toast'
+
 import type { z } from "zod"
 
 type FormData = z.infer<typeof reviewSchema>
@@ -174,6 +175,7 @@ export default function AddReview() {
           </CardContent>
         </Card>
       </main>
+      <Toaster/>
     </div>
   )
 }
