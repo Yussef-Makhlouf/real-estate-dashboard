@@ -13,7 +13,6 @@ import Link from "next/link"
 import { SidebarProvider } from "@/components/SidebarProvider"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { useToast } from "@/components/ui/use-toast"
-import { toast, Toaster } from "sonner"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 
@@ -35,8 +34,6 @@ interface User {
   role: "Admin" | "SuperAdmin"
 }
 
-
-
 function UsersListContent() {
   const [users, setUsers] = useState<User[]>([])
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -46,9 +43,7 @@ function UsersListContent() {
   const [editingUser, setEditingUser] = useState<User | null>(null)
 
   const { toast } = useToast()
-
   const [loading, setLoading] = useState(true);
-
   const router = useRouter();
 
   const form = useForm<UserEditSchema>({

@@ -93,10 +93,15 @@ export default function UsersPage() {
   const onSubmit = async (data: any) => {
     setIsLoading(true)
     try {
+      const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("No token found!");
+          return;
+        }
       const response = await fetch("http://localhost:8080/auth/add", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       })
