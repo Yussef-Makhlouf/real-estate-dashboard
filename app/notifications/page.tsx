@@ -1,54 +1,66 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { io } from "socket.io-client";
-import { Header } from "@/components/Header";
-import { Sidebar } from "@/components/Sidebar";
-import { SidebarProvider } from "@/components/SidebarProvider";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Bell } from "lucide-react";
+"use client"
+import { useState, useEffect } from "react"
+import { io } from "socket.io-client"
+import { Header } from "@/components/Header"
+import { Sidebar } from "@/components/Sidebar"
+import { SidebarProvider } from "@/components/SidebarProvider"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Bell } from "lucide-react"
 
 interface EmailData {
-  _id: string;
-  email: string;
-  createdAt: string;
+  _id: string
+  email: string
+  createdAt: string
 }
 
 export default function NotificationsPage() {
-  const [subscriptions, setSubscriptions] = useState<EmailData[]>([]);
+  const [subscriptions, setSubscriptions] = useState<EmailData[]>([])
 
   useEffect(() => {
-    fetchSubscriptions();
+    fetchSubscriptions()
+    
+    const markAsRead = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        await fetch("http://localhost:8080/newsletter/markAsRead", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        // Reset notification count to 0 after marking as read
+        socket.emit("notifications_read")
+      } catch (error) {
+        console.error("Failed to mark as read:", error)
+      }
+    }
+    
+    markAsRead()
 
-    const socket = io("http://localhost:8080");
-
-    socket.on("emails_fetched", async () => {
-      await fetchSubscriptions(); // Re-fetch the latest list when a new email is received
-    });
+    const socket = io("http://localhost:8080")
+    socket.on("emails_fetched", fetchSubscriptions)
 
     return () => {
-      socket.disconnect();
-    };
-  }, []);
+      socket.disconnect()
+    }
+  }, [])
 
   const fetchSubscriptions = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token")
       const response = await fetch("http://localhost:8080/newsletter", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const data = await response.json()
 
       if (Array.isArray(data.emailData)) {
-        setSubscriptions(data.emailData);
+        setSubscriptions(data.emailData)
       } else {
-        setSubscriptions([]);
+        setSubscriptions([])
       }
     } catch (error) {
-      console.error("Failed to fetch subscriptions:", error);
-      setSubscriptions([]);
+      console.error("Failed to fetch subscriptions:", error)
+      setSubscriptions([])
     }
-  };
+  }
 
   return (
     <SidebarProvider>
@@ -96,5 +108,5 @@ export default function NotificationsPage() {
         </main>
       </div>
     </SidebarProvider>
-  );
+  )
 }

@@ -5,10 +5,25 @@ import { Sidebar } from "@/components/Sidebar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import { Button } from "@/components/ui/button"
-import { Search, Plus, UserPlus, Users, Shield, Settings } from "lucide-react"
+import { Search, Plus, UserPlus, Users, Shield, Settings, Edit, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { SidebarProvider } from "@/components/SidebarProvider"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import { useToast } from "@/components/ui/use-toast"
+import { toast, Toaster } from "sonner"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+
+
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { userEditSchema } from "@/lib/schemas/user-schema"
+import type { z } from "zod"
+
+type UserEditSchema = z.infer<typeof userEditSchema>
 
 interface User {
   _id: string
@@ -20,13 +35,31 @@ interface User {
   role: "Admin" | "SuperAdmin"
 }
 
+
+
 function UsersListContent() {
   const [users, setUsers] = useState<User[]>([])
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("")
+  const [UserToDelete, setUserToDelete] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editingUser, setEditingUser] = useState<User | null>(null)
+
+  const { toast } = useToast()
 
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const router = useRouter();
+
+  const form = useForm<UserEditSchema>({
+    resolver: zodResolver(userEditSchema),
+    defaultValues: {
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      phoneNumber: ""
+    }
+  })
     const fetchUsers = async () => {
       setLoading(true);
       try {
@@ -41,13 +74,12 @@ function UsersListContent() {
             Authorization: `Bearer ${token}`,
           },
         });
-  
+ 
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
   
         const data = await response.json();
-        console.log("Fetched Users:", data);
   
         if (Array.isArray(data.users)) {
           setUsers(data.users);
@@ -60,9 +92,112 @@ function UsersListContent() {
         setLoading(false);
       }
     };
-  
+
+
+  useEffect(() => {
+
     fetchUsers();
   }, []);
+
+
+  const handleDelete = (id: string) => {
+    setUserToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleEdit = (user: User) => {
+    form.reset({
+      firstName: user.firstName,
+      middleName: user.middleName,
+      lastName: user.lastName,
+      phoneNumber: user.phone
+    })
+    setEditingUser(user)
+    setEditDialogOpen(true)
+  }
+  
+  const onSubmit = async (data: UserEditSchema) => {
+    try {
+      const token = localStorage.getItem('token')
+      await axios.put(
+        `http://localhost:8080/auth/update/${editingUser?._id}`,
+        data,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+      
+      fetchUsers()
+      setEditDialogOpen(false)
+      toast({
+        title: "تم التحديث بنجاح",
+        description: "تم تحديث بيانات المستخدم"
+      })
+    } catch (error) {
+      // Handle specific error cases
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          router.push('/login');
+        }
+        // You can add toast notification here for user feedback
+        if (error.response?.status === 403) {
+          toast({
+            variant: "destructive",
+            title: "غير مصرح",
+            description: "ليس لديك الصلاحية لحذف مستخدم"
+          })
+        }
+      }
+      
+    }
+  }
+  
+
+
+
+  const confirmDelete = async () => {
+    if (UserToDelete) {
+      try {
+        const token = localStorage.getItem('token');
+        
+        await axios.delete(`http://localhost:8080/auth/delete/${UserToDelete}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+  
+        // Only update UI after successful deletion
+        setUsers(users.filter(user => user._id !== UserToDelete));
+        fetchUsers(); // Refresh the list
+  
+      } catch (error) {
+        // Handle specific error cases
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 401) {
+            router.push('/login');
+          }
+          // You can add toast notification here for user feedback
+          if (error.response?.status === 403) {
+            toast({
+              variant: "destructive",
+              title: "غير مصرح",
+              description: "ليس لديك الصلاحية لحذف مستخدم"
+            })
+          }
+        }
+        
+      } finally {
+        setDeleteDialogOpen(false);
+        setUserToDelete(null);
+      }
+    }
+  };
+  
+
   
 
 
@@ -193,12 +328,24 @@ function UsersListContent() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm">
-                                تعديل
-                              </Button>
-                              <Button variant="destructive" size="sm">
-                                حذف
-                              </Button>
+                            <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-gray-50"
+                      onClick={() => handleEdit(user)}
+                    >
+                      <Edit className="h-4 w-4 ml-2" />
+                      تعديل
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="hover:bg-red-600"
+                      onClick={() => handleDelete(user._id)}
+                    >
+                      <Trash2 className="h-4 w-4 ml-2" />
+                      حذف
+                    </Button>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -213,6 +360,63 @@ function UsersListContent() {
                       <p className="mt-2 text-gray-500">لم يتم العثور على أي مستخدمين يطابقون بحثك</p>
                     </div>
                   )}
+                <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>تعديل بيانات المستخدم</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={form.handleSubmit(onSubmit)}>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right">الاسم الأول</Label>
+                          <div className="col-span-3">
+                            <Input {...form.register("firstName")} />
+                            {form.formState.errors.firstName && (
+                              <p className="text-sm text-red-500">{form.formState.errors.firstName.message}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right">الاسم الأوسط</Label>
+                          <div className="col-span-3">
+                            <Input {...form.register("middleName")} />
+                            {form.formState.errors.middleName && (
+                              <p className="text-sm text-red-500">{form.formState.errors.middleName.message}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right">الاسم الأخير</Label>
+                          <div className="col-span-3">
+                            <Input {...form.register("lastName")} />
+                            {form.formState.errors.lastName && (
+                              <p className="text-sm text-red-500">{form.formState.errors.lastName.message}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right">رقم الهاتف</Label>
+                          <div className="col-span-3">
+                            <Input {...form.register("phoneNumber")} />
+                            {form.formState.errors.phoneNumber && (
+                              <p className="text-sm text-red-500">{form.formState.errors.phoneNumber.message}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button type="submit">حفظ التغييرات</Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+                            <ConfirmDialog
+                              open={deleteDialogOpen}
+                              onOpenChange={setDeleteDialogOpen}
+                              onConfirm={confirmDelete}
+                              title="تأكيد الحذف"
+                              description="هل أنت متأكد من حذف هذا الرأي؟ لا يمكن التراجع عن هذا الإجراء."
+                            />
                 </div>
               </CardContent>
             </Card>
