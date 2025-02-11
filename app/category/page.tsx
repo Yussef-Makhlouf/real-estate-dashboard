@@ -11,6 +11,8 @@ import Link from "next/link"
 import { Edit, Trash2, Home, MapPin, DollarSign, Globe, Search, Plus, Filter, Loader2, ArrowUpDown } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "@/hooks/use-toast"
+import { Formik } from "formik"
+import { useRouter } from "next/navigation"
 
 interface Category {
   _id: string
@@ -25,7 +27,7 @@ interface Category {
   status?: 'available' | 'sold' | 'rented'
 }
 
-export default function Properties() {
+export default function Category() {
   // State declarations remain the same
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null)
@@ -38,6 +40,7 @@ export default function Properties() {
   const [totalPages, setTotalPages] = useState(1)
   const [sortBy, setSortBy] = useState<'area' | 'price' | 'date'>('date')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const router = useRouter()
 
   useEffect(() => {
     fetchData()
@@ -69,6 +72,13 @@ export default function Properties() {
     }
   }
 
+
+  const viewUnits = (categoryId: string) => {
+    console.log(categoryId);
+    
+    router.push(`/properties/${categoryId}`)
+  }
+  
   const handleDelete = async (id: string) => {
     try {
       await axios.delete(`http://localhost:8080/category/delete/${id}`)
@@ -180,6 +190,15 @@ export default function Properties() {
               <Trash2 className="h-4 w-4 ml-2" />
               {category.lang === 'ar' ? 'حذف' : 'Delete'}
             </Button>
+            <div className="flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={() => viewUnits(category._id)}
+                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                >
+                  عرض المنشئات
+                </button>
+              </div>
           </div>
         </CardContent>
       </Card>
@@ -194,7 +213,7 @@ export default function Properties() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col space-y-6 mb-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h2 className="text-3xl font-bold text-gray-900">العقارات</h2>
+              <h2 className="text-3xl font-bold text-gray-900">المشاريع</h2>
               
               <div className="flex flex-wrap gap-3 items-center">
                 <div className="relative">
