@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-  const authToken = request.cookies.get('auth-token')?.value
+
+   const authToken = request.cookies.get('auth-token')?.value
   const isLoginPage = request.nextUrl.pathname === '/login'
   const isResetPasswordPage = request.nextUrl.pathname === '/reset-password'
 

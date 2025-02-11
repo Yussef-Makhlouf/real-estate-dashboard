@@ -18,7 +18,8 @@ import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight,
   Undo, Redo, Image as ImageIcon, Link as LinkIcon,
-  Table as TableIcon, Color as ColorIcon, 
+  Table as TableIcon, 
+  // Color as ColorIcon, 
   Heading1, Heading2, Quote, Code,
   ChevronDown, Plus, Minus
 } from "lucide-react"
