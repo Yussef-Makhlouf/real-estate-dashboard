@@ -60,7 +60,7 @@ export default function EditFAQ() {
   useEffect(() => {
     const fetchFAQData = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/question/${params.id}`, {
+        const response = await fetch(`http://localhost:8080/question/getOne/${params.id}`, {
           headers: { 
             Authorization: `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
