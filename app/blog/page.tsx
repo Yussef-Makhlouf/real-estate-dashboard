@@ -9,6 +9,8 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { TabComponent } from "@/components/ui/tab-component"
 import Link from "next/link"
 import { Edit, Trash2, Plus, Eye, Calendar, Tag, Loader2, AlertCircle, BookOpen } from "lucide-react"
+import toast, { Toaster } from 'react-hot-toast';
+
 
 interface BlogPost {
   _id: string
@@ -47,17 +49,18 @@ export default function Blog() {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       })
-
+  
       const data = await response.json()
       const arabicBlogs = data.blogs.filter((blog: BlogPost) => blog.lang === 'ar')
       const englishBlogs = data.blogs.filter((blog: BlogPost) => blog.lang === 'en')
-
+  
       setBlogPosts({
         ar: arabicBlogs,
         en: englishBlogs
       })
       setIsLoading(false)
     } catch (err) {
+      toast.error('حدث خطأ أثناء تحميل المقالات')
       setError('Error fetching blog posts')
       setIsLoading(false)
     }
@@ -79,15 +82,18 @@ export default function Blog() {
         })
         
         if (!response.ok) throw new Error('Failed to delete blog post')
+        
+        toast.success('تم حذف المقال بنجاح')
         fetchBlogPosts()
       } catch (err) {
+        toast.error('حدث خطأ أثناء حذف المقال')
         console.error('Error deleting post:', err)
       }
     }
     setDeleteDialogOpen(false)
     setPostToDelete(null)
   }
-
+  
   const BlogGrid = ({ posts }: { posts: BlogPost[] }) => (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" dir="rtl">
       {posts.map((post) => (
@@ -178,6 +184,7 @@ export default function Blog() {
             </div>
           </div>
         </main>
+ 
       </div>
     )
   }
@@ -236,6 +243,7 @@ export default function Blog() {
         title="تأكيد الحذف"
         description="هل أنت متأكد من حذف هذا المقال؟ لا يمكن التراجع عن هذا الإجراء."
       />
+        <Toaster/>
     </div>
   )
 }

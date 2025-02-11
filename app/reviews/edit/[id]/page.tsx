@@ -1,6 +1,6 @@
 "use client"
 import { useRouter } from 'next/navigation'
-import { useReducer, useEffect, useState } from "react"
+import { useReducer, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Star, Loader2 } from "lucide-react"
@@ -13,7 +13,7 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { TabComponent } from "@/components/ui/tab-component"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { reviewSchema } from "@/lib/schemas"
-import { useToast } from "@/hooks/use-toast"
+import toast, { Toaster } from 'react-hot-toast'
 import type { z } from "zod"
 
 type FormData = z.infer<typeof reviewSchema>
@@ -24,43 +24,52 @@ type State = {
 
 type Action = { type: "SET_LOADING"; lang: "ar" | "en"; value: boolean }
 
-const Form = ({ lang, forms, onSubmit, state, dispatch }: {
+const Form = ({ lang, forms, onSubmit, state }: {
   lang: "ar" | "en"
   forms: Record<"ar" | "en", ReturnType<typeof useForm<FormData>>>
   onSubmit: (data: FormData, lang: "ar" | "en") => Promise<void>
   state: State
-  dispatch: React.Dispatch<Action>
 }) => {
   const { register, handleSubmit, setValue, watch, formState: { errors } } = forms[lang]
   const rate = watch("rate")
 
   return (
-    <form dir={lang === "ar" ? "rtl" : "ltr"} onSubmit={handleSubmit((data) => onSubmit(data, lang))} className="space-y-6">
+    <form onSubmit={handleSubmit((data) => onSubmit(data, lang))} className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "الاسم" : "Name"}</label>
-          <Input {...register("name")} dir={lang === "ar" ? "rtl" : "ltr"} />
+          <Input {...register("name")} className={errors.name ? "border-red-500" : ""} />
           {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
         </div>
+
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "البلد" : "Country"}</label>
-          <Input {...register("country")} dir={lang === "ar" ? "rtl" : "ltr"} />
+          <Input {...register("country")} className={errors.country ? "border-red-500" : ""} />
           {errors.country && <p className="text-red-500 text-sm">{errors.country.message}</p>}
         </div>
+
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "التعليق" : "Comment"}</label>
           <RichTextEditor
-            content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
-            onChange={(content) => setValue("description", content.replace(/<[^>]*>/g, ''))}
-            language={lang}
-          />
+  key={`${lang}-${watch("description")}`}
+  content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
+  onChange={(content) => {
+    // تأخير التحديث لمدة 300 مللي ثانية
+    const timeoutId = setTimeout(() => {
+      setValue("description", content.replace(/<[^>]*>/g, ''))
+    }, 300)
+    
+    return () => clearTimeout(timeoutId)
+  }}
+  language={lang}
+/>
 
           {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
         </div>
 
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "التقييم" : "Rating"}</label>
-          <div className="flex items-center space-x-1">
+          <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((value) => (
               <button
                 key={value}
@@ -72,7 +81,6 @@ const Form = ({ lang, forms, onSubmit, state, dispatch }: {
               </button>
             ))}
           </div>
-          {errors.rate && <p className="text-red-500 text-sm">{errors.rate.message}</p>}
         </div>
 
         <div className="space-y-2">
@@ -81,6 +89,7 @@ const Form = ({ lang, forms, onSubmit, state, dispatch }: {
             onImagesChange={(images) => setValue("image", images[0])}
             maxImages={1}
             language={lang}
+            initialImages={[watch("image") as string || ""]}
           />
         </div>
 
@@ -91,118 +100,110 @@ const Form = ({ lang, forms, onSubmit, state, dispatch }: {
               {lang === "ar" ? "جاري التحديث..." : "Updating..."}
             </>
           ) : (
-            lang === "ar" ? "تحديث الرأي" : "Update Review"
+            lang === "ar" ? "تحديث المراجعة" : "Update Review"
           )}
         </Button>
       </div>
     </form>
   )
 }
-
-const reducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case "SET_LOADING":
-      return { ...state, isLoading: { ...state.isLoading, [action.lang]: action.value } }
-    default:
-      return state
-  }
-}
-
 export default function EditReview({ params }: { params: { id: string } }) {
-  const [state, dispatch] = useReducer(reducer, {
+  const router = useRouter()
+  const [state, dispatch] = useReducer((state: State, action: Action): State => {
+    if (action.type === "SET_LOADING") {
+      return { ...state, isLoading: { ...state.isLoading, [action.lang]: action.value } }
+    }
+    return state
+  }, {
     isLoading: { ar: false, en: false }
   })
-  const { toast } = useToast()
-  const router = useRouter()
-  const [reviewData, setReviewData] = useState<any>(null)
 
-  // Initialize forms at component level
-  const arForm = useForm<FormData>({
-    resolver: zodResolver(reviewSchema),
-    defaultValues: { lang: 'ar' }
-  })
+  const forms = {
+    ar: useForm<FormData>({ resolver: zodResolver(reviewSchema), defaultValues: { lang: 'ar' } }),
+    en: useForm<FormData>({ resolver: zodResolver(reviewSchema), defaultValues: { lang: 'en' } })
+  }
+  const fetchReview = async () => {
+    const loadingToast = toast.loading('جاري تحميل البيانات...')
+  
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        throw new Error('No authentication token found')
+      }
 
-  const enForm = useForm<FormData>({
-    resolver: zodResolver(reviewSchema),
-    defaultValues: { lang: 'en' }
-  })
-
-  const forms = { ar: arForm, en: enForm }
-  useEffect(() => {
-    const fetchReview = async () => {
-      const token = localStorage.getItem("token")
-      const response = await fetch(`http://localhost:8080/review/${params.id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch(`http://localhost:8080/review/findOne/${params.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       })
-      const data = await response.json()
-      const review = data.review
 
-      // Set data only for the matching language form
-      const targetForm = forms[review.lang as 'ar' | 'en']
+      if (!response.ok) {
+        throw new Error('Review not found')
+      }
+
+      const data = await response.json()
+    
+      if (!data.review) {
+        throw new Error('Invalid review data')
+      }
+
+      const targetForm = forms[data.review.lang as keyof typeof forms]
       if (targetForm) {
         targetForm.reset({
-          lang: review.lang,
-          name: review.name,
-          country: review.country,
-          description: review.description,
-          rate: review.rate,
-          image: review.Image
+          lang: data.review.lang,
+          name: data.review.name,
+          country: data.review.country,
+          description: data.review.description,
+          rate: data.review.rate,
+          image: data.review.Image?.secure_url
         })
       }
+
+      toast.success('تم تحميل البيانات بنجاح', { id: loadingToast })
+    } catch (error) {
+      console.error('Fetch error:', error)
+      toast.error('فشل في تحميل البيانات', { id: loadingToast })
+      router.push('/reviews')
     }
-    fetchReview()
-  }, [])
+  }
 
 
+useEffect(() => {
+  fetchReview()
+}, [params.id])
+
+// Add loading indicator in the UI
 
   const onSubmit = async (data: FormData, lang: "ar" | "en") => {
+    const loadingToast = toast.loading('جاري حفظ التغييرات...')
     dispatch({ type: "SET_LOADING", lang, value: true })
+
     try {
       const formData = new FormData()
       formData.append("lang", lang)
       formData.append("name", data.name)
       formData.append("country", data.country)
-      formData.append("description", data.description.replace(/<[^>]*>/g, ''))
+      formData.append("description", data.description)
       formData.append("rate", String(data.rate))
 
       if (data.image instanceof File) {
         formData.append("image", data.image)
       }
 
-      const token = localStorage.getItem("token")
-      if (!token) {
-        toast({
-          title: lang === "ar" ? "تنبيه" : "Alert",
-          description: lang === "ar" ? "يرجى تسجيل الدخول أولاً" : "Please login first",
-          variant: "destructive",
-        })
-        return
-      }
-
       const response = await fetch(`http://localhost:8080/review/update/${params.id}`, {
         method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         body: formData
       })
 
-      if (!response.ok) {
-        throw new Error(lang === "ar" ? "فشل في تحديث المراجعة" : "Failed to update review")
-      }
+      if (!response.ok) throw new Error('Failed to update review')
 
-      toast({
-        title: lang === "ar" ? "تم بنجاح" : "Success",
-        description: lang === "ar" ? "تم تحديث المراجعة بنجاح" : "Review updated successfully"
-      })
-
-      router.push("/reviews")
+      toast.success('تم تحديث المراجعة بنجاح', { id: loadingToast })
+      setTimeout(() => router.push("/reviews"), 1500)
     } catch (error) {
-      toast({
-        title: lang === "ar" ? "خطأ" : "Error",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive"
-      })
+      toast.error('فشل في تحديث المراجعة', { id: loadingToast })
+      console.error('Update error:', error)
     } finally {
       dispatch({ type: "SET_LOADING", lang, value: false })
     }
@@ -215,16 +216,17 @@ export default function EditReview({ params }: { params: { id: string } }) {
       <main className="pt-16 px-4 sm:px-6 lg:px-8">
         <Card>
           <CardHeader>
-            <CardTitle>تعديل الرأي / Edit Review</CardTitle>
+            <CardTitle>تعديل المراجعة</CardTitle>
           </CardHeader>
           <CardContent>
             <TabComponent
-              arabicContent={<Form lang="ar" forms={forms} onSubmit={onSubmit} state={state} dispatch={dispatch} />}
-              englishContent={<Form lang="en" forms={forms} onSubmit={onSubmit} state={state} dispatch={dispatch} />}
+              arabicContent={<Form lang="ar" forms={forms} onSubmit={onSubmit} state={state} />}
+              englishContent={<Form lang="en" forms={forms} onSubmit={onSubmit} state={state} />}
             />
           </CardContent>
         </Card>
       </main>
+      <Toaster position="top-center" />
     </div>
   )
 }

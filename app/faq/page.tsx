@@ -10,7 +10,7 @@ import { Edit, Trash2, Plus, Search, HelpCircle, Globe, Loader2 } from "lucide-r
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import { toast } from "react-hot-toast"
+import toast, { Toaster } from 'react-hot-toast'
 
 interface FAQ {
   _id: string
@@ -25,10 +25,9 @@ export default function FAQ() {
   const [faqs, setFaqs] = useState<FAQ[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [questionToDelete, setQuestionToDelete] = useState(null)
+  const [questions, setQuestions] = useState({ ar: [], en: [] })
 
-  useEffect(() => {
-    fetchFaqs()
-  }, [])
 
   const fetchFaqs = async () => {
     try {
@@ -91,6 +90,9 @@ export default function FAQ() {
     arabic: faqs.filter(faq => faq.lang === 'ar').length,
     english: faqs.filter(faq => faq.lang === 'en').length,
   }
+  useEffect(() => {
+    fetchFaqs()
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
@@ -242,6 +244,7 @@ export default function FAQ() {
           description="هل أنت متأكد من حذف هذا السؤال؟ لا يمكن التراجع عن هذا الإجراء."
         />
       </main>
+      <Toaster />
     </div>
   )
 }

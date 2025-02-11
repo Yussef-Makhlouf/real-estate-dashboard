@@ -13,7 +13,7 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { TabComponent } from "@/components/ui/tab-component"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { blogPostSchema } from "@/lib/schemas"
-import { toast } from "react-hot-toast"
+import toast, { Toaster } from 'react-hot-toast';
 import type { z } from "zod"
 
 type FormData = z.infer<typeof blogPostSchema>
@@ -53,8 +53,10 @@ const Form = ({ lang, forms, onSubmit, state, dispatch }: FormProps) => {
           <label className="block text-sm font-medium">{lang === "ar" ? "المحتوى (بالعربية)" : "Content (English)"}</label>
           <RichTextEditor
   content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
+  
   onChange={(content) => setValue("description", content.replace(/<[^>]*>/g, ''))}
   language={lang}
+
 />
           {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
         </div>
@@ -194,6 +196,8 @@ export default function AddBlogPost() {
 
   return (
     <div className="min-h-screen bg-gray-100">
+        <Toaster position="top-center" />
+
       <Header />
       <Sidebar />
       <main className="pt-16 px-4 sm:px-6 lg:px-8">

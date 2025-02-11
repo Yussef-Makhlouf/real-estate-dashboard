@@ -1,10 +1,3 @@
-let userConfig = undefined
-try {
-  userConfig = await import('./v0-user-next.config')
-} catch (e) {
-  // ignore error
-}
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -15,35 +8,54 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
-    domains: ['ik.imagekit.io'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8080',
+        pathname: '/uploads/**',
+      }
+    ],
   },
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  webpack: (config) => {
+    config.resolve.fallback = { fs: false }
+    return config
+  }
 }
 
-mergeConfig(nextConfig, userConfig)
-
-function mergeConfig(nextConfig, userConfig) {
-  if (!userConfig) {
-    return
+// Load user config if exists
+const loadUserConfig = async () => {
+  try {
+    return await import('./v0-user-next.config')
+  } catch {
+    return null
   }
+}
 
-  for (const key in userConfig) {
-    if (
-      typeof nextConfig[key] === 'object' &&
-      !Array.isArray(nextConfig[key])
-    ) {
-      nextConfig[key] = {
-        ...nextConfig[key],
-        ...userConfig[key],
-      }
+// Merge configurations
+const mergeConfig = (baseConfig, userConfig) => {
+  if (!userConfig) return baseConfig
+
+  const merged = { ...baseConfig }
+  
+  Object.entries(userConfig).forEach(([key, value]) => {
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      merged[key] = { ...merged[key], ...value }
     } else {
-      nextConfig[key] = userConfig[key]
+      merged[key] = value
     }
-  }
+  })
+
+  return merged
 }
 
-export default nextConfig
+// Export final config
+export default async () => {
+  const userConfig = await loadUserConfig()
+  return mergeConfig(nextConfig, userConfig?.default)
+}
