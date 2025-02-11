@@ -13,7 +13,7 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { TabComponent } from "@/components/ui/tab-component"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { blogPostSchema } from "@/lib/schemas"
-import { toast } from "react-hot-toast"
+import toast, { Toaster } from 'react-hot-toast';
 import type { z } from "zod"
 
 type FormData = z.infer<typeof blogPostSchema>
@@ -194,6 +194,8 @@ export default function AddBlogPost() {
 
   return (
     <div className="min-h-screen bg-gray-100">
+        <Toaster position="top-center" />
+
       <Header />
       <Sidebar />
       <main className="pt-16 px-4 sm:px-6 lg:px-8">

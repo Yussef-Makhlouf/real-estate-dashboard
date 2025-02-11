@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import Image from 'next/image'
-import { toast } from "react-toastify"
+import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios'
 import { Loader2, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react'
 
@@ -59,16 +59,30 @@ export default function Login() {
       }
     }
   })
-    const handleForgotPassword = () => {
-      if (!formik.values.email) {
-        toast.error("يرجى إدخال البريد الإلكتروني أولاً")
-        return
-      }
-      router.push(`/reset-password?email=${encodeURIComponent(formik.values.email)}`)
+  const handleForgotPassword = async () => {
+    if (!formik.values.email) {
+      toast.error("يرجى إدخال البريد الإلكتروني أولاً")
+      return
     }
-
+  
+    setIsLoading(true)
+    try {
+      await axios.post('http://localhost:8080/auth/sendEmail', {
+        email: formik.values.email
+      })
+      
+      toast.success('تم إرسال رابط إعادة تعيين كلمة المرور')
+      router.push(`/reset-password?email=${encodeURIComponent(formik.values.email)}`)
+    } catch (error) {
+      toast.error('فشل في إرسال البريد الإلكتروني')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
+        <Toaster position="top-center" reverseOrder={false} />
         <div className="w-full max-w-md p-6">
           <div className="bg-white rounded-2xl shadow-2xl p-8 space-y-8">
             <div className="text-center">
@@ -185,5 +199,4 @@ export default function Login() {
           </div>
         </div>
       </div>
-    )
-  }
+    )  }
