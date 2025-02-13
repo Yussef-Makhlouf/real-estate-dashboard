@@ -80,7 +80,7 @@ export default function AddCategory() {
       if (response.status === 201) {
         alert(lang === 'ar' ? "تمت الإضافة بنجاح!" : "Added successfully!");
         reset();
-        router.push('/properties');
+        router.push('/category');
       }
     } catch (error: any) {
       console.error("Error:", error);

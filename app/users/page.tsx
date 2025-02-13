@@ -101,12 +101,25 @@ export default function UsersPage() {
       const response = await fetch("http://localhost:8080/auth/add", {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       })
 
+      console.log(data);
+      
+
       if (!response.ok) throw new Error("فشل في إضافة المستخدم")
+
+        if(response?.status === 403) {
+          toast({
+            title: "خطأ",
+            description: "ليس لديك الصلاحية لإضافة مستخدم",
+            variant: "destructive",
+          })
+          return
+        } 
 
       toast({
         title: "تم بنجاح",

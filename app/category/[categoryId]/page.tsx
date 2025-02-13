@@ -93,6 +93,7 @@ export default function UnitsPage() {
 
   if (loading) return <div className="text-center py-8">جاري التحميل...</div>
   if (error) return <div className="text-red-500 text-center py-8">{error}</div>
+  const filteredUnits = units.filter(unit => unit.lang === selectedLang)
 
   return (
        <div className="min-h-screen bg-gray-100">
@@ -114,7 +115,7 @@ export default function UnitsPage() {
                 English
               </Button>
             </div>
-            <Link href={`/properties/${categoryId}/add`}>
+            <Link href={`/category/${categoryId}/add`}>
               <Button>إضافة وحدة جديدة</Button>
             </Link>
           </div>
@@ -124,7 +125,7 @@ export default function UnitsPage() {
             <Card
             key={unit._id}
             className="overflow-hidden cursor-pointer"
-            onClick={() => router.push(`/properties/${categoryId}/${unit._id}`)}
+            onClick={() => router.push(`/category/${categoryId}/${unit._id}`)}
           >             
            <div className="relative">
                 <img
@@ -169,14 +170,20 @@ export default function UnitsPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-2">
 
-                  <Link href={`/properties/${categoryId}/edit/${unit._id}`}>
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4 ml-2" />
-                      تعديل
-                    </Button>
-                  </Link>
+       <Link href={`/category/${categoryId}/edit/${unit._id}`}>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation() // Prevent Card's onClick from firing
+                    }}
+                  >
+                    <Edit className="h-4 w-4 ml-2" />
+                    تعديل
+                  </Button>
+                </Link>
                   <Button
                     variant="destructive"
                     size="sm"
