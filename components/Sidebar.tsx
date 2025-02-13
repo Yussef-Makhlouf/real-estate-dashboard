@@ -227,6 +227,8 @@ export function Sidebar() {
         },
         body: JSON.stringify({ token }),
       })
+      console.log(token);
+      
 
       if (response.ok) {
         localStorage.removeItem("token")

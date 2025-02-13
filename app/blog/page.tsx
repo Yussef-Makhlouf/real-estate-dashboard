@@ -44,7 +44,7 @@ export default function Blog() {
 
   const fetchBlogPosts = async () => {
     try {
-      const response = await fetch('http://localhost:8080/blog/?page=1&size=60', {
+      const response = await fetch('http://localhost:8080/blog/?page=1&size=6', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }

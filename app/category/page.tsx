@@ -76,7 +76,7 @@ export default function Category() {
   const viewUnits = (categoryId: string) => {
     console.log(categoryId);
     
-    router.push(`/properties/${categoryId}`)
+    router.push(`/category/${categoryId}`)
   }
   
   const handleDelete = async (id: string) => {
@@ -171,7 +171,7 @@ export default function Category() {
           </div>
 
           <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
-            <Link href={`/properties/edit/${category._id}`}>
+            <Link href={`/category/edit/${category._id}`}>
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -251,7 +251,7 @@ export default function Category() {
                   </Button>
                 </div>
 
-                <Link href="/properties/add">
+                <Link href="/category/add">
                   <Button className="shadow-sm">
                     <Plus className="mr-2 h-4 w-4" />
                     إضافة عقار جديد
