@@ -77,7 +77,7 @@ export default function EditBlogPost() {
               forms.ar.reset({
                 title: blog.title,
                 description: blog.description?.replace(/<[^>]*>/g, ''),
-                image: blog.image,
+                image: blog.Image.secure_url,
                 lang: 'ar'
               });
               dispatch({ 
@@ -166,10 +166,18 @@ export default function EditBlogPost() {
             {lang === "ar" ? "المحتوى (بالعربية)" : "Content (English)"}
           </label>
           <RichTextEditor
+  key={`${lang}-${forms[lang].watch("description")}`}
   content={forms[lang].watch("description")?.replace(/<[^>]*>/g, '') || ""}
-  onChange={(content) => forms[lang].setValue("description", content.replace(/<[^>]*>/g, ''))}
+  onChange={(content) => {
+    const timeoutId = setTimeout(() => {
+      forms[lang].setValue("description", content.replace(/<[^>]*>/g, ''))
+    }, 300)
+    
+    return () => clearTimeout(timeoutId)
+  }}
   language={lang}
 />
+
 
         </div>
         <div className="space-y-2">
@@ -235,15 +243,16 @@ export default function EditBlogPost() {
   <ImageUpload
     language={lang}
     onImagesChange={(images) => forms[lang].setValue("image", images[0])}
-    maxImages={1}
-    initialImages={[
-      forms[lang].watch("image") 
-        ? `http://localhost:8080/uploads/${forms[lang].watch("image")}` 
-        : ""
-    ]}
-
+    initialImages={
+      forms[lang].watch("Image")?.secure_url || 
+      forms[lang].watch("image")?.secure_url ||
+      forms[lang].watch("Image") ||
+      forms[lang].watch("image") ||
+      null
+    }
   />
 </div>
+
 
         <Button  type="submit" disabled={state.isLoading[lang]} className="w-full ">
           {state.isLoading[lang] ? (
