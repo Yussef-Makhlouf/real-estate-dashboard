@@ -6,6 +6,8 @@ import { toast } from "./use-toast"
 interface ImageUploadProps {
   onImagesChange: (files: File[]) => void
   language: "ar" | "en"
+  maxImages:number
+  existingImages: []
   initialImages?: {
     secure_url?: string
     public_id?: string

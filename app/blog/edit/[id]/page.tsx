@@ -241,16 +241,13 @@ export default function EditBlogPost() {
     {lang === "ar" ? "صورة المقال" : "Article Image"}
   </label>
   <ImageUpload
-    language={lang}
-    onImagesChange={(images) => forms[lang].setValue("image", images[0])}
-    initialImages={
-      forms[lang].watch("Image")?.secure_url || 
-      forms[lang].watch("image")?.secure_url ||
-      forms[lang].watch("Image") ||
-      forms[lang].watch("image") ||
-      null
-    }
-  />
+            language={lang}
+            onImagesChange={(images) => forms[lang].setValue("image", images[0])}
+            initialImages={forms[lang].watch("Image")?.secure_url ||
+              forms[lang].watch("image")?.secure_url ||
+              forms[lang].watch("Image") ||
+              forms[lang].watch("image") ||
+              null} maxImages={0} existingImages={[]}  />
 </div>
 
 
