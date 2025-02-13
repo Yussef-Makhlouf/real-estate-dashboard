@@ -92,8 +92,7 @@ const Form = ({ lang, forms, onSubmit, state, dispatch }: FormProps) => {
           <ImageUpload
             onImagesChange={(images) => setValue("image", images[0])}
             maxImages={1}
-            language={lang}
-          />
+            language={lang} existingImages={[]}          />
         </div>
         <Button type="submit" disabled={state.isLoading[lang]}>
           {state.isLoading[lang] ? (

@@ -51,18 +51,18 @@ const Form = ({ lang, forms, onSubmit, state }: {
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "التعليق" : "Comment"}</label>
           <RichTextEditor
-  key={`${lang}-${watch("description")}`}
-  content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
-  onChange={(content) => {
-    // تأخير التحديث لمدة 300 مللي ثانية
-    const timeoutId = setTimeout(() => {
-      setValue("description", content.replace(/<[^>]*>/g, ''))
-    }, 300)
-    
-    return () => clearTimeout(timeoutId)
-  }}
-  language={lang}
-/>
+            key={`${lang}-${watch("description")}`}
+            content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
+            onChange={(content) => {
+              // تأخير التحديث لمدة 300 مللي ثانية
+              const timeoutId = setTimeout(() => {
+                setValue("description", content.replace(/<[^>]*>/g, ''))
+              }, 300)
+
+              return () => clearTimeout(timeoutId)
+            }}
+            language={lang}
+          />
 
           {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
         </div>
@@ -86,16 +86,13 @@ const Form = ({ lang, forms, onSubmit, state }: {
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "الصورة" : "Image"}</label>
           <ImageUpload
-    language={lang}
-    onImagesChange={(images) => forms[lang].setValue("image", images[0])}
-    initialImages={
-      forms[lang].watch("Image")?.secure_url || 
-      forms[lang].watch("image")?.secure_url ||
-      forms[lang].watch("Image") ||
-      forms[lang].watch("image") ||
-      null
-    }
-  />
+            language={lang}
+            onImagesChange={(images) => forms[lang].setValue("image", images[0])}
+            initialImages={forms[lang].watch("Image")?.secure_url ||
+              forms[lang].watch("image")?.secure_url ||
+              forms[lang].watch("Image") ||
+              forms[lang].watch("image") ||
+              null} maxImages={0} existingImages={[]}          />
         </div>
 
         <Button type="submit" disabled={state.isLoading[lang]}>
@@ -129,7 +126,7 @@ export default function EditReview({ params }: { params: { id: string } }) {
   }
   const fetchReview = async () => {
     const loadingToast = toast.loading('جاري تحميل البيانات...')
-  
+
     try {
       const token = localStorage.getItem('token')
       if (!token) {
@@ -148,7 +145,7 @@ export default function EditReview({ params }: { params: { id: string } }) {
       }
 
       const data = await response.json()
-    
+
       if (!data.review) {
         throw new Error('Invalid review data')
       }
@@ -174,11 +171,11 @@ export default function EditReview({ params }: { params: { id: string } }) {
   }
 
 
-useEffect(() => {
-  fetchReview()
-}, [params.id])
+  useEffect(() => {
+    fetchReview()
+  }, [params.id])
 
-// Add loading indicator in the UI
+
 
   const onSubmit = async (data: FormData, lang: "ar" | "en") => {
     const loadingToast = toast.loading('جاري حفظ التغييرات...')

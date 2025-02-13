@@ -25,6 +25,7 @@ export default function EditProperty({ params }: { params: { id: string } }) {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<FormData>()
 
@@ -112,7 +113,7 @@ export default function EditProperty({ params }: { params: { id: string } }) {
         <div className="space-y-2">
           <label className="block text-sm font-medium">الوصف</label>
           <RichTextEditor
-            content={register("description").value || ""}
+            content={watch("description") || ""}
             onChange={(content) => setValue("description", content)}
             language="ar"
           />
@@ -123,8 +124,7 @@ export default function EditProperty({ params }: { params: { id: string } }) {
           <ImageUpload
             onImagesChange={(files) => setValue("image", files[0])}
             maxImages={1}
-            language="ar"
-          />
+            language="ar" existingImages={[]}          />
         </div>
       </div>
 
@@ -154,7 +154,7 @@ export default function EditProperty({ params }: { params: { id: string } }) {
         <div className="space-y-2">
           <label className="block text-sm font-medium">Description</label>
           <RichTextEditor
-            content={register("description").value || ""}
+            content={watch("description") || ""}
             onChange={(content) => setValue("description", content)}
             language="en"
           />
@@ -163,10 +163,9 @@ export default function EditProperty({ params }: { params: { id: string } }) {
         <div className="space-y-2">
           <label className="block text-sm font-medium">Images</label>
           <ImageUpload
-            onImagesChange={(files) => setValue("image", files[0])}
-            maxImages={1}
-            language="en"
-          />
+              onImagesChange={(files) => setValue("image", files[0])}
+              maxImages={1}
+              language="en" existingImages={[]}          />
         </div>
       </div>
 
