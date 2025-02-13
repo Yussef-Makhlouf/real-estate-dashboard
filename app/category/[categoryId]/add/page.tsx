@@ -287,7 +287,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
               <FormItem>
                 <FormLabel>{lang === "ar" ? "خط العرض" : "Latitude"}</FormLabel>
                 <FormControl>
-                  <Input type="number" step="any" {...field} />
+                  <Input type="number" {...field} />
                 </FormControl>
               </FormItem>
             )}
@@ -300,7 +300,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
               <FormItem>
                 <FormLabel>{lang === "ar" ? "خط الطول" : "Longitude"}</FormLabel>
                 <FormControl>
-                  <Input type="number" step="any" {...field} />
+                  <Input type="number" {...field} />
                 </FormControl>
               </FormItem>
             )}

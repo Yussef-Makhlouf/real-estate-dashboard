@@ -163,9 +163,9 @@ export default function EditProperty({ params }: { params: { id: string } }) {
         <div className="space-y-2">
           <label className="block text-sm font-medium">Images</label>
           <ImageUpload
-              onImagesChange={(files) => setValue("image", files[0])}
+            onImagesChange={(files) => setValue("image", files[0])}
               maxImages={1}
-              language="en" existingImages={[]}          />
+              language="en" existingImages={[]}/>
         </div>
       </div>
 

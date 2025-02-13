@@ -221,7 +221,7 @@ export default function AddCategory() {
         formData.append('image', data.Image)
       }
 
-      const response = await fetch("http://localhost:8080/category/addcategory", {
+      const response = await fetch("http://localhost:8080/category/create", {
         method: "POST",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         body: formData

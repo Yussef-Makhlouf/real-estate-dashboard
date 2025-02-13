@@ -174,7 +174,8 @@ import { usePathname, useRouter } from "next/navigation"
 import { 
   Home, Building, Users, FileQuestion, Star, BookOpen, LogOut, X, 
   ChevronDown, Settings, LayoutDashboard, UserPlus, Shield,
-  Newspaper
+  Newspaper,
+  Send
 } from "lucide-react"
 import { useSidebar } from "./SidebarProvider"
 import { Button } from "@/components/ui/button"
@@ -194,6 +195,7 @@ const menuItems = [
   { name: "آراء العملاء", icon: Star, href: "/reviews" },
   { name: "المدونة", icon: BookOpen, href: "/blog" },
   { name: "المشتركين", icon: Newspaper, href: "/subscribers" },
+  { name: "المهتمين بالعقار", icon: Send, href: "/intersted" },
 ]
 
 const userManagementItems = [
