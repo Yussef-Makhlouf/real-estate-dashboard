@@ -198,8 +198,8 @@ const menuItems = [
 
 const userManagementItems = [
   { name: "الأدوار", icon: Shield, href: "/roles" },
-  { name: "المستخدمين", icon: Users, href: "/users" },
-  { name: "المشرفين", icon: UserPlus, href: "/users/list" },
+  { name: "اضافة مستخدم", icon: Users, href: "/users" },
+  // { name: "المشرفين", icon: UserPlus, href: "/users/list" },
 ]
 
 export function Sidebar() {

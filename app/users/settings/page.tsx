@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { User, Phone, Mail, Shield, Calendar, MapPin, Building, Key } from "lucide-react"
-import { toast } from "react-hot-toast"
+import toast, { Toaster } from 'react-hot-toast'
 
 export default function UserSettings() {
   const [isLoading, setIsLoading] = useState(false)
@@ -267,32 +267,7 @@ export default function UserSettings() {
                           <h3 className="text-lg font-semibold">معلومات العمل</h3>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <FormField
-                            control={form.control}
-                            name="department"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>القسم</FormLabel>
-                                <FormControl>
-                                  <Input className="h-11" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="location"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>الموقع</FormLabel>
-                                <FormControl>
-                                  <Input className="h-11" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                       
                           <FormField
                             control={form.control}
                             name="joinDate"
@@ -346,6 +321,7 @@ export default function UserSettings() {
             </div>
           </div>
         </main>
+        <Toaster />
       </div>
     </SidebarProvider>
   )
