@@ -285,16 +285,13 @@ export default function EditProperty() {
           />
         </div>
 
-        <Button type="submit" disabled={state.isLoading[lang]} className="w-full">
-          {state.isLoading[lang] ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {lang === "ar" ? "جاري الحفظ..." : "Saving..."}
-            </>
-          ) : (
-            lang === "ar" ? "حفظ النسخة العربية" : "Save English Version"
-          )}
-        </Button>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Images</label>
+          <ImageUpload
+            onImagesChange={(files) => setValue("image", files[0])}
+              maxImages={1}
+              language="en" existingImages={[]}/>
+        </div>
       </div>
     </form>
   )

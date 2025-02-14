@@ -260,13 +260,18 @@ export default function AddCategory() {
       if (data.Image) {
         formData.append('image', data.Image)
       }
-      console.log(formData)
+
       const response = await fetch("http://localhost:8080/category/create", {
         method: "POST",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         body: formData
       })
-      console.log(response)
+
+      console.log(formData);
+      
+
+      console.log(response);
+      
       if (!response.ok) throw new Error("Failed to add category")
 
       toast.success(data.lang === "ar" ? "تم إضافة القسم بنجاح" : "Category added successfully")

@@ -40,18 +40,14 @@ const unitSchema = z.object({
   floor: z.number().min(0, { message: "يجب أن يكون رقم الطابق أكبر من أو يساوي 0" }),
   location: z.string().min(1, { message: "يجب إدخال الموقع" }),
   coordinates: z.object({
-    latitude: z.number()
-      .min(-90, "خط العرض يجب أن يكون بين -90 و 90")
-      .max(90, "خط العرض يجب أن يكون بين -90 و 90"),
-    longitude: z.number()
-      .min(-180, "خط الطول يجب أن يكون بين -180 و 180")
-      .max(180, "خط الطول يجب أن يكون بين -180 و 180")
+    latitude: z.string().min(0),
+    longitude: z.string().min(0)
   }),
   description: z.string().min(10, { message: "يجب أن يكون الوصف على الأقل 10 أحرف" }),
   status: z.string().min(1, { message: "يجب اختيار حالة الوحدة" }),
   nearbyPlaces: z.array(z.object({
-    place: z.string().min(1, { message: "يجب إدخال اسم المكان" }),
-    timeInMinutes: z.number().min(0, { message: "يجب أن يكون الوقت أكبر من أو يساوي 0" })
+    place: z.string(),
+    timeInMinutes: z.string().min(0)
   })).optional(),
   lang: z.string()
 })
@@ -317,7 +313,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
               <FormItem>
                 <FormLabel>{lang === "ar" ? "خط العرض" : "Latitude"}</FormLabel>
                 <FormControl>
-                  <Input type="number" step="any" {...field} />
+                  <Input type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -331,7 +327,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
               <FormItem>
                 <FormLabel>{lang === "ar" ? "خط الطول" : "Longitude"}</FormLabel>
                 <FormControl>
-                  <Input type="number" step="any" {...field} />
+                  <Input type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -379,7 +375,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input type="number" placeholder={lang === "ar" ? "الوقت بالدقائق" : "Time in minutes"} {...field} />
+                      <Input type="text" placeholder={lang === "ar" ? "الوقت بالدقائق" : "Time in minutes"} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

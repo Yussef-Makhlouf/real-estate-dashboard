@@ -21,45 +21,88 @@ interface Subscription {
   createdAt: string
 }
 
+interface InterestedUser {
+  _id: string
+  fullName: string
+  phone: number
+  email: string
+  categoryId: {
+    title: string
+    Image: { secure_url: string }
+    location: string
+  }
+  unitId: {
+    title: string
+    type: string
+    price: number
+    images: { secure_url: string }[]
+    status: string
+  }
+}
+
 export function Header() {
   const { toggle } = useSidebar()
   const [notifications, setNotifications] = useState(0)
+  const [newInterests, setNewInterests] = useState(0)
+  const [interestedUsers, setInterestedUsers] = useState<InterestedUser[]>([])
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
 
-  const fetchUnreadCount = async () => {
+  const fetchData = async () => {
     try {
       const token = localStorage.getItem("token")
-      const [countResponse, subscriptionsResponse] = await Promise.all([
+      const [countResponse, subscriptionsResponse, interestedResponse] = await Promise.all([
         fetch("http://localhost:8080/newsletter/unread", {
           headers: { Authorization: `Bearer ${token}` }
         }),
         fetch("http://localhost:8080/newsletter", {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch("http://localhost:8080/interested", {
           headers: { Authorization: `Bearer ${token}` }
         })
       ])
 
       const countData = await countResponse.json()
       const subsData = await subscriptionsResponse.json()
+      const interestedData = await interestedResponse.json()
 
       setNotifications(countData.count)
       setSubscriptions(subsData.emailData || [])
+      setInterestedUsers(interestedData.interested || [])
     } catch (error) {
       console.error("Failed to fetch data:", error)
     }
   }
 
   useEffect(() => {
-    fetchUnreadCount()
+    fetchData()
+
     const socket = io("http://localhost:8080")
 
-    socket.on("new_subscription", async () => {
-      fetchUnreadCount()
+    socket.on("new_intersted", () => {
+      setNewInterests(prev => prev + 1)
+      fetchData()
+    })
+
+    socket.on("intersted-featch", (data) => {
+      setInterestedUsers(data)
+    })
+
+    socket.on("new_subscription", () => {
+      fetchData()
     })
 
     socket.on("notifications_read", () => {
-      setNotifications(0)
-      setSubscriptions([])
-    })
+      
+         setNotifications(0)
+        setSubscriptions([])
+      })
+
+    socket.on("intersted_read", () => {
+
+         setNewInterests(0)
+        setInterestedUsers([])
+     })
 
     return () => {
       socket.disconnect()
@@ -95,59 +138,68 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="relative">
-          <DropdownMenu onOpenChange={async (open) => {
-  if (!open && notifications > 0) {
-    const token = localStorage.getItem("token")
-    await fetch("http://localhost:8080/newsletter/markAsRead", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    setNotifications(0)
-  }
-}}>
-  
-  <DropdownMenuTrigger asChild>
-    <Button variant="ghost" size="icon">
-      <div className="relative">
-        <Bell className="h-5 w-5" />
-        {notifications > 0 && (
-          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
-            {notifications}
-          </span>
-        )}
-      </div>
-    </Button>
-  </DropdownMenuTrigger>
-  <DropdownMenuContent align="end" className="w-80">
-    <DropdownMenuLabel className="flex justify-between">
-      <span>الإشعارات</span>
-      <span className="text-xs text-muted-foreground">
-        {notifications} إشعارات جديدة
-      </span>
-    </DropdownMenuLabel>
-    <DropdownMenuSeparator />
-    {subscriptions.map((sub) => (
-      <DropdownMenuItem key={sub._id} className="p-4">
-        <div className="flex flex-col gap-1">
-          <p className="font-medium">{sub.email}</p>
-          <span className="text-xs text-muted-foreground">
-            {new Date(sub.createdAt).toLocaleString()}
-          </span>
-        </div>
-      </DropdownMenuItem>
-    ))}
-    <DropdownMenuSeparator />
-    <DropdownMenuItem asChild>
+        <DropdownMenu onOpenChange={async (open) => {
+          if (!open && (notifications > 0 || newInterests > 0)) {
+            const token = localStorage.getItem("token")
+            await fetch("http://localhost:8080/newsletter/markAsRead", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` }
+            }),
+            await fetch("http://localhost:8080/interested/markAsRead", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` }
+            })
+            setNotifications(0)
+            setNewInterests(0)
+          }
+        }}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <div className="relative">
+                <Bell className="h-5 w-5" />
+                {(notifications > 0 || newInterests > 0) && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                    {notifications + newInterests}
+                  </span>
+                )}
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80">
+            <DropdownMenuLabel>الإشعارات</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {subscriptions.map((sub) => (
+              <DropdownMenuItem key={sub._id} className="p-4">
+                <div className="flex flex-col gap-1">
+                  <p className="font-medium">{sub.email}</p>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(sub.createdAt).toLocaleString()}
+                  </span>
+                </div>
+              </DropdownMenuItem>
+            ))}
+            {interestedUsers.map((user) => (
+              <DropdownMenuItem key={user._id} className="p-4">
+                <div className="flex flex-col gap-1">
+                  <p className="font-medium">{user.fullName}</p>
+                  <p className="text-sm">{user.email}</p>
+                  <p className="text-sm">هاتف: {user.phone}</p>
+                  <div className="text-xs text-muted-foreground">
+                    <p>الفئة: {user.categoryId.title}</p>
+                    <p>الوحدة: {user.unitId.title}</p>
+                    <p>السعر: ${user.unitId.price}</p>
+                  </div>
+                </div>
+              </DropdownMenuItem>
+            ))}
+<DropdownMenuItem asChild>
       <Link href="/notifications" className="w-full text-center text-primary">
         عرض كل الإشعارات
       </Link>
     </DropdownMenuItem>
-  </DropdownMenuContent>
-</DropdownMenu>
-
+          </DropdownMenuContent>
+        </DropdownMenu>
           </div>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -181,7 +233,6 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </div>
-    </header>
+        </header>
   )
 }
