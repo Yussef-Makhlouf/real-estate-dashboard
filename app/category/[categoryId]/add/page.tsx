@@ -21,36 +21,41 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 
 const unitSchema = z.object({
-  title: z.string().min(3),
-  type: z.string(),
-  price: z.number().min(0),
-  area: z.number().min(0),
-  rooms: z.number().min(0),
-  bathrooms: z.number().min(0),
-  livingrooms: z.number().min(0),
-  elevators: z.number().min(0),
-  parking: z.number().min(0),
-  guard: z.number().min(0),
-  waterTank: z.number().min(0),
-  maidRoom: z.number().min(0),
-  cameras: z.number().min(0),
-  floor: z.number().min(0),
-  location: z.string(),
+  title: z.string().min(3, { message: "يجب أن يكون العنوان على الأقل 3 أحرف" }),
+  type: z.string().min(1, { message: "يجب اختيار نوع الوحدة" }),
+  price: z.number().min(0, { message: "يجب أن يكون السعر أكبر من أو يساوي 0" }),
+  area: z.number().min(0, { message: "يجب أن تكون المساحة أكبر من أو تساوي 0" }),
+  rooms: z.number().min(0, { message: "يجب أن يكون عدد الغرف أكبر من أو يساوي 0" }),
+  bathrooms: z.number().min(0, { message: "يجب أن يكون عدد الحمامات أكبر من أو يساوي 0" }),
+  livingrooms: z.number().min(0, { message: "يجب أن يكون عدد الصالات أكبر من أو يساوي 0" }),
+  elevators: z.number().min(0, { message: "يجب أن يكون عدد المصاعد أكبر من أو يساوي 0" }),
+  parking: z.number().min(0, { message: "يجب أن يكون عدد مواقف السيارات أكبر من أو يساوي 0" }),
+  guard: z.number().min(0, { message: "يجب أن يكون عدد الحراس أكبر من أو يساوي 0" }),
+  waterTank: z.number().min(0, { message: "يجب أن يكون عدد خزانات المياه أكبر من أو يساوي 0" }),
+  maidRoom: z.number().min(0, { message: "يجب أن يكون عدد غرف الخدم أكبر من أو يساوي 0" }),
+  cameras: z.number().min(0, { message: "يجب أن يكون عدد الكاميرات أكبر من أو يساوي 0" }),
+  floor: z.number().min(0, { message: "يجب أن يكون رقم الطابق أكبر من أو يساوي 0" }),
+  location: z.string().min(1, { message: "يجب إدخال الموقع" }),
   coordinates: z.object({
-    latitude: z.number(),
+    latitude: z.number()
+      .min(-90, "خط العرض يجب أن يكون بين -90 و 90")
+      .max(90, "خط العرض يجب أن يكون بين -90 و 90"),
     longitude: z.number()
+      .min(-180, "خط الطول يجب أن يكون بين -180 و 180")
+      .max(180, "خط الطول يجب أن يكون بين -180 و 180")
   }),
-  description: z.string(),
-  status: z.string(),
+  description: z.string().min(10, { message: "يجب أن يكون الوصف على الأقل 10 أحرف" }),
+  status: z.string().min(1, { message: "يجب اختيار حالة الوحدة" }),
   nearbyPlaces: z.array(z.object({
-    place: z.string(),
-    timeInMinutes: z.number()
+    place: z.string().min(1, { message: "يجب إدخال اسم المكان" }),
+    timeInMinutes: z.number().min(0, { message: "يجب أن يكون الوقت أكبر من أو يساوي 0" })
   })).optional(),
   lang: z.string()
 })
+
 const getArabicPlaceholder = (fieldName: string): string => {
   const placeholders: { [key: string]: string } = {
     price: "السعر",
@@ -129,6 +134,19 @@ const reducer = (state: State, action: Action): State => {
 }
 
 const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en", form: any, onSubmit: (data: FormData, lang: "ar" | "en") => void, state: State, dispatch: React.Dispatch<Action> }) => {
+  const handleGoogleMapsLink = (link: string) => {
+    const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+    const match = link.match(regex);
+    if (match) {
+      const latitude = parseFloat(match[1]);
+      const longitude = parseFloat(match[2]);
+      form.setValue("coordinates.latitude", latitude);
+      form.setValue("coordinates.longitude", longitude);
+    } else {
+      toast.error(lang === "ar" ? "رابط خريطة Google غير صالح" : "Invalid Google Maps link");
+    }
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit((data: FormData) => onSubmit(data, lang))} 
@@ -152,6 +170,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
                 language={lang}
                 existingImages={[]}
               />
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -167,117 +186,128 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
                 <FormControl>
                   <Input {...field} dir={lang === "ar" ? "rtl" : "ltr"} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
 
-          {/* Add all other fields similar to edit form */}
-         {/* Type Selection */}
-<FormField
-  control={form.control}
-  name="type"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>{lang === "ar" ? "نوع الوحدة" : "Unit Type"}</FormLabel>
-      <Select onValueChange={field.onChange} defaultValue={field.value}>
-        <FormControl>
-          <SelectTrigger>
-            <SelectValue placeholder={lang === "ar" ? "اختر نوع الوحدة" : "Select unit type"} />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent>
-          {unitTypes.map((type) => (
-            <SelectItem key={type} value={type}>{type}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </FormItem>
-  )}
-/>
-
-{/* Number Input Fields */}
-{[
-  "price", "area", "rooms", "bathrooms", "livingrooms",
-  "elevators", "parking", "guard", "waterTank", "maidRoom",
-  "cameras", "floor"
-].map((fieldName) => (
-  <FormField
-    key={fieldName}
-    control={form.control}
-    name={fieldName}
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>
-          {lang === "ar" 
-            ? getArabicPlaceholder(fieldName) 
-            : getEnglishPlaceholder(fieldName)}
-        </FormLabel>
-        <FormControl>
-          <Input 
-            type="number" 
-            {...field}
-            onChange={e => field.onChange(Number(e.target.value))}
+          {/* Type Selection */}
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{lang === "ar" ? "نوع الوحدة" : "Unit Type"}</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={lang === "ar" ? "اختر نوع الوحدة" : "Select unit type"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {unitTypes.map((type) => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </FormControl>
-      </FormItem>
-    )}
-  />
-))}
 
-{/* Location Field */}
-<FormField
-  control={form.control}
-  name="location"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>{lang === "ar" ? "الموقع" : "Location"}</FormLabel>
-      <FormControl>
-        <Input {...field} />
-      </FormControl>
-    </FormItem>
-  )}
-/>
-
-{/* Status Selection */}
-<FormField
-  control={form.control}
-  name="status"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>{lang === "ar" ? "الحالة" : "Status"}</FormLabel>
-      <Select onValueChange={field.onChange} defaultValue={field.value}>
-        <FormControl>
-          <SelectTrigger>
-            <SelectValue placeholder={lang === "ar" ? "اختر الحالة" : "Select status"} />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent>
-          {unitStatuses.map((status) => (
-            <SelectItem key={status} value={status}>{status}</SelectItem>
+          {/* Number Input Fields */}
+          {[
+            "price", "area", "rooms", "bathrooms", "livingrooms",
+            "elevators", "parking", "guard", "waterTank", "maidRoom",
+            "cameras", "floor"
+          ].map((fieldName) => (
+            <FormField
+              key={fieldName}
+              control={form.control}
+              name={fieldName}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {lang === "ar" 
+                      ? getArabicPlaceholder(fieldName) 
+                      : getEnglishPlaceholder(fieldName)}
+                  </FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field}
+                      onChange={e => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           ))}
-        </SelectContent>
-      </Select>
-    </FormItem>
-  )}
-/>
 
-{/* Description Field */}
-<FormField
-  control={form.control}
-  name="description"
-  render={({ field }) => (
-    <FormItem className="col-span-full">
-      <FormLabel>{lang === "ar" ? "الوصف" : "Description"}</FormLabel>
-      <FormControl>
-        <Textarea 
-          rows={4} 
-          {...field} 
-          dir={lang === "ar" ? "rtl" : "ltr"}
-        />
-      </FormControl>
-    </FormItem>
-  )}
-/>
+          {/* Location Field */}
+          <FormField
+            control={form.control}
+            name="location"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{lang === "ar" ? "الموقع" : "Location"}</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    onChange={(e) => {
+                      field.onChange(e);
+                      handleGoogleMapsLink(e.target.value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Status Selection */}
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{lang === "ar" ? "الحالة" : "Status"}</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={lang === "ar" ? "اختر الحالة" : "Select status"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {unitStatuses.map((status) => (
+                      <SelectItem key={status} value={status}>{status}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Description Field */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem className="col-span-full">
+                <FormLabel>{lang === "ar" ? "الوصف" : "Description"}</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    rows={4} 
+                    {...field} 
+                    dir={lang === "ar" ? "rtl" : "ltr"}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* Coordinates */}
           <FormField
@@ -289,6 +319,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
                 <FormControl>
                   <Input type="number" step="any" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -302,6 +333,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
                 <FormControl>
                   <Input type="number" step="any" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -337,6 +369,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
                     <FormControl>
                       <Input placeholder={lang === "ar" ? "اسم المكان" : "Place name"} {...field} />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -348,6 +381,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
                     <FormControl>
                       <Input type="number" placeholder={lang === "ar" ? "الوقت بالدقائق" : "Time in minutes"} {...field} />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -369,11 +403,7 @@ export default function AddUnit() {
     images: [],
     existingImages: [],
     isLoading: { ar: false, en: false },
-    nearbyPlaces: [
-      { place: "", timeInMinutes: 0 },
-      { place: "", timeInMinutes: 0 },
-      { place: "", timeInMinutes: 0 }
-    ]
+    nearbyPlaces: []
   })
 
   const router = useRouter()
@@ -449,5 +479,4 @@ export default function AddUnit() {
       </main>
     </div>
   )
-
 }

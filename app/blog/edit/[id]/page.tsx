@@ -67,11 +67,11 @@ export default function EditBlogPost() {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         const data = await response.json();
-        
+
         // Handle blog data for both languages
         if (data.blog) {
           const blogData = Array.isArray(data.blog) ? data.blog : [data.blog];
-          
+
           blogData.forEach((blog: any) => {
             if (blog.lang === 'ar') {
               forms.ar.reset({
@@ -80,10 +80,10 @@ export default function EditBlogPost() {
                 image: blog.Image.secure_url,
                 lang: 'ar'
               });
-              dispatch({ 
-                type: "SET_KEYWORDS", 
-                lang: "ar", 
-                value: Array.isArray(blog.Keywords) ? blog.Keywords : blog.Keywords?.split(',') || [] 
+              dispatch({
+                type: "SET_KEYWORDS",
+                lang: "ar",
+                value: Array.isArray(blog.Keywords) ? blog.Keywords : blog.Keywords?.split(',') || []
               });
             } else if (blog.lang === 'en') {
               forms.en.reset({
@@ -92,11 +92,11 @@ export default function EditBlogPost() {
                 image: blog.image,
                 lang: 'en'
               });
-              dispatch({ 
-                type: "SET_KEYWORDS", 
-                lang: "en", 
-                value: Array.isArray(blog.Keywords) ? blog.Keywords : blog.Keywords?.split(',') || [] 
-               
+              dispatch({
+                type: "SET_KEYWORDS",
+                lang: "en",
+                value: Array.isArray(blog.Keywords) ? blog.Keywords : blog.Keywords?.split(',') || []
+
               });
             }
           });
@@ -106,15 +106,15 @@ export default function EditBlogPost() {
         toast.error("Error fetching blog data");
       }
     };
-  
+
     if (params.id) {
       fetchBlogData();
     }
   }, [params.id]);
-  
+
   // In the onSubmit function, modify how keywords are handled:
   const onSubmit = async (data: FormData, lang: "ar" | "en") => {
-    
+
     dispatch({ type: "SET_LOADING", lang, value: true });
     try {
       const formData = new FormData();
@@ -127,17 +127,17 @@ export default function EditBlogPost() {
       } else if (typeof data.image === "string" && data.image.startsWith("http")) {
         formData.append("imageUrl", data.image); // Send existing image URL
       }
-  
-  
+
+
       const response = await fetch(`http://localhost:8080/blog/update/${params.id}`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         body: formData,
       });
-  
+
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
-  
+
       toast.success(lang === "ar" ? "تم تحديث المقال بنجاح" : "Blog updated successfully");
       router.push("/blog");
     } catch (error) {
@@ -166,19 +166,21 @@ export default function EditBlogPost() {
             {lang === "ar" ? "المحتوى (بالعربية)" : "Content (English)"}
           </label>
           <RichTextEditor
-  key={`${lang}-${forms[lang].watch("description")}`}
-  content={forms[lang].watch("description")?.replace(/<[^>]*>/g, '') || ""}
-  onChange={(content) => {
-    const timeoutId = setTimeout(() => {
-      forms[lang].setValue("description", content.replace(/<[^>]*>/g, ''))
-    }, 300)
-    
-    return () => clearTimeout(timeoutId)
-  }}
-  language={lang}
-/>
+            content={forms[lang].watch("description")?.replace(/<[^>]*>/g, '').replace(/ /g, ' ') || ""}
+            onChange={(content) => {
+              const plainText = content
+                .replace(/<[^>]*>/g, '')
+                .replace(/ /g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim()
 
-
+              forms[lang].setValue("description", plainText, {
+                shouldValidate: true,
+                shouldDirty: true
+              })
+            }}
+            language={lang}
+          />
         </div>
         <div className="space-y-2">
           <label className="block text-sm font-medium">
@@ -195,8 +197,7 @@ export default function EditBlogPost() {
             <Button
               type="button"
               variant="outline"
-              
-              className="text-sm  px-4 "
+              className="text-sm px-4"
               onClick={() => {
                 if (state.newKeyword[lang] && !state.keywords[lang].includes(state.newKeyword[lang])) {
                   dispatch({
@@ -210,48 +211,47 @@ export default function EditBlogPost() {
             >
               {lang === "ar" ? "إضافة" : "Add"}
             </Button>
-            
           </div>
           <div className="flex flex-wrap gap-2 mt-2">
-  {state.keywords[lang].map((keyword, index) => (
-    <span
-      key={index}
-      className="bg-primary text-primary-foreground px-2 py-1 rounded-md flex items-center gap-1"
-    >
-      {keyword}
-      <button
-        type="button"
-        onClick={() => {
-          dispatch({
-            type: "SET_KEYWORDS",
-            lang,
-            value: state.keywords[lang].filter((_, i) => i !== index)
-          });
-        }}
-        className="hover:text-red-500"
-      >
-        <X className="h-4 w-4" />
-      </button>
-    </span>
-  ))}
-</div>
+            {state.keywords[lang].map((keyword, index) => (
+              <span
+                key={index}
+                className="bg-primary text-primary-foreground px-2 py-1 rounded-md flex items-center gap-1"
+              >
+                {keyword}
+                <button
+                  type="button"
+                  onClick={() => {
+                    dispatch({
+                      type: "SET_KEYWORDS",
+                      lang,
+                      value: state.keywords[lang].filter((_, i) => i !== index)
+                    });
+                  }}
+                  className="hover:text-red-500"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </span>
+            ))}
+          </div>
         </div>
         <div className="space-y-2">
-  <label className="block text-sm font-medium">
-    {lang === "ar" ? "صورة المقال" : "Article Image"}
-  </label>
-  <ImageUpload
+          <label className="block text-sm font-medium">
+            {lang === "ar" ? "صورة المقال" : "Article Image"}
+          </label>
+          <ImageUpload
             language={lang}
             onImagesChange={(images) => forms[lang].setValue("image", images[0])}
             initialImages={forms[lang].watch("Image")?.secure_url ||
               forms[lang].watch("image")?.secure_url ||
               forms[lang].watch("Image") ||
               forms[lang].watch("image") ||
-              null} maxImages={0} existingImages={[]}  />
-</div>
+              null} maxImages={0} existingImages={[]} />
+        </div>
 
 
-        <Button  type="submit" disabled={state.isLoading[lang]} className="w-full ">
+        <Button type="submit" disabled={state.isLoading[lang]} className="w-full ">
           {state.isLoading[lang] ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
