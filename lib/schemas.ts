@@ -396,21 +396,30 @@ export const categorySchema = z.discriminatedUnion('lang', [
       .refine(text => validateLanguage(stripHtml(text), 'ar'), {
         message: "يجب أن يحتوي النص على حروف عربية فقط"
       }),
-    image: z.instanceof(File, { message: "الصورة مطلوبة" })
-      .refine(file => file.size > 0, { message: "حجم الصورة غير صالح" })
-      .refine(file => file.type.startsWith('image/'), { 
-        message: "يجب أن يكون الملف صورة" 
-      }),
-      coordinates: z.object({
-        latitude: z.number({
-          required_error: "خط العرض مطلوب",
-          invalid_type_error: "يجب أن يكون رقمًا"
+    image: z.union([
+      z.instanceof(File)
+        .refine(file => file.size > 0, { message: "حجم الصورة غير صالح" })
+        .refine(file => file.type.startsWith('image/'), {
+          message: "يجب أن يكون الملف صورة"
         }),
-        longitude: z.number({
-          required_error: "خط الطول مطلوب",
-          invalid_type_error: "يجب أن يكون رقمًا"
-        })
+      z.undefined()
+    ]).optional(),
+    existingImages: z.array(
+      z.object({
+        url: z.string(),
+        public_id: z.string()
       })
+    ).optional(),
+    coordinates: z.object({
+      latitude: z.number({
+        required_error: "خط العرض مطلوب",
+        invalid_type_error: "يجب أن يكون رقمًا"
+      }),
+      longitude: z.number({
+        required_error: "خط الطول مطلوب",
+        invalid_type_error: "يجب أن يكون رقمًا"
+      })
+    })
   }),
   z.object({
     lang: z.literal('en'),
@@ -430,14 +439,23 @@ export const categorySchema = z.discriminatedUnion('lang', [
       .refine(text => validateLanguage(stripHtml(text), 'en'), {
         message: "Text must contain only English characters"
       }),
-    image: z.instanceof(File, { message: "Image is required" })
-      .refine(file => file.size > 0, { message: "Invalid image size" })
-      .refine(file => file.type.startsWith('image/'), { 
-        message: "File must be an image" 
-      }),
+    image: z.union([
+      z.instanceof(File)
+        .refine(file => file.size > 0, { message: "Invalid image size" })
+        .refine(file => file.type.startsWith('image/'), {
+          message: "File must be an image"
+        }),
+      z.undefined()
+    ]).optional(),
+    existingImages: z.array(
+      z.object({
+        url: z.string(),
+        public_id: z.string()
+      })
+    ).optional(),
     coordinates: z.object({
       latitude: z.number().refine(val => val !== undefined, { message: "Latitude is required" }),
-  longitude: z.number().refine(val => val !== undefined, { message: "Longitude is required" })
-    }),
+      longitude: z.number().refine(val => val !== undefined, { message: "Longitude is required" })
+    })
   })
 ]);
