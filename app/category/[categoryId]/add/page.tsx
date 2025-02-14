@@ -40,14 +40,14 @@ const unitSchema = z.object({
   floor: z.number().min(0),
   location: z.string(),
   coordinates: z.object({
-    latitude: z.number(),
-    longitude: z.number()
+    latitude: z.string().min(0),
+    longitude: z.string().min(0)
   }),
   description: z.string(),
   status: z.string(),
   nearbyPlaces: z.array(z.object({
     place: z.string(),
-    timeInMinutes: z.number()
+    timeInMinutes: z.string().min(0)
   })).optional(),
   lang: z.string()
 })
@@ -287,7 +287,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
               <FormItem>
                 <FormLabel>{lang === "ar" ? "خط العرض" : "Latitude"}</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} />
+                  <Input type="text" {...field} />
                 </FormControl>
               </FormItem>
             )}
@@ -300,7 +300,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
               <FormItem>
                 <FormLabel>{lang === "ar" ? "خط الطول" : "Longitude"}</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} />
+                  <Input type="text" {...field} />
                 </FormControl>
               </FormItem>
             )}
@@ -346,7 +346,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input type="number" placeholder={lang === "ar" ? "الوقت بالدقائق" : "Time in minutes"} {...field} />
+                      <Input type="text" placeholder={lang === "ar" ? "الوقت بالدقائق" : "Time in minutes"} {...field} />
                     </FormControl>
                   </FormItem>
                 )}

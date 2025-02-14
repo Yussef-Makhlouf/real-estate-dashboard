@@ -227,6 +227,11 @@ export default function AddCategory() {
         body: formData
       })
 
+      console.log(formData);
+      
+
+      console.log(response);
+      
       if (!response.ok) throw new Error("Failed to add category")
       
       toast.success(data.lang === "ar" ? "تم إضافة القسم بنجاح" : "Category added successfully")

@@ -76,6 +76,7 @@ export function Header() {
 
   useEffect(() => {
     fetchData()
+
     const socket = io("http://localhost:8080")
 
     socket.on("new_intersted", () => {
@@ -93,20 +94,15 @@ export function Header() {
 
     socket.on("notifications_read", () => {
       
-      setTimeout(() => {
-        setNotifications(0)
+         setNotifications(0)
         setSubscriptions([])
-            }, 60000)
+      })
 
-     })
- 
     socket.on("intersted_read", () => {
 
-      setTimeout(() => {
-        setNewInterests(0)
+         setNewInterests(0)
         setInterestedUsers([])
-                  }, 60000)
-    })
+     })
 
     return () => {
       socket.disconnect()
@@ -194,19 +190,16 @@ export function Header() {
                     <p>السعر: ${user.unitId.price}</p>
                   </div>
                 </div>
+              </DropdownMenuItem>
+            ))}
 <DropdownMenuItem asChild>
       <Link href="/notifications" className="w-full text-center text-primary">
         عرض كل الإشعارات
       </Link>
     </DropdownMenuItem>
-              </DropdownMenuItem>
-            ))}
           </DropdownMenuContent>
         </DropdownMenu>
-
-
           </div>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

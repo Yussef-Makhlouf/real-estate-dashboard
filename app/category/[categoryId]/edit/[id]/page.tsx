@@ -26,28 +26,28 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 const unitSchema = z.object({
   title: z.string().min(3),
   type: z.string(),
-  price: z.number().min(0),
-  area: z.number().min(0),
-  rooms: z.number().min(0),
-  bathrooms: z.number().min(0),
-  livingrooms: z.number().min(0),
-  elevators: z.number().min(0),
-  parking: z.number().min(0),
-  guard: z.number().min(0),
-  waterTank: z.number().min(0),
-  maidRoom: z.number().min(0),
-  cameras: z.number().min(0),
-  floor: z.number().min(0),
+  price: z.string().min(0),
+  area: z.string().min(0),
+  rooms: z.string().min(0),
+  bathrooms: z.string().min(0),
+  livingrooms: z.string().min(0),
+  elevators: z.string().min(0),
+  parking: z.string().min(0),
+  guard: z.string().min(0),
+  waterTank: z.string().min(0),
+  maidRoom: z.string().min(0),
+  cameras: z.string().min(0),
+  floor: z.string().min(0),
   location: z.string(),
   coordinates: z.object({
-    latitude: z.number(),
-    longitude: z.number()
+    latitude: z.string(),
+    longitude: z.string()
   }),
   description: z.string(),
   status: z.string(),
   nearbyPlaces: z.array(z.object({
     place: z.string(),
-    timeInMinutes: z.number()
+    timeInMinutes: z.string()
   })).optional(),
   lang: z.string()
 })
@@ -95,7 +95,7 @@ const unitTypes = [
 ]
 
 const unitStatuses = [
-  "Available", "Sold", "Rented", "Reserved", "Under Maintenance"
+  "Available", "Sold", "Rented", "Reserved", "Under Maintenance","eslam"
 ]
 
 type State = {
@@ -227,7 +227,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
                         {lang === "ar" ? "الوقت (بالدقائق)" : "Time (minutes)"}
                       </FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} />
+                        <Input type="text" {...field} />
                       </FormControl>
                     </FormItem>
                   )}

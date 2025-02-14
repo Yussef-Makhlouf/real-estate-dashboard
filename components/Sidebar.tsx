@@ -175,7 +175,10 @@ import {
   Home, Building, Users, FileQuestion, Star, BookOpen, LogOut, X, 
   ChevronDown, Settings, LayoutDashboard, UserPlus, Shield,
   Newspaper,
-  Send
+  Send,
+  BookCheck,
+  Type,
+  TimerIcon
 } from "lucide-react"
 import { useSidebar } from "./SidebarProvider"
 import { Button } from "@/components/ui/button"
@@ -187,6 +190,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { link } from "fs"
 
 const menuItems = [
   { name: "لوحة التحكم", icon: LayoutDashboard, href: "/" },
@@ -196,6 +200,7 @@ const menuItems = [
   { name: "المدونة", icon: BookOpen, href: "/blog" },
   { name: "المشتركين", icon: Newspaper, href: "/subscribers" },
   { name: "المهتمين بالعقار", icon: Send, href: "/intersted" },
+  { name: "الاستشارات المحجوزة", icon: TimerIcon , href: "/consultation" },
 ]
 
 const userManagementItems = [
