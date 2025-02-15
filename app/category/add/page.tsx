@@ -275,7 +275,7 @@ export default function AddCategory() {
       if (!response.ok) throw new Error("Failed to add category")
 
       toast.success(data.lang === "ar" ? "تم إضافة القسم بنجاح" : "Category added successfully")
-      router.push("/")
+      router.push("/category")
     } catch (error) {
       toast.error(data.lang === "ar" ? "حدث خطأ أثناء الإضافة" : "Error adding category")
     } finally {

@@ -49,8 +49,8 @@ export default function Category() {
     try {
       setLoading(true);
       let endpoint;
-      
-      switch(selectedLang) {
+
+      switch (selectedLang) {
         case 'ar':
           endpoint = "http://localhost:8080/category/getAllCategoryAR";
           break;
@@ -63,14 +63,14 @@ export default function Category() {
             axios.get("http://localhost:8080/category/getAllCategoryAR"),
             axios.get("http://localhost:8080/category/getAllCategoryEN")
           ]);
-          
+
           const combinedCategories = [...arResponse.data.category, ...enResponse.data.category];
           setCategories(combinedCategories);
           setTotalPages(Math.ceil(combinedCategories.length / 9));
           setLoading(false);
           return;
       }
-  
+
       const response = await axios.get(endpoint);
       setCategories(response.data.category);
       setTotalPages(Math.ceil(response.data.total / 9));
@@ -84,12 +84,15 @@ export default function Category() {
       setLoading(false);
     }
   };
-  
-  
+
+
 
   const viewUnits = (categoryId: string) => {
     router.push(`/category/${categoryId}`)
   }
+  const formatCoordinate = (value: number | undefined): string => {
+    return value !== undefined && !isNaN(value) ? value.toFixed(7) : "N/A";
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -134,10 +137,10 @@ export default function Category() {
             {category.status && (
               <span className={`px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm shadow-lg
                 ${category.status === 'available' ? 'bg-green-500/90 text-white' :
-                category.status === 'sold' ? 'bg-red-500/90 text-white' :
-                'bg-yellow-500/90 text-white'}`}>
+                  category.status === 'sold' ? 'bg-red-500/90 text-white' :
+                    'bg-yellow-500/90 text-white'}`}>
                 {category.status === 'available' ? 'متاح' :
-                 category.status === 'sold' ? 'تم البيع' : 'مؤجر'}
+                  category.status === 'sold' ? 'تم البيع' : 'مؤجر'}
               </span>
             )}
           </div>
@@ -169,15 +172,17 @@ export default function Category() {
               </span>
             </div>
 
+
             <div className="flex items-center text-gray-600">
               <MapPin className="w-4 h-4 mr-2 text-gray-400" />
               <span className="text-sm">
-                {category.coordinates ? 
-                  `${category.coordinates.latitude.toFixed(4)}, ${category.coordinates.longitude.toFixed(4)}` 
-                  : 'Coordinates not available'}
+                {category?.coordinates?.latitude && category?.coordinates?.longitude ? (
+                  `${formatCoordinate(category.coordinates.latitude)}, ${formatCoordinate(category.coordinates.longitude)}`
+                ) : (
+                  <>Coordinates not available</>
+                )}
               </span>
             </div>
-
             <div className="flex items-start">
               <p className="text-gray-600 line-clamp-2 text-sm leading-relaxed">
                 {category.description || 'No description available'}
@@ -229,7 +234,7 @@ export default function Category() {
           <div className="flex flex-col space-y-6 mb-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <h2 className="text-3xl font-bold text-gray-900">المشاريع</h2>
-              
+
               <div className="flex flex-wrap gap-3 items-center">
                 <div className="relative">
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />

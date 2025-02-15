@@ -80,13 +80,18 @@ const Form = ({ lang, forms, onSubmit, state }: {
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "الصورة" : "Image"}</label>
           <ImageUpload
-            language={lang}
-            onImagesChange={(images) => forms[lang].setValue("image", images[0])}
-            initialImages={forms[lang].watch("Image")?.secure_url ||
-              forms[lang].watch("image")?.secure_url ||
-              forms[lang].watch("Image") ||
-              forms[lang].watch("image") ||
-              null} maxImages={0} existingImages={[]} />
+  language={lang}
+  onImagesChange={(images) => forms[lang].setValue("image", images[0])}
+  initialImages={[
+    forms[lang].watch("Image")?.secure_url ||
+    forms[lang].watch("image")?.secure_url ||
+    forms[lang].watch("Image") ||
+    forms[lang].watch("image")
+  ].filter(Boolean)}
+  maxImages={10}
+  existingImages={state.existingImages || []}
+/>
+
         </div>
 
         <Button type="submit" disabled={state.isLoading[lang]}>
