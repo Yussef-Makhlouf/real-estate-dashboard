@@ -39,7 +39,6 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     fetchData()
-    markAsRead()
 
     const socket = io("http://localhost:8080")
     socket.on("emails_fetched", fetchData)
@@ -74,17 +73,6 @@ export default function NotificationsPage() {
     }
   }
 
-  const markAsRead = async () => {
-    try {
-      const token = localStorage.getItem("token")
-      await fetch("http://localhost:8080/newsletter/markAsRead", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` }
-      })
-    } catch (error) {
-      console.error("Failed to mark as read:", error)
-    }
-  }
 
   return (
     <SidebarProvider>
