@@ -263,158 +263,123 @@ function UsersListContent() {
                 </CardContent>
               </Card>
             </div>
-
             <Card className="shadow-lg">
-              <CardHeader className="border-b border-gray-100 bg-white/50">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <CardTitle className="text-2xl font-bold flex items-center">
-                    <Users className="ml-2 h-6 w-6 text-primary" />
-                    قائمة المستخدمين
-                  </CardTitle>
-                  <div className="relative w-full sm:w-96">
-                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <Input
-                      placeholder="البحث عن مستخدم..."
-                      className="pl-4 pr-10 h-11"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+  <CardHeader className="border-b border-gray-100 bg-white/50">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <CardTitle className="text-2xl font-bold flex items-center">
+        <Users className="ml-2 h-6 w-6 text-primary" />
+        قائمة المستخدمين
+      </CardTitle>
+      <div className="relative w-full sm:w-96">
+        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        <Input
+          placeholder="البحث عن مستخدم..."
+          className="pl-4 pr-10 h-11"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+    </div>
+  </CardHeader>
+  <CardContent className="p-0">
+    <div className="overflow-x-auto">
+      <Table className="w-full">
+        <TableHeader>
+          <TableRow className="bg-gray-50/80">
+            <TableHead className="w-[35%] py-5 px-6 text-right font-bold text-gray-900">
+              المستخدم
+            </TableHead>
+            <TableHead className="w-[30%] py-5 px-6 text-right font-bold text-gray-900 hidden lg:table-cell">
+              البريد الإلكتروني
+            </TableHead>
+            <TableHead className="w-[15%] py-5 px-6 text-right font-bold text-gray-900 hidden md:table-cell">
+              رقم الهاتف
+            </TableHead>
+            <TableHead className="w-[10%] py-5 px-6 text-right font-bold text-gray-900">
+              نوع المستخدم
+            </TableHead>
+            <TableHead className="w-[10%] py-5 px-6 text-center font-bold text-gray-900">
+              الإجراءات
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredUsers.map((user) => (
+            <TableRow 
+              key={user._id} 
+              className="border-b hover:bg-gray-50/50 transition-colors"
+            >
+              <TableCell className="py-4 px-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <span className="text-primary font-semibold text-lg">
+                      {user.firstName[0]}{user.lastName[0]}
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-gray-900 text-base mb-0.5">
+                      {`${user.firstName} ${user.middleName} ${user.lastName}`}
+                    </p>
+                    <p className="text-sm text-gray-500 lg:hidden truncate">
+                      {user.email}
+                    </p>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="font-bold">المستخدم</TableHead>
-                        <TableHead className="font-bold hidden sm:table-cell">البريد الإلكتروني</TableHead>
-                        <TableHead className="font-bold hidden md:table-cell">رقم الهاتف</TableHead>
-                        <TableHead className="font-bold">نوع المستخدم</TableHead>
-                        <TableHead className="font-bold">الإجراءات</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredUsers.map((user) => (
-                        <TableRow key={user._id} className="hover:bg-gray-50">
-                          <TableCell className="font-medium">
-                            <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                <span className="text-primary font-semibold">
-                                  {user.firstName[0]}{user.lastName[0]}
-                                </span>
-                              </div>
-                              <div>
-                                <p className="font-semibold">{`${user.firstName} ${user.lastName}`}</p>
-                                <p className="text-sm text-gray-500 sm:hidden">{user.email}</p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell">{user.email}</TableCell>
-                          <TableCell className="hidden md:table-cell">{user.phone}</TableCell>
-                          <TableCell>
-                            <span className={`px-3 py-1 rounded-full text-sm whitespace-nowrap ${
-                              user.role === 'Admin' 
-                                ? 'bg-blue-100 text-blue-800' 
-                                : 'bg-green-100 text-green-800'
-                            }`}>
-                              {user.role === 'Admin' ? 'مدير' : 'مشرف'}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                            <Button
-                      variant="outline"
-                      size="sm"
-                      className="hover:bg-gray-50"
-                      onClick={() => handleEdit(user)}
-                    >
-                      <Edit className="h-4 w-4 ml-2" />
-                      تعديل
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="hover:bg-red-600"
-                      onClick={() => handleDelete(user._id)}
-                    >
-                      <Trash2 className="h-4 w-4 ml-2" />
-                      حذف
-                    </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-
-                  {filteredUsers.length === 0 && (
-                    <div className="text-center py-12">
-                      <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900">لا يوجد مستخدمين</h3>
-                      <p className="mt-2 text-gray-500">لم يتم العثور على أي مستخدمين يطابقون بحثك</p>
-                    </div>
-                  )}
-                <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>تعديل بيانات المستخدم</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={form.handleSubmit(onSubmit)}>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label className="text-right">الاسم الأول</Label>
-                          <div className="col-span-3">
-                            <Input {...form.register("firstName")} />
-                            {form.formState.errors.firstName && (
-                              <p className="text-sm text-red-500">{form.formState.errors.firstName.message}</p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label className="text-right">الاسم الأوسط</Label>
-                          <div className="col-span-3">
-                            <Input {...form.register("middleName")} />
-                            {form.formState.errors.middleName && (
-                              <p className="text-sm text-red-500">{form.formState.errors.middleName.message}</p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label className="text-right">الاسم الأخير</Label>
-                          <div className="col-span-3">
-                            <Input {...form.register("lastName")} />
-                            {form.formState.errors.lastName && (
-                              <p className="text-sm text-red-500">{form.formState.errors.lastName.message}</p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label className="text-right">رقم الهاتف</Label>
-                          <div className="col-span-3">
-                            <Input {...form.register("phoneNumber")} />
-                            {form.formState.errors.phoneNumber && (
-                              <p className="text-sm text-red-500">{form.formState.errors.phoneNumber.message}</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button type="submit">حفظ التغييرات</Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-                            <ConfirmDialog
-                              open={deleteDialogOpen}
-                              onOpenChange={setDeleteDialogOpen}
-                              onConfirm={confirmDelete}
-                              title="تأكيد الحذف"
-                              description="هل أنت متأكد من حذف هذا الرأي؟ لا يمكن التراجع عن هذا الإجراء."
-                            />
+              </TableCell>
+              <TableCell className="py-4 px-6 hidden lg:table-cell text-gray-700">
+                <div className="max-w-xs truncate">{user.email}</div>
+              </TableCell>
+              <TableCell className="py-4 px-6 hidden md:table-cell text-gray-700">
+                <span className="font-medium">{user.phone}</span>
+              </TableCell>
+              <TableCell className="py-4 px-6">
+                <span className={`
+                  inline-flex px-3 py-1.5 rounded-full text-sm font-medium
+                  ${user.role === 'Admin' 
+                    ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-600/20' 
+                    : 'bg-green-50 text-green-700 ring-1 ring-green-600/20'}
+                `}>
+                  {user.role === 'Admin' ? 'مدير' : 'مشرف'}
+                </span>
+              </TableCell>
+              <TableCell className="py-4 px-6">
+                <div className="flex items-center justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hover:bg-gray-50 font-medium h-9"
+                    onClick={() => handleEdit(user)}
+                  >
+                    <Edit className="h-4 w-4 ml-1.5" />
+                    <span className="hidden sm:inline">تعديل</span>
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="hover:bg-red-600 font-medium h-9"
+                    onClick={() => handleDelete(user._id)}
+                  >
+                    <Trash2 className="h-4 w-4 ml-1.5" />
+                    <span className="hidden sm:inline">حذف</span>
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      {filteredUsers.length === 0 && (
+        <div className="text-center py-12">
+          <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900">لا يوجد مستخدمين</h3>
+          <p className="mt-2 text-gray-500">لم يتم العثور على أي مستخدمين يطابقون بحثك</p>
+        </div>
+      )}
+    </div>
+  </CardContent>
+</Card>
+
           </div>
         </div>
       </main>

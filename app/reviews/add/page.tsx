@@ -51,14 +51,14 @@ const Form = ({ lang, forms, onSubmit, state, dispatch }: {
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "التعليق" : "Comment"}</label>
           <RichTextEditor
-  content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
-  onChange={(content) => setValue("description", content.replace(/<[^>]*>/g, ''))}
-  language={lang}
-/>
+            content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
+            onChange={(content) => setValue("description", content.replace(/<[^>]*>/g, ''))}
+            language={lang}
+          />
 
           {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
         </div>
-        
+
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "التقييم" : "Rating"}</label>
           <div className="flex items-center space-x-1">
@@ -80,7 +80,7 @@ const Form = ({ lang, forms, onSubmit, state, dispatch }: {
           <label className="block text-sm font-medium">{lang === "ar" ? "الصورة" : "Image"}</label>
           <ImageUpload
             onImagesChange={(images) => setValue("image", images[0])}
-     
+
             language={lang}
           />
         </div>
@@ -175,7 +175,7 @@ export default function AddReview() {
           </CardContent>
         </Card>
       </main>
-      <Toaster/>
+      <Toaster />
     </div>
   )
 }

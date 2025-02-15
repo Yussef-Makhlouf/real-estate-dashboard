@@ -17,18 +17,17 @@ import { useRouter } from "next/navigation"
 interface Category {
   _id: string
   title: string
-  location: string
-  area: number
-  description: string
-  Image: { secure_url: string }
-  coordinates: { latitude: number; longitude: number }
+  location?: string
+  area?: number
+  description?: string
+  Image?: { secure_url: string }
+  coordinates?: { latitude: number; longitude: number }
   lang: 'ar' | 'en'
   price?: number
   status?: 'available' | 'sold' | 'rented'
 }
 
 export default function Category() {
-  // State declarations remain the same
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
@@ -44,41 +43,54 @@ export default function Category() {
 
   useEffect(() => {
     fetchData()
-  }, [currentPage, selectedLang, sortBy, sortOrder])
+  }, [currentPage, selectedLang, sortBy, sortOrder, searchQuery])
 
   const fetchData = async () => {
     try {
-      setLoading(true)
-      const response = await axios.get("http://localhost:8080/category/", {
-        params: {
-          page: currentPage,
-          size: 9,
-          lang: selectedLang !== 'all' ? selectedLang : undefined,
-          sort: sortBy,
-          order: sortOrder,
-          search: searchQuery || undefined
-        }
-      })
-      setCategories(response.data.category)
-      setTotalPages(Math.ceil(response.data.total / 9))
+      setLoading(true);
+      let endpoint;
+      
+      switch(selectedLang) {
+        case 'ar':
+          endpoint = "http://localhost:8080/category/getAllCategoryAR";
+          break;
+        case 'en':
+          endpoint = "http://localhost:8080/category/getAllCategoryEN";
+          break;
+        case 'all':
+          // Fetch both languages and combine them
+          const [arResponse, enResponse] = await Promise.all([
+            axios.get("http://localhost:8080/category/getAllCategoryAR"),
+            axios.get("http://localhost:8080/category/getAllCategoryEN")
+          ]);
+          
+          const combinedCategories = [...arResponse.data.category, ...enResponse.data.category];
+          setCategories(combinedCategories);
+          setTotalPages(Math.ceil(combinedCategories.length / 9));
+          setLoading(false);
+          return;
+      }
+  
+      const response = await axios.get(endpoint);
+      setCategories(response.data.category);
+      setTotalPages(Math.ceil(response.data.total / 9));
     } catch (err) {
       toast({
         title: "خطأ في جلب البيانات",
         description: "حدث خطأ أثناء جلب العقارات",
         variant: "destructive"
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
-
+  };
+  
+  
 
   const viewUnits = (categoryId: string) => {
-    console.log(categoryId);
-    
     router.push(`/category/${categoryId}`)
   }
-  
+
   const handleDelete = async (id: string) => {
     try {
       await axios.delete(`http://localhost:8080/category/delete/${id}`)
@@ -97,6 +109,7 @@ export default function Category() {
     setDeleteDialogOpen(false)
     setPropertyToDelete(null)
   }
+
   const PropertyCard = ({ category }: { category: Category }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -108,7 +121,7 @@ export default function Category() {
       <Card className="h-full flex flex-col group hover:shadow-xl transition-all duration-300 border-gray-200">
         <div className="relative overflow-hidden aspect-video">
           <img
-            src={category.Image.secure_url}
+            src={category.Image?.secure_url || '/placeholder-image.jpg'}
             alt={category.title}
             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
           />
@@ -138,7 +151,7 @@ export default function Category() {
               </span>
               <span className="text-sm text-gray-500 flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-gray-400" />
-                {category.location}
+                {category.location || 'Location not available'}
               </span>
             </div>
           </CardTitle>
@@ -151,7 +164,7 @@ export default function Category() {
               <span>
                 {category.lang === 'ar' ? 'المساحة:' : 'Area:'}{' '}
                 <span className="font-semibold text-gray-900">
-                  {category.area.toLocaleString()} م²
+                  {(category.area || 0).toLocaleString()} م²
                 </span>
               </span>
             </div>
@@ -159,22 +172,24 @@ export default function Category() {
             <div className="flex items-center text-gray-600">
               <MapPin className="w-4 h-4 mr-2 text-gray-400" />
               <span className="text-sm">
-                {category.coordinates.latitude.toFixed(4)}, {category.coordinates.longitude.toFixed(4)}
+                {category.coordinates ? 
+                  `${category.coordinates.latitude.toFixed(4)}, ${category.coordinates.longitude.toFixed(4)}` 
+                  : 'Coordinates not available'}
               </span>
             </div>
 
             <div className="flex items-start">
               <p className="text-gray-600 line-clamp-2 text-sm leading-relaxed">
-                {category.description}
+                {category.description || 'No description available'}
               </p>
             </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
             <Link href={`/category/edit/${category._id}`}>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="hover:bg-gray-50 hover:text-primary transition-colors"
               >
                 <Edit className="h-4 w-4 ml-2" />
@@ -191,14 +206,14 @@ export default function Category() {
               {category.lang === 'ar' ? 'حذف' : 'Delete'}
             </Button>
             <div className="flex items-center justify-end">
-                <button
-                  type="button"
-                  onClick={() => viewUnits(category._id)}
-                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  عرض المنشئات
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => viewUnits(category._id)}
+                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                عرض المنشئات
+              </button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -231,21 +246,30 @@ export default function Category() {
                   <Button
                     variant={selectedLang === 'all' ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setSelectedLang('all')}
+                    onClick={() => {
+                      setCurrentPage(1)
+                      setSelectedLang('all')
+                    }}
                   >
                     الكل
                   </Button>
                   <Button
                     variant={selectedLang === 'ar' ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setSelectedLang('ar')}
+                    onClick={() => {
+                      setCurrentPage(1)
+                      setSelectedLang('ar')
+                    }}
                   >
                     العربية
                   </Button>
                   <Button
                     variant={selectedLang === 'en' ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setSelectedLang('en')}
+                    onClick={() => {
+                      setCurrentPage(1)
+                      setSelectedLang('en')
+                    }}
                   >
                     English
                   </Button>

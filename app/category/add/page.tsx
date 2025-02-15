@@ -14,9 +14,10 @@ import { toast } from "react-hot-toast"
 import { useRouter } from 'next/navigation'
 import * as z from "zod"
 import { Textarea } from "@/components/ui/textarea"
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api'
+import { error } from "console"
 
 const extractCoordinatesFromGoogleMapsUrl = (url: string) => {
   try {
@@ -45,11 +46,14 @@ const categorySchema = z.object({
   googleMapsUrl: z.string().url().optional(),
   lang: z.string(),
   Image: z.any()
-})
 
+})
+const isArabic = (text: string) => /[\u0600-\u06FF]/.test(text);
+const isEnglish = (text: string) => /[a-zA-Z]/.test(text);
 type FormData = z.infer<typeof categorySchema>
 
-const CategoryForm = ({ lang, form, onSubmit, isLoading }: { lang: string; form: any; onSubmit: any; isLoading: boolean }) => {  return (
+const CategoryForm = ({ lang, form, onSubmit, isLoading }: { lang: string; form: any; onSubmit: any; isLoading: boolean }) => {
+  return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
@@ -61,25 +65,45 @@ const CategoryForm = ({ lang, form, onSubmit, isLoading }: { lang: string; form:
               <ImageUpload
                 maxImages={1}
                 onImagesChange={(files) => field.onChange(files[0])}
-                // language={lang}
-                existingImages={[]} language={"ar"}              />
+
+                existingImages={[]} language={"ar"} />
             </FormItem>
           )}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{lang === "ar" ? "عنوان القسم" : "Category Title"}</FormLabel>
-                <FormControl>
-                  <Input {...field} dir={lang === "ar" ? "rtl" : "ltr"} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+        <FormField
+  control={form.control}
+  name="title"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>{lang === "ar" ? "عنوان القسم" : "Category Title"}</FormLabel>
+      <FormControl>
+        <Input 
+          {...field} 
+          dir={lang === "ar" ? "rtl" : "ltr"}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (lang === "ar" && isEnglish(value)) {
+              form.setError('title', {
+                type: 'manual',
+                message: 'يرجى الكتابة باللغة العربية فقط'
+              });
+            } else if (lang === "en" && isArabic(value)) {
+              form.setError('title', {
+                type: 'manual',
+                message: 'Please type in English only'
+              });
+            } else {
+              form.clearErrors('title');
+              field.onChange(value);
+            }
+          }}        />
+      </FormControl>
+      <FormMessage className="text-red-500" />
+    </FormItem>
+  )}
+/>
 
           <FormField
             control={form.control}
@@ -88,8 +112,8 @@ const CategoryForm = ({ lang, form, onSubmit, isLoading }: { lang: string; form:
               <FormItem>
                 <FormLabel>{lang === "ar" ? "المساحة" : "Area"}</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="number" 
+                  <Input
+                    type="number"
                     {...field}
                     onChange={e => field.onChange(Number(e.target.value))}
                   />
@@ -112,68 +136,85 @@ const CategoryForm = ({ lang, form, onSubmit, isLoading }: { lang: string; form:
           />
 
           <div className="grid grid-cols-2 gap-4">
-            
-          <FormField
-  control={form.control}
-  name="coordinates"
-  render={({ field }) => (
-    <FormItem className="col-span-2">
-      <FormLabel>
-        {lang === "ar" ? "رابط خرائط جوجل" : "Google Maps Link"}
-      </FormLabel>
-      <FormControl>
-        <Input
-          placeholder={
-            lang === "ar" 
-              ? "الصق رابط خرائط جوجل هنا" 
-              : "Paste Google Maps link here"
-          }
-          onChange={(e) => {
-            const coords = extractCoordinatesFromGoogleMapsUrl(e.target.value)
-            if (coords) {
-              field.onChange(coords)
-              form.setValue('coordinates.latitude', coords.latitude)
-              form.setValue('coordinates.longitude', coords.longitude)
-            }
-          }}
-        />
-      </FormControl>
-      <div className="grid grid-cols-2 gap-4 mt-2">
-        <Input
-          type="text"
-          value={field.value?.latitude || ''}
-          readOnly
-          placeholder={lang === "ar" ? "خط العرض" : "Latitude"}
-        />
-        <Input
-          type="text"
-          value={field.value?.longitude || ''}
-          readOnly
-          placeholder={lang === "ar" ? "خط الطول" : "Longitude"}
-        />
-      </div>
-    </FormItem>
-  )}
-/>
+
+            <FormField
+              control={form.control}
+              name="coordinates"
+              render={({ field }) => (
+                <FormItem className="col-span-2">
+                  <FormLabel>
+                    {lang === "ar" ? "رابط خرائط جوجل" : "Google Maps Link"}
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={
+                        lang === "ar"
+                          ? "الصق رابط خرائط جوجل هنا"
+                          : "Paste Google Maps link here"
+                      }
+                      onChange={(e) => {
+                        const coords = extractCoordinatesFromGoogleMapsUrl(e.target.value)
+                        if (coords) {
+                          field.onChange(coords)
+                          form.setValue('coordinates.latitude', coords.latitude)
+                          form.setValue('coordinates.longitude', coords.longitude)
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <div className="grid grid-cols-2 gap-4 mt-2">
+                    <Input
+                      type="text"
+                      value={field.value?.latitude || ''}
+                      readOnly
+                      placeholder={lang === "ar" ? "خط العرض" : "Latitude"}
+                    />
+                    <Input
+                      type="text"
+                      value={field.value?.longitude || ''}
+                      readOnly
+                      placeholder={lang === "ar" ? "خط الطول" : "Longitude"}
+                    />
+                  </div>
+                </FormItem>
+              )}
+            />
           </div>
         </div>
 
         <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{lang === "ar" ? "الوصف" : "Description"}</FormLabel>
-              <FormControl>
-                <Textarea 
-                  rows={4} 
-                  {...field} 
-                  dir={lang === "ar" ? "rtl" : "ltr"}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+  control={form.control}
+  name="description"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>{lang === "ar" ? "الوصف" : "Description"}</FormLabel>
+      <FormControl>
+        <Textarea 
+          rows={4} 
+          {...field} 
+          dir={lang === "ar" ? "rtl" : "ltr"}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (lang === "ar" && isEnglish(value)) {
+              form.setError('description', {
+                type: 'manual',
+                message: 'يرجى الكتابة باللغة العربية فقط'
+              });
+            } else if (lang === "en" && isArabic(value)) {
+              form.setError('description', {
+                type: 'manual',
+                message: 'Please type in English only'
+              });
+            } else {
+              form.clearErrors('description');
+              field.onChange(value);
+            }
+          }}        />
+      </FormControl>
+      <FormMessage className="text-red-500" />
+    </FormItem>
+  )}
+/>
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -209,14 +250,13 @@ export default function AddCategory() {
     setIsLoading(true)
     try {
       const formData = new FormData()
-      formData.append('data', JSON.stringify({
-        title: data.title,
-        area: data.area,
-        description: data.description,
-        location: data.location,
-        coordinates: data.coordinates,
-        lang: data.lang
-      }))
+      formData.append('title', data.title)
+      formData.append('area', data.area.toString())
+      formData.append('description', data.description)
+      formData.append('location', data.location)
+      formData.append('latitude', data.coordinates.latitude.toString())
+      formData.append('longitude', data.coordinates.longitude.toString())
+      formData.append('lang', data.lang)
       if (data.Image) {
         formData.append('image', data.Image)
       }
@@ -233,7 +273,7 @@ export default function AddCategory() {
       console.log(response);
       
       if (!response.ok) throw new Error("Failed to add category")
-      
+
       toast.success(data.lang === "ar" ? "تم إضافة القسم بنجاح" : "Category added successfully")
       router.push("/")
     } catch (error) {
@@ -242,6 +282,7 @@ export default function AddCategory() {
       setIsLoading(false)
     }
   }
+
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -255,17 +296,17 @@ export default function AddCategory() {
           <CardContent>
             <TabComponent
               arabicContent={
-                <CategoryForm 
-                  lang="ar" 
-                  form={forms.ar} 
+                <CategoryForm
+                  lang="ar"
+                  form={forms.ar}
                   onSubmit={onSubmit}
                   isLoading={isLoading}
                 />
               }
               englishContent={
-                <CategoryForm 
-                  lang="en" 
-                  form={forms.en} 
+                <CategoryForm
+                  lang="en"
+                  form={forms.en}
                   onSubmit={onSubmit}
                   isLoading={isLoading}
                 />

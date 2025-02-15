@@ -40,7 +40,7 @@ type FormProps = {
 
 const Form = ({ lang, forms, onSubmit, state, dispatch }: FormProps) => {
   const { register, handleSubmit, setValue, watch, formState: { errors } } = forms[lang]
-  
+
   return (
     <form dir={lang === "ar" ? "rtl" : "ltr"} onSubmit={handleSubmit((data) => onSubmit(data, lang))} className="space-y-6">
       <div className="space-y-4">
@@ -51,13 +51,27 @@ const Form = ({ lang, forms, onSubmit, state, dispatch }: FormProps) => {
         </div>
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "المحتوى (بالعربية)" : "Content (English)"}</label>
-          <RichTextEditor
-  content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
+      
+<RichTextEditor
   
-  onChange={(content) => setValue("description", content.replace(/<[^>]*>/g, ''))}
+  content={forms[lang].watch("description")?.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ') || ""}
+  onChange={(content) => {
+    const plainText = content
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+    
+    forms[lang].setValue("description", plainText, {
+      shouldValidate: true,
+      shouldDirty: true
+    })
+  }}
   language={lang}
-
 />
+
+
+
           {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
         </div>
         <div className="mt-6 space-y-2">
@@ -92,7 +106,7 @@ const Form = ({ lang, forms, onSubmit, state, dispatch }: FormProps) => {
           <ImageUpload
             onImagesChange={(images) => setValue("image", images[0])}
             maxImages={1}
-            language={lang} existingImages={[]}          />
+            language={lang} existingImages={[]} />
         </div>
         <Button type="submit" disabled={state.isLoading[lang]}>
           {state.isLoading[lang] ? (
@@ -114,13 +128,13 @@ const reducer = (state: State, action: Action): State => {
     case "ADD_KEYWORD":
       return state.newKeyword[action.lang] && !state.keywords[action.lang].includes(state.newKeyword[action.lang])
         ? {
-            ...state,
-            keywords: {
-              ...state.keywords,
-              [action.lang]: [...state.keywords[action.lang], state.newKeyword[action.lang]],
-            },
-            newKeyword: { ...state.newKeyword, [action.lang]: "" },
-          }
+          ...state,
+          keywords: {
+            ...state.keywords,
+            [action.lang]: [...state.keywords[action.lang], state.newKeyword[action.lang]],
+          },
+          newKeyword: { ...state.newKeyword, [action.lang]: "" },
+        }
         : state
     case "REMOVE_KEYWORD":
       return {
@@ -182,7 +196,7 @@ export default function AddBlogPost() {
 
       console.log("Article published successfully:", result);
       toast.success(lang === "ar" ? "تم نشر المقال بنجاح" : "Article published successfully");
-      
+
       const router = useRouter();
       router.push("/blog");
     } catch (error) {
@@ -190,12 +204,12 @@ export default function AddBlogPost() {
     } finally {
       dispatch({ type: "SET_LOADING", lang, value: false })
     }
-    
+
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
-        <Toaster position="top-center" />
+      <Toaster position="top-center" />
 
       <Header />
       <Sidebar />

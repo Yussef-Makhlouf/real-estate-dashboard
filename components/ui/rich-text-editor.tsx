@@ -10,6 +10,7 @@ import TextStyle from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import { Button } from "./button"
+import { useEffect, useState } from 'react'
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   AlignLeft, AlignCenter, AlignRight,
@@ -29,6 +30,8 @@ export function RichTextEditor({
   onChange,
   language
 }: RichTextEditorProps) {
+  const [isMounted, setIsMounted] = useState(false)
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -36,6 +39,13 @@ export function RichTextEditor({
         types: ['heading', 'paragraph'],
       }),
       Underline,
+      Image,
+      Link.configure({
+        openOnClick: false,
+      }),
+      TextStyle,
+      Color,
+      Highlight,
     ],
     content,
     editorProps: {
@@ -45,13 +55,18 @@ export function RichTextEditor({
         lang: language,
       },
     },
+    immediatelyRender:false,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
     },
-    immediatelyRender: false
   })
 
-  if (!editor) return null
+  useEffect(() => {
+    setIsMounted(true)
+    return () => editor?.destroy()
+  }, [editor])
+
+  if (!isMounted || !editor) return null
 
   const addImage = () => {
     const url = window.prompt('URL الصورة')

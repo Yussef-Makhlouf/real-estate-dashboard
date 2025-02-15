@@ -42,30 +42,47 @@ function SubscribersContent() {
               <CardTitle className="text-2xl font-bold">المشتركين في النشرة البريدية</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>البريد الإلكتروني</TableHead>
-                    <TableHead>تاريخ الاشتراك</TableHead>
-                    <TableHead>الحالة</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {subscribers.map((subscriber) => (
-                    <TableRow key={subscriber._id}>
-                      <TableCell>{subscriber.email}</TableCell>
-                      <TableCell>{new Date(subscriber.createdAt).toLocaleString('ar-SA')}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-sm ${
-                          subscriber.isRead ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {subscriber.isRead ? 'مقروء' : 'جديد'}
-                        </span>
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table className="w-full border-collapse">
+                  <TableHeader>
+                    <TableRow className="bg-gray-50">
+                      <TableHead className="w-1/3 p-4 text-right font-bold text-gray-700 border-b">
+                        البريد الإلكتروني
+                      </TableHead>
+                      <TableHead className="w-1/3 p-4 text-right font-bold text-gray-700 border-b">
+                        تاريخ الاشتراك
+                      </TableHead>
+                      <TableHead className="w-1/3 p-4 text-right font-bold text-gray-700 border-b">
+                        الحالة
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {subscribers.map((subscriber) => (
+                      <TableRow 
+                        key={subscriber._id}
+                        className="border-b hover:bg-gray-50 transition-colors"
+                      >
+                        <TableCell className="p-4 text-right">
+                          <span className="font-medium">{subscriber.email}</span>
+                        </TableCell>
+                        <TableCell className="p-4 text-right">
+                          {new Date(subscriber.createdAt).toLocaleString('ar-SA')}
+                        </TableCell>
+                        <TableCell className="p-4 text-right">
+                          <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-medium ${
+                            subscriber.isRead 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {subscriber.isRead ? 'مقروء' : 'جديد'}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </div>

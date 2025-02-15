@@ -34,7 +34,7 @@ export default function EditProperty({ params }: { params: { id: string } }) {
       try {
         const response = await fetch(`http://localhost:8080/category/getOne/${params.id}`)
         const data = await response.json()
-        
+
         if (data.category) {
           setLanguage(data.category.lang)
           setValue("title", data.category.title)
@@ -113,10 +113,11 @@ export default function EditProperty({ params }: { params: { id: string } }) {
         <div className="space-y-2">
           <label className="block text-sm font-medium">الوصف</label>
           <RichTextEditor
-            content={watch("description") || ""}
-            onChange={(content) => setValue("description", content)}
+            content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
+            onChange={(content) => setValue("description", content.replace(/<[^>]*>/g, ''))}
             language="ar"
           />
+
         </div>
 
         <div className="space-y-2">
@@ -124,7 +125,15 @@ export default function EditProperty({ params }: { params: { id: string } }) {
           <ImageUpload
             onImagesChange={(files) => setValue("image", files[0])}
             maxImages={1}
-            language="ar" existingImages={[]}          />
+            language="ar"
+            initialImages={watch("Image")?.secure_url ||
+              watch("image")?.secure_url ||
+              watch("Image") ||
+              watch("image") ||
+              null}
+            existingImages={[]}
+          />
+
         </div>
       </div>
 
@@ -154,18 +163,26 @@ export default function EditProperty({ params }: { params: { id: string } }) {
         <div className="space-y-2">
           <label className="block text-sm font-medium">Description</label>
           <RichTextEditor
-            content={watch("description") || ""}
-            onChange={(content) => setValue("description", content)}
+            content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
+            onChange={(content) => setValue("description", content.replace(/<[^>]*>/g, ''))}
             language="en"
           />
+
         </div>
 
         <div className="space-y-2">
           <label className="block text-sm font-medium">Images</label>
           <ImageUpload
             onImagesChange={(files) => setValue("image", files[0])}
-              maxImages={1}
-              language="en" existingImages={[]}/>
+            maxImages={1}
+            language="en"
+            initialImages={watch("Image")?.secure_url ||
+              watch("image")?.secure_url ||
+              watch("Image") ||
+              watch("image") ||
+              null}
+            existingImages={[]}
+          />
         </div>
       </div>
 
