@@ -1,298 +1,192 @@
 "use client"
 
-import { useReducer, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { X, Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { Header } from "@/components/Header"
 import { Sidebar } from "@/components/Sidebar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { TabComponent } from "@/components/ui/tab-component"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { categorySchema } from "@/lib/schemas"
-import { useRouter, useParams } from 'next/navigation'
 import type { z } from "zod"
-import toast, { Toaster } from 'react-hot-toast'
 
 type FormData = z.infer<typeof categorySchema>
 
-type State = {
-  keywords: { ar: string[]; en: string[] }
-  newKeyword: { ar: string; en: string }
-  isLoading: { ar: boolean; en: boolean }
-}
-
-type Action =
-  | { type: "SET_KEYWORDS"; lang: "ar" | "en"; value: string[] }
-  | { type: "SET_NEW_KEYWORD"; lang: "ar" | "en"; value: string }
-  | { type: "SET_LOADING"; lang: "ar" | "en"; value: boolean }
-
-const reducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case "SET_KEYWORDS":
-      return { ...state, keywords: { ...state.keywords, [action.lang]: action.value } }
-    case "SET_NEW_KEYWORD":
-      return { ...state, newKeyword: { ...state.newKeyword, [action.lang]: action.value } }
-    case "SET_LOADING":
-      return { ...state, isLoading: { ...state.isLoading, [action.lang]: action.value } }
-    default:
-      return state
-  }
-}
-
-export default function EditProperty() {
-  const [state, dispatch] = useReducer(reducer, {
-    keywords: { ar: [], en: [] },
-    newKeyword: { ar: "", en: "" },
-    isLoading: { ar: false, en: false },
-  })
-
+export default function EditProperty({ params }: { params: { id: string } }) {
   const router = useRouter()
-  const params = useParams()
+  const [isLoading, setIsLoading] = useState(true)
+  const [language, setLanguage] = useState<"ar" | "en">("ar")
 
-  const forms = {
-    ar: useForm<FormData>({ resolver: zodResolver(categorySchema), defaultValues: { lang: "ar" } }),
-    en: useForm<FormData>({ resolver: zodResolver(categorySchema), defaultValues: { lang: "en" } }),
-  }
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<FormData>()
 
   useEffect(() => {
-    const fetchPropertyData = async () => {
+    const fetchCategory = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/category/getOne/${params.id}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
+        const response = await fetch(`http://localhost:8080/category/getOne/${params.id}`)
         const data = await response.json()
 
-        if (data.property) {
-          const propertyData = Array.isArray(data.property) ? data.property : [data.property]
+        if (data.category) {
+          setLanguage(data.category.lang)
+          setValue("title", data.category.title)
+          setValue("location", data.category.location)
+          setValue("area", data.category.area)
+          setValue("description", data.category.description)
+          setValue("coordinates", data.category.coordinates)
 
-          propertyData.forEach((property: any) => {
-            if (property.lang === 'ar') {
-              forms.ar.reset({
-                title: property.title,
-                location: property.location,
-                area: property.area,
-                description: property.description?.replace(/<[^>]*>/g, ''),
-                coordinates: property.coordinates,
-                image: property.Image.secure_url,
-                lang: 'ar'
-              })
-              dispatch({
-                type: "SET_KEYWORDS",
-                lang: "ar",
-                value: Array.isArray(property.Keywords) ? property.Keywords : property.Keywords?.split(',') || []
-              })
-            } else if (property.lang === 'en') {
-              forms.en.reset({
-                title: property.title,
-                location: property.location,
-                area: property.area,
-                description: property.description?.replace(/<[^>]*>/g, ''),
-                coordinates: property.coordinates,
-                image: property.image,
-                lang: 'en'
-              })
-              dispatch({
-                type: "SET_KEYWORDS",
-                lang: "en",
-                value: Array.isArray(property.Keywords) ? property.Keywords : property.Keywords?.split(',') || []
-              })
-            }
-          })
+          if (data.category.Image) {
+            const response = await fetch(data.category.Image.secure_url)
+            const blob = await response.blob()
+            const file = new File([blob], "image.jpg", { type: blob.type })
+            setValue("image", file)
+          }
         }
       } catch (error) {
-        console.error('Error fetching property:', error)
-        toast.error("Error fetching property data")
+        console.error("Error fetching category:", error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    if (params.id) {
-      fetchPropertyData()
-    }
-  }, [params.id])
+    fetchCategory()
+  }, [params.id, setValue])
 
-  const onSubmit = async (data: FormData, lang: "ar" | "en") => {
-    dispatch({ type: "SET_LOADING", lang, value: true })
+  const onSubmit = async (data: FormData) => {
     try {
-      const formData = new FormData()
-      formData.append("title", data.title.trim())
-      formData.append("location", data.location.trim())
-      formData.append("area", data.area.toString())
-      formData.append("description", data.description.replace(/<[^>]*>/g, '').trim())
-      formData.append("coordinates", JSON.stringify(data.coordinates))
-      formData.append("lang", lang)
-      if (data.image instanceof File) {
-        formData.append("image", data.image)
-      } else if (typeof data.image === "string" && data.image.startsWith("http")) {
-        formData.append("imageUrl", data.image) // Send existing image URL
-      }
-
       const response = await fetch(`http://localhost:8080/category/update/${params.id}`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        body: formData,
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: data.title,
+          location: data.location,
+          area: data.area,
+          description: data.description,
+          coordinates: data.coordinates,
+          lang: language
+        })
       })
 
-      const result = await response.json()
-      if (!response.ok) throw new Error(result.message)
-
-      toast.success(lang === "ar" ? "تم تحديث العقار بنجاح" : "Property updated successfully")
-      router.push("/property")
+      if (response.ok) {
+        router.push("/category")
+      }
     } catch (error) {
-      toast.error(lang === "ar" ? "حدث خطأ أثناء التحديث" : "Error updating property")
-    } finally {
-      dispatch({ type: "SET_LOADING", lang, value: false })
+      console.error("Error updating category:", error)
     }
   }
 
-  const renderForm = (lang: "ar" | "en") => (
-    <form onSubmit={forms[lang].handleSubmit((data) => onSubmit(data, lang))} className="space-y-6">
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  const formContent = language === "ar" ? (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
-          <label className="block text-sm font-medium">{lang === "ar" ? "العنوان (بالعربية)" : "Title (English)"}</label>
-          <Input
-            {...forms[lang].register("title")}
-            dir={lang === "ar" ? "rtl" : "ltr"}
-            className={forms[lang].formState.errors.title ? "border-red-500" : ""}
-          />
-          {forms[lang].formState.errors.title && (
-            <p className="text-red-500 text-sm">{forms[lang].formState.errors.title.message}</p>
-          )}
+          <label className="block text-sm font-medium">العنوان</label>
+          <Input {...register("title")} className={errors.title ? "border-red-500" : ""} />
+          {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium">
-            {lang === "ar" ? "الموقع (بالعربية)" : "Location (English)"}
-          </label>
-          <Input
-            {...forms[lang].register("location")}
-            dir={lang === "ar" ? "rtl" : "ltr"}
-            className={forms[lang].formState.errors.location ? "border-red-500" : ""}
-          />
-          {forms[lang].formState.errors.location && (
-            <p className="text-red-500 text-sm">{forms[lang].formState.errors.location.message}</p>
-          )}
+          <label className="block text-sm font-medium">الموقع</label>
+          <Input {...register("location")} className={errors.location ? "border-red-500" : ""} />
+          {errors.location && <p className="text-red-500 text-sm">{errors.location.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium">
-            {lang === "ar" ? "المساحة (بالعربية)" : "Area (English)"}
-          </label>
-          <Input
-            {...forms[lang].register("area", { valueAsNumber: true })}
-            type="number"
-            dir={lang === "ar" ? "rtl" : "ltr"}
-          />
-          {forms[lang].formState.errors.area && (
-            <p className="text-red-500 text-sm">{forms[lang].formState.errors.area.message}</p>
-          )}
+          <label className="block text-sm font-medium">المساحة</label>
+          <Input {...register("area", { valueAsNumber: true })} type="number" />
+          {errors.area && <p className="text-red-500 text-sm">{errors.area.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium">
-            {lang === "ar" ? "الوصف (بالعربية)" : "Description (English)"}
-          </label>
+          <label className="block text-sm font-medium">الوصف</label>
           <RichTextEditor
-            content={forms[lang].watch("description")?.replace(/<[^>]*>/g, '').replace(/ /g, ' ') || ""}
-            onChange={(content) => {
-              const plainText = content
-                .replace(/<[^>]*>/g, '')
-                .replace(/ /g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim()
-
-              forms[lang].setValue("description", plainText, {
-                shouldValidate: true,
-                shouldDirty: true
-              })
-            }}
-            language={lang}
+            content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
+            onChange={(content) => setValue("description", content.replace(/<[^>]*>/g, ''))}
+            language="ar"
           />
+
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium">
-            {lang === "ar" ? "الكلمات المفتاحية (عربي)" : "Keywords (English)"}
-          </label>
-          <div className="flex gap-2">
-            <Input
-              value={state.newKeyword[lang]}
-              onChange={(e) =>
-                dispatch({ type: "SET_NEW_KEYWORD", lang, value: e.target.value })
-              }
-              placeholder={lang === "ar" ? "أضف كلمة مفتاحية" : "Add keyword"}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              className="text-sm px-4"
-              onClick={() => {
-                if (state.newKeyword[lang] && !state.keywords[lang].includes(state.newKeyword[lang])) {
-                  dispatch({
-                    type: "SET_KEYWORDS",
-                    lang,
-                    value: [...state.keywords[lang], state.newKeyword[lang]],
-                  })
-                  dispatch({ type: "SET_NEW_KEYWORD", lang, value: "" })
-                }
-              }}
-            >
-              {lang === "ar" ? "إضافة" : "Add"}
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {state.keywords[lang].map((keyword, index) => (
-              <span
-                key={index}
-                className="bg-primary text-primary-foreground px-2 py-1 rounded-md flex items-center gap-1"
-              >
-                {keyword}
-                <button
-                  type="button"
-                  onClick={() => {
-                    dispatch({
-                      type: "SET_KEYWORDS",
-                      lang,
-                      value: state.keywords[lang].filter((_, i) => i !== index)
-                    })
-                  }}
-                  className="hover:text-red-500"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium">
-            {lang === "ar" ? "صورة العقار" : "Property Image"}
-          </label>
+          <label className="block text-sm font-medium">الصور</label>
           <ImageUpload
-            language={lang}
-            onImagesChange={(images) => forms[lang].setValue("image", images[0])}
-            initialImages={forms[lang].watch("Image")?.secure_url ||
-              forms[lang].watch("image")?.secure_url ||
-              forms[lang].watch("Image") ||
-              forms[lang].watch("image") ||
-              null}
+            onImagesChange={(files) => setValue("image", files[0])}
             maxImages={1}
+            language="ar"
+            initialImages={watch("Image")?.secure_url ||
+              watch("image")?.secure_url ||
+              watch("Image") ||
+              watch("image") ||
+              null}
             existingImages={[]}
           />
+
+        </div>
+      </div>
+
+      <Button type="submit">حفظ التغييرات</Button>
+    </form>
+  ) : (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Title</label>
+          <Input {...register("title")} className={errors.title ? "border-red-500" : ""} />
+          {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Location</label>
+          <Input {...register("location")} className={errors.location ? "border-red-500" : ""} />
+          {errors.location && <p className="text-red-500 text-sm">{errors.location.message}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Area</label>
+          <Input {...register("area", { valueAsNumber: true })} type="number" />
+          {errors.area && <p className="text-red-500 text-sm">{errors.area.message}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Description</label>
+          <RichTextEditor
+            content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
+            onChange={(content) => setValue("description", content.replace(/<[^>]*>/g, ''))}
+            language="en"
+          />
+
         </div>
 
         <div className="space-y-2">
           <label className="block text-sm font-medium">Images</label>
           <ImageUpload
             onImagesChange={(files) => setValue("image", files[0])}
-              maxImages={1}
-              language="en" existingImages={[]}/>
+            maxImages={1}
+            language="en"
+            initialImages={watch("Image")?.secure_url ||
+              watch("image")?.secure_url ||
+              watch("Image") ||
+              watch("image") ||
+              null}
+            existingImages={[]}
+          />
         </div>
       </div>
+
+      <Button type="submit">Save Changes</Button>
     </form>
   )
 
@@ -300,20 +194,16 @@ export default function EditProperty() {
     <div className="min-h-screen bg-gray-100">
       <Header />
       <Sidebar />
-      <main className="pt-16 px-4 sm:px-6 lg:px-8">
+      <main className="pt-16 px-4 sm:px-6 lg:px-8" dir={language === "ar" ? "rtl" : "ltr"}>
         <Card>
           <CardHeader>
-            <CardTitle>تعديل العقار</CardTitle>
+            <CardTitle>{language === "ar" ? "تعديل العقار" : "Edit Property"}</CardTitle>
           </CardHeader>
           <CardContent>
-            <TabComponent
-              arabicContent={renderForm("ar")}
-              englishContent={renderForm("en")}
-            />
+            {formContent}
           </CardContent>
         </Card>
       </main>
-      <Toaster />
     </div>
   )
 }
