@@ -711,8 +711,8 @@ export default function EditUnit() {
         })
         const data = await response.json()
         console.log(data)
-        if (data.unit) {
-          const unit = data.unit
+        if (data.returnedData.unit) {
+          const unit = data.returnedData.unit
           const form = unit.lang === "ar" ? forms.ar : forms.en
           
           form.reset({

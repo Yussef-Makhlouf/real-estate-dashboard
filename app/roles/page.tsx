@@ -379,7 +379,50 @@ function UsersListContent() {
     </div>
   </CardContent>
 </Card>
+<Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>تعديل المستخدم</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              {/* Form fields */}
+              <div className="space-y-4">
+                <div>
+                  <Label>الاسم الأول</Label>
+                  <Input {...form.register("firstName")} />
+                </div>
+                <div>
+                  <Label>الاسم الأوسط</Label>
+                  <Input {...form.register("middleName")} />
+                </div>
+                <div>
+                  <Label>الاسم الأخير</Label>
+                  <Input {...form.register("lastName")} />
+                </div>
+                <div>
+                  <Label>رقم الهاتف</Label>
+                  <Input {...form.register("phoneNumber")} />
+                </div>
+              </div>
+              <DialogFooter className="mt-4">
+                <Button type="submit">حفظ التغييرات</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
 
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>تأكيد الحذف</DialogTitle>
+            </DialogHeader>
+            <p>هل أنت متأكد من حذف هذا المستخدم؟</p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>إلغاء</Button>
+              <Button variant="destructive" onClick={confirmDelete}>حذف</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
           </div>
         </div>
       </main>

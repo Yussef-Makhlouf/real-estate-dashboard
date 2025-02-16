@@ -443,12 +443,7 @@ export function Header() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="text-lg">حسابي</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild className="p-3">
-                <Link href="/profile" className="flex items-center gap-3">
-                  <User className="h-4 w-4" />
-                  <span>الملف الشخصي</span>
-                </Link>
-              </DropdownMenuItem>
+         
               <DropdownMenuItem asChild className="p-3">
                 <Link href="/users/settings" className="flex items-center gap-3">
                   <Settings className="h-4 w-4" />

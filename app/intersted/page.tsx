@@ -152,7 +152,7 @@ export default function InterestedPage() {
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-start gap-4">
                         <Avatar className="h-12 w-12 sm:h-16 sm:w-16 border-2 border-primary/20 group-hover:border-primary transition-colors">
-                          <AvatarImage src={user.categoryId.Image?.secure_url} />
+                          <AvatarImage />
                           <AvatarFallback>{user.fullName.substring(0, 2)}</AvatarFallback>
                         </Avatar>
                         
@@ -176,7 +176,7 @@ export default function InterestedPage() {
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 text-gray-600">
                               <Building className="h-4 w-4 text-primary" />
-                              <span className="text-sm font-medium truncate">{user.categoryId.title}</span>
+                              {/* <span className="text-sm font-medium truncate">{user.categoryId.title}</span> */}
                             </div>
                             <div className="flex items-center gap-2 text-gray-600">
                               <Home className="h-4 w-4 text-primary" />
@@ -197,7 +197,7 @@ export default function InterestedPage() {
 
                         <div className="mt-3 flex items-center gap-2 text-gray-600">
                           <MapPin className="h-4 w-4 text-primary shrink-0" />
-                          <span className="text-sm truncate">{user.categoryId.location}</span>
+                          {/* <span className="text-sm truncate">{user.categoryId.location}</span> */}
                         </div>
 
                         <Button
