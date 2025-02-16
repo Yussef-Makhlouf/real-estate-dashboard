@@ -71,6 +71,7 @@ export default function InterestedPage() {
       try {
         const response = await fetch('http://localhost:8080/interested')
         const data = await response.json()
+        console.log(data);
         setInterestedUsers(data.interested)
       } catch (error) {
         toast.error('حدث خطأ أثناء تحميل البيانات')

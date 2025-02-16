@@ -158,7 +158,9 @@ export default function UnitsPage() {
                     <DollarSign className="w-4 h-4 ml-2" />
                     <span>السعر: {unit.price.toLocaleString()} ريال</span>
                   </div>
-
+                  <div>
+                    
+                  </div>
                   <div className="flex items-center">
                     <MapPin className="w-4 h-4 ml-2" />
                     <span>الطابق: {unit.floor}</span>
@@ -169,6 +171,7 @@ export default function UnitsPage() {
                     <span>حمامات: {unit.bathrooms}</span>
                   </div>
                 </div>
+                
 
                   <div className="flex justify-end gap-2">
 
