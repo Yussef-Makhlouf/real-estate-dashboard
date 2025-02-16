@@ -48,32 +48,32 @@ export default function Category() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      const pageSize = 9; // Items per page
       let endpoint;
-
+  
       switch (selectedLang) {
         case 'ar':
-          endpoint = "http://localhost:8080/category/getAllCategoryAR";
+          endpoint = `http://localhost:8080/category/getAllCategoryAR`;
           break;
         case 'en':
-          endpoint = "http://localhost:8080/category/getAllCategoryEN";
+          endpoint = `http://localhost:8080/category/getAllCategory`;
           break;
         case 'all':
-          // Fetch both languages and combine them
           const [arResponse, enResponse] = await Promise.all([
-            axios.get("http://localhost:8080/category/getAllCategoryAR"),
-            axios.get("http://localhost:8080/category/getAllCategoryEN")
+            axios.get(`http://localhost:8080/category/getAllCategoryAR`),
+            axios.get(`http://localhost:8080/category/getAllCategoryEN`)
           ]);
-
+  
           const combinedCategories = [...arResponse.data.category, ...enResponse.data.category];
           setCategories(combinedCategories);
-          setTotalPages(Math.ceil(combinedCategories.length / 9));
+          setTotalPages(Math.ceil((arResponse.data.total + enResponse.data.total) / pageSize));
           setLoading(false);
           return;
       }
-
+  
       const response = await axios.get(endpoint);
       setCategories(response.data.category);
-      setTotalPages(Math.ceil(response.data.total / 9));
+      setTotalPages(Math.ceil(response.data.total / pageSize));
     } catch (err) {
       toast({
         title: "خطأ في جلب البيانات",
@@ -84,7 +84,7 @@ export default function Category() {
       setLoading(false);
     }
   };
-
+  
 
 
   const viewUnits = (categoryId: string) => {
@@ -204,7 +204,10 @@ export default function Category() {
             <Button
               variant="destructive"
               size="sm"
-              onClick={() => handleDelete(category._id)}
+              onClick={() => {
+                setPropertyToDelete(category._id)
+                setDeleteDialogOpen(true)
+              }}
               className="hover:bg-red-600 transition-colors"
             >
               <Trash2 className="h-4 w-4 ml-2" />
@@ -318,19 +321,8 @@ export default function Category() {
                 </div>
               </AnimatePresence>
 
-              <div className="mt-8 flex justify-center gap-2">
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <Button
-                    key={i + 1}
-                    variant={currentPage === i + 1 ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCurrentPage(i + 1)}
-                    className="min-w-[2.5rem]"
-                  >
-                    {i + 1}
-                  </Button>
-                ))}
-              </div>
+
+
             </>
           )}
         </div>

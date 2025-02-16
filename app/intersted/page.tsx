@@ -152,7 +152,7 @@ export default function InterestedPage() {
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-start gap-4">
                         <Avatar className="h-12 w-12 sm:h-16 sm:w-16 border-2 border-primary/20 group-hover:border-primary transition-colors">
-                          <AvatarImage src={user.categoryId.Image?.secure_url} />
+                          <AvatarImage />
                           <AvatarFallback>{user.fullName.substring(0, 2)}</AvatarFallback>
                         </Avatar>
                         

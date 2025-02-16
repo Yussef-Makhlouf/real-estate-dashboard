@@ -62,28 +62,28 @@ export default function Dashboard() {
   const stats = [
     {
       title: "إجمالي المشاريع",
-      value: categoryStats?.returnedData.count.toString() || "0",
+      value: categoryStats?.returnedData?.count?.toString() || "0",
       icon: Building,
       change: "+5.25%",
       trend: "up",
     },
     {
       title: "المقالات الجديدة",
-      value: blogStats?.returnedData.count.toString() || "0",
+      value: blogStats?.returnedData?.count?.toString() || "0",
       icon: FileText,
       change: "+3.15%",
       trend: "up",
     },
     {
       title: "عدد المهتمين",
-      value: interestedStats?.returnedData.count.toString() || "0",
+      value: interestedStats?.returnedData?.count?.toString() || "0",
       icon: PieChart,
       change: "+1.23%",
       trend: "up",
     },
     {
       title: "عدد الاستشارات",
-      value: consultationStats?.returnedData.consultes?.length.toString() || "0",
+      value: consultationStats?.returnedData?.consultes?.length.toString() || "0",
       icon: MessageSquare,
       change: "+7.89%",
       trend: "up",

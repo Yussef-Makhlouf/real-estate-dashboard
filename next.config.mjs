@@ -14,13 +14,21 @@ const nextConfig = {
         hostname: 'localhost',
         port: '8080',
         pathname: '/uploads/**',
-      }
+      },
+      {
+        protocol: 'https',
+        hostname: 'tasis-al-bina.onrender.com',
+      },
     ],
+  },
+  env: {
+    API_BASE_URL: 'https://tasis-al-bina.onrender.com',
   },
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
+    missingSuspenseWithCSRBailout: false,
   },
   webpack: (config) => {
     config.resolve.fallback = { fs: false }

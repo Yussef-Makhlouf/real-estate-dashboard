@@ -93,7 +93,7 @@
 //     })
 
 //     socket.on("notifications_read", () => {
-      
+
 //          setNotifications(0)
 //         setSubscriptions([])
 //       })
@@ -450,10 +450,11 @@ export function Header() {
                     <p className="text-sm">{user.email}</p>
                     <p className="text-sm">هاتف: {user.phone}</p>
                     <div className="text-xs text-gray-500">
-                      <p>الفئة: {user.categoryId.title}</p>
-                      <p>الوحدة: {user.unitId.title}</p>
-                      <p>السعر: {user.unitId.price.toLocaleString()} ريال</p>
+                      <p>الفئة: {user.categoryId?.title || 'غير محدد'}</p>
+                      <p>الوحدة: {user.unitId?.title || 'غير محدد'}</p>
+                      <p>السعر: {user.unitId?.price?.toLocaleString() || 0} ريال</p>
                     </div>
+
                   </div>
                 </DropdownMenuItem>
               ))}
@@ -486,12 +487,7 @@ export function Header() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="text-lg">حسابي</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild className="p-3">
-                <Link href="/profile" className="flex items-center gap-3">
-                  <User className="h-4 w-4" />
-                  <span>الملف الشخصي</span>
-                </Link>
-              </DropdownMenuItem>
+         
               <DropdownMenuItem asChild className="p-3">
                 <Link href="/users/settings" className="flex items-center gap-3">
                   <Settings className="h-4 w-4" />

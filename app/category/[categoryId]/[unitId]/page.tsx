@@ -55,7 +55,7 @@ export default function UnitDetails() {
     const fetchUnitDetails = async () => {
       try {
         const response = await axios.get(`http://localhost:8080/unit/getunit/${unitId}`)
-        setUnit(response.data.unit)
+        setUnit(response.data.returnedData.unit)
       } catch (err) {
         setError("فشل في جلب بيانات الوحدة")
       } finally {
