@@ -93,7 +93,7 @@
 //     })
 
 //     socket.on("notifications_read", () => {
-      
+
 //          setNotifications(0)
 //         setSubscriptions([])
 //       })
@@ -418,10 +418,11 @@ export function Header() {
                     <p className="text-sm">{user.email}</p>
                     <p className="text-sm">هاتف: {user.phone}</p>
                     <div className="text-xs text-gray-500">
-                      <p>الفئة: {user.categoryId.title}</p>
-                      <p>الوحدة: {user.unitId.title}</p>
-                      <p>السعر: {user.unitId.price.toLocaleString()} ريال</p>
+                      <p>الفئة: {user.categoryId?.title || 'غير محدد'}</p>
+                      <p>الوحدة: {user.unitId?.title || 'غير محدد'}</p>
+                      <p>السعر: {user.unitId?.price?.toLocaleString() || 0} ريال</p>
                     </div>
+
                   </div>
                 </DropdownMenuItem>
               ))}

@@ -151,11 +151,12 @@ export default function NotificationsPage() {
                               <p className="font-medium text-gray-900">{user.fullName}</p>
                               <p className="text-sm text-gray-600">{user.email}</p>
                               <p className="text-sm text-gray-600">هاتف: {user.phone}</p>
-                              <div className="mt-2 text-sm text-gray-500">
-                                <p>الفئة: {user.categoryId.title}</p>
-                                <p>الوحدة: {user.unitId.title}</p>
-                                <p>السعر: ${user.unitId.price}</p>
+                              <div className="text-xs text-gray-500">
+                                <p>الفئة: {user.categoryId?.title || 'غير محدد'}</p>
+                                <p>الوحدة: {user.unitId?.title || 'غير محدد'}</p>
+                                <p>السعر: {user.unitId?.price?.toLocaleString() || 0} ريال</p>
                               </div>
+
                             </div>
                           </div>
                         ))}
