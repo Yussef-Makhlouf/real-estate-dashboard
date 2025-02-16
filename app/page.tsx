@@ -103,10 +103,10 @@ export default function Dashboard() {
   const fetchStats = async () => {
     try {
       const [categoryRes, blogRes, interestedRes, consultationRes] = await Promise.all([
-        fetch('http://localhost:8080/category/getLastThreeCategoryForDashboard'),
-        fetch('http://localhost:8080/blog/getLastThreeBlogsforDashboard'),
-        fetch('http://localhost:8080/interested/getLastThreeIntersted'),
-        fetch('http://localhost:8080/consultation/getLastThreeConsultes')
+        fetch('https://tasis-al-bina.onrender.com/category/getLastThreeCategoryForDashboard'),
+        fetch('https://tasis-al-bina.onrender.com/blog/getLastThreeBlogsforDashboard'),
+        fetch('https://tasis-al-bina.onrender.com/interested/getLastThreeIntersted'),
+        fetch('https://tasis-al-bina.onrender.com/consultation/getLastThreeConsultes')
       ])
 
       const categoryData = await categoryRes.json()
@@ -131,7 +131,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:8080/category/getLastThreeCategoryForDashboard')
+        const response = await fetch('https://tasis-al-bina.onrender.com/category/getLastThreeCategoryForDashboard')
         const data = await response.json()
         setCategories(data.returnedData.categories)
       } catch (error) {
@@ -140,7 +140,7 @@ export default function Dashboard() {
     }
     const fetchBlogs = async () => {
       try {
-        const response = await fetch('http://localhost:8080/blog/getLastThreeBlogsforDashboard')
+        const response = await fetch('https://tasis-al-bina.onrender.com/blog/getLastThreeBlogsforDashboard')
         const data = await response.json()
         setBlogs(data.returnedData.blogs)
       } catch (error) {
@@ -149,7 +149,7 @@ export default function Dashboard() {
     }
     const fetchInterestedUsers = async () => {
       try {
-        const response = await fetch('http://localhost:8080/interested/getLastThreeIntersted')
+        const response = await fetch('https://tasis-al-bina.onrender.com/interested/getLastThreeIntersted')
         const data = await response.json()
         setInterestedUsers(data.returnedData.intested)
       } catch (error) {
@@ -158,7 +158,7 @@ export default function Dashboard() {
     }
     const fetchConsultations = async () => {
       try {
-        const response = await fetch('http://localhost:8080/consultation/getLastThreeConsultes')
+        const response = await fetch('https://tasis-al-bina.onrender.com/consultation/getLastThreeConsultes')
         const data = await response.json()
         setConsultations(data.returnedData.consultes)
       } catch (error) {

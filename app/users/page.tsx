@@ -65,7 +65,7 @@ export default function UsersPage() {
 
     setIsSendingCode(true)
     try {
-      const response = await fetch("http://localhost:8080/auth/sendEmailNew", {
+      const response = await fetch("https://tasis-al-bina.onrender.com/auth/sendEmailNew", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -98,7 +98,7 @@ export default function UsersPage() {
           console.error("No token found!");
           return;
         }
-      const response = await fetch("http://localhost:8080/auth/add", {
+      const response = await fetch("https://tasis-al-bina.onrender.com/auth/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

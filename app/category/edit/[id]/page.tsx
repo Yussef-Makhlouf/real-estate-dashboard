@@ -32,7 +32,7 @@
 //   useEffect(() => {
 //     const fetchCategory = async () => {
 //       try {
-//         const response = await fetch(`http://localhost:8080/category/getOne/${params.id}`)
+//         const response = await fetch(`https://tasis-al-bina.onrender.com/category/getOne/${params.id}`)
 //         const data = await response.json()
 
 //         if (data.category) {
@@ -62,7 +62,7 @@
 
 //   const onSubmit = async (data: FormData) => {
 //     try {
-//       const response = await fetch(`http://localhost:8080/category/update/${params.id}`, {
+//       const response = await fetch(`https://tasis-al-bina.onrender.com/category/update/${params.id}`, {
 //         method: 'PUT',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -255,7 +255,7 @@ export default function EditProperty({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/category/getOne/${params.id}`)
+        const response = await fetch(`https://tasis-al-bina.onrender.com/category/getOne/${params.id}`)
         const data = await response.json()
         if (data.category) {
           setLanguage(data.category.lang)
@@ -313,7 +313,7 @@ export default function EditProperty({ params }: { params: { id: string } }) {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const response = await fetch(`http://localhost:8080/category/update/${params.id}`, {
+      const response = await fetch(`https://tasis-al-bina.onrender.com/category/update/${params.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

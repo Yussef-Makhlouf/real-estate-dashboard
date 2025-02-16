@@ -50,7 +50,7 @@ export default function NotificationsPage() {
   useEffect(() => {
     fetchData()
 
-    // const socket = io("http://localhost:8080", {
+    // const socket = io("https://tasis-al-bina.onrender.com", {
     //   reconnection: true,
     //   timeout: 10000
     // })
@@ -67,13 +67,13 @@ export default function NotificationsPage() {
     try {
       const token = localStorage.getItem("token")
       const [emailResponse, interestedResponse,consultaionsResponse] = await Promise.all([
-        fetch("http://localhost:8080/newsletter/getAllLastHour", {
+        fetch("https://tasis-al-bina.onrender.com/newsletter/getAllLastHour", {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch("http://localhost:8080/interested/getAllLastOneHour", {
+        fetch("https://tasis-al-bina.onrender.com/interested/getAllLastOneHour", {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch("http://localhost:8080/consultation/getAllLastOneHour", {
+        fetch("https://tasis-al-bina.onrender.com/consultation/getAllLastOneHour", {
           headers: { Authorization: `Bearer ${token}` }
         })
       ])

@@ -54,7 +54,7 @@ export default function UnitDetails() {
   useEffect(() => {
     const fetchUnitDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/unit/getunit/${unitId}`)
+        const response = await axios.get(`https://tasis-al-bina.onrender.com/unit/getunit/${unitId}`)
         setUnit(response.data.returnedData.unit)
       } catch (err) {
         setError("فشل في جلب بيانات الوحدة")

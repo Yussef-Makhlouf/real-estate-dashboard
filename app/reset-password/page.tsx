@@ -49,7 +49,7 @@ export default function ResetPassword() {
     onSubmit: async (values) => {
       setIsLoading(true)
       try {
-        const response = await axios.post('http://localhost:8080/auth/reset/', {
+        const response = await axios.post('https://tasis-al-bina.onrender.com/auth/reset/', {
           verificationCode: values.code,
           newPassword: values.newPassword,
           email
@@ -72,7 +72,7 @@ export default function ResetPassword() {
     if (!canResend) return
     setIsLoading(true)
     try {
-      await axios.post('http://localhost:8080/auth/sendEmail', { email })
+      await axios.post('https://tasis-al-bina.onrender.com/auth/sendEmail', { email })
       setTimer(60)
       setCanResend(false)
       toast.success('تم إرسال الرمز مرة أخرى')
