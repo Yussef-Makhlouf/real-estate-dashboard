@@ -1,33 +1,38 @@
+import createNextIntlPlugin from 'next-intl/plugin'
+import withBundleAnalyzer from '@next/bundle-analyzer'
+
+const withNextIntl = createNextIntlPlugin()
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true
   },
   images: {
+    domains: ['ik.imagekit.io'],
     unoptimized: true,
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8080',
-        pathname: '/uploads/**',
-      }
+        protocol: 'https',
+        hostname: '**',
+      },
     ],
   },
-  experimental: {
-    webpackBuildWorker: true,
-    parallelServerBuildTraces: true,
-    parallelServerCompiles: true,
-    missingSuspenseWithCSRBailout: false,
+  env: {
+    API_BASE_URL: process.env.API_BASE_URL,
   },
-  webpack: (config) => {
-    config.resolve.fallback = { fs: false }
-    return config
-  }
+  poweredByHeader: false,
+  compress: true,
+  reactStrictMode: true,
+  swcMinify: true,
 }
+
+const analyzeBundleConfig = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+})(nextConfig)
 
 // Load user config if exists
 const loadUserConfig = async () => {
@@ -58,5 +63,5 @@ const mergeConfig = (baseConfig, userConfig) => {
 // Export final config
 export default async () => {
   const userConfig = await loadUserConfig()
-  return mergeConfig(nextConfig, userConfig?.default)
+  return withNextIntl(mergeConfig(analyzeBundleConfig, userConfig?.default))
 }
