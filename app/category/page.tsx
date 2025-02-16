@@ -239,16 +239,7 @@ export default function Category() {
               <h2 className="text-3xl font-bold text-gray-900">المشاريع</h2>
 
               <div className="flex flex-wrap gap-3 items-center">
-                <div className="relative">
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    type="search"
-                    placeholder="بحث في العقارات..."
-                    className="w-full sm:w-64 pl-4 pr-10"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
+         
 
                 <div className="flex rounded-lg bg-white shadow-sm border p-1">
                   <Button
@@ -292,17 +283,7 @@ export default function Category() {
               </div>
             </div>
 
-            <div className="flex gap-2 items-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSortOrder(current => current === 'asc' ? 'desc' : 'asc')}
-                className="text-sm"
-              >
-                <ArrowUpDown className="mr-2 h-4 w-4" />
-                ترتيب حسب {sortBy === 'area' ? 'المساحة' : sortBy === 'price' ? 'السعر' : 'التاريخ'}
-              </Button>
-            </div>
+
           </div>
 
           {loading ? (
