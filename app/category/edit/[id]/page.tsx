@@ -266,10 +266,7 @@ export default function EditProperty({ params }: { params: { id: string } }) {
           setValue("coordinates", data.category.coordinates)
           setGoogleMapsLink(data.category.googleMapsLink || "") // استعادة الرابط السابق
           if (data.category.Image) {
-            const response = await fetch(data.category.Image.secure_url)
-            const blob = await response.blob()
-            const file = new File([blob], "image.jpg", { type: blob.type })
-            setValue("image", file)
+            setValue("image", data.category.Image.secure_url)
           }
         }
       } catch (error) {

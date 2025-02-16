@@ -255,15 +255,15 @@ export default function EditBlogPost() {
                     {articleLanguage === 'ar' ? 'صورة المقال' : 'Article Image'}
                   </label>
                   <ImageUpload
-            language={articleLanguage}
-            onImagesChange={(images) => form.setValue("image", images[0])}
-            initialImages={[
-              form.watch("Image")?.secure_url ||
-              form.watch("image")?.secure_url ||
-              form.watch("Image") ||
-              form.watch("image")
-            ].filter(Boolean)}
-            maxImages={10} existingImages={[]}          />
+                    language={articleLanguage}
+                    onImagesChange={(images) => form.setValue("image", images[0])}
+                    initialImages={[
+                      form.watch("Image")?.secure_url ||
+                      form.watch("image")?.secure_url ||
+                      form.watch("Image") ||
+                      form.watch("image")
+                    ].filter(Boolean)}
+                    maxImages={10} existingImages={[]} />
 
                 </div>
 
@@ -271,7 +271,7 @@ export default function EditBlogPost() {
                   type="submit"
                   disabled={state.isLoading[articleLanguage]}
                   className="w-full bg-[#20284DE5] hover:bg-[#AA9554] text-white"
-             
+
                 >
                   {state.isLoading[articleLanguage] ? (
                     <>

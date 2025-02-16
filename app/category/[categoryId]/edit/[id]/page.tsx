@@ -710,11 +710,11 @@ export default function EditUnit() {
           },
         })
         const data = await response.json()
-        console.log(data)
+   
         if (data.returnedData.unit) {
           const unit = data.returnedData.unit
           const form = unit.lang === "ar" ? forms.ar : forms.en
-          
+      
           form.reset({
             ...unit,
             nearbyPlaces: unit.nearbyPlaces || [
@@ -724,17 +724,23 @@ export default function EditUnit() {
             ]
           })
 
-          if (unit.images) {
-            dispatch({ type: "SET_EXISTING_IMAGES", value: unit.images })
+          if (unit.images && unit.images.length > 0) {
+            const formattedImages = unit.images.map((img: any) => ({
+              url: img.secure_url,
+              id: img._id || img.public_id
+            }))
+            
+            dispatch({
+              type: "SET_EXISTING_IMAGES",
+              value: formattedImages
+            })
           }
-
           dispatch({ type: "SET_LANGUAGE", lang: unit.lang })
         }
       } catch (error) {
         toast.error("Failed to fetch unit data")
       }
     }
-
     if (params.id) fetchUnitData()
   }, [params.id])
 

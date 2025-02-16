@@ -40,8 +40,8 @@ const unitSchema = z.object({
   floor: z.number().min(0, { message: "يجب أن يكون رقم الطابق أكبر من أو يساوي 0" }),
   location: z.string().min(1, { message: "يجب إدخال الموقع" }),
   coordinates: z.object({
-    latitude: z.string().min(0),
-    longitude: z.string().min(0)
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180)
   }),
   description: z.string().min(10, { message: "يجب أن يكون الوصف على الأقل 10 أحرف" }),
   status: z.string().min(1, { message: "يجب اختيار حالة الوحدة" }),
@@ -90,14 +90,16 @@ const getEnglishPlaceholder = (fieldName: string): string => {
 
 type FormData = z.infer<typeof unitSchema>
 
-const unitTypes = [
-  "Villa", "Apartment", "Duplex", "Penthouse", "Townhouse",
-  "Studio", "Chalet", "Warehouse", "Office", "Shop"
-]
+const unitTypes = {
+  ar: ["فيلا", "شقة", "دوبلكس", "مكتب", "محل تجاري", "مستودع", "استوديو", "شاليه"],
+  en: ["Villa", "Apartment", "Duplex", "Office", "Retail Shop", "Warehouse", "Studio", "Chalet"]
+}
 
-const unitStatuses = [
-  "Available", "Sold", "Rented", "Reserved", "Under Maintenance"
-]
+const unitStatuses = {
+  ar: ["متاح للبيع", "متاح للإيجار", "محجوز", "مؤجر", "مباع", "غير متاح"],
+  en: ["Available for sale", "Available for rent", "Reserved", "Rented", "Sold", "Unavailable"]
+}
+
 
 type State = {
   images: File[]
@@ -145,9 +147,9 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data: FormData) => onSubmit(data, lang))} 
+      <form onSubmit={form.handleSubmit((data: FormData) => onSubmit(data, lang))}
         className="space-y-8 bg-white p-6 rounded-lg shadow-sm">
-        
+
         {/* Images Section */}
         <FormField
           control={form.control}
@@ -201,7 +203,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {unitTypes.map((type) => (
+                    {unitTypes[lang].map((type) => (
                       <SelectItem key={type} value={type}>{type}</SelectItem>
                     ))}
                   </SelectContent>
@@ -224,13 +226,13 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    {lang === "ar" 
-                      ? getArabicPlaceholder(fieldName) 
+                    {lang === "ar"
+                      ? getArabicPlaceholder(fieldName)
                       : getEnglishPlaceholder(fieldName)}
                   </FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       {...field}
                       onChange={e => field.onChange(Number(e.target.value))}
                     />
@@ -249,8 +251,8 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
               <FormItem>
                 <FormLabel>{lang === "ar" ? "الموقع" : "Location"}</FormLabel>
                 <FormControl>
-                  <Input 
-                    {...field} 
+                  <Input
+                    {...field}
                     onChange={(e) => {
                       field.onChange(e);
                       handleGoogleMapsLink(e.target.value);
@@ -276,7 +278,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {unitStatuses.map((status) => (
+                    {unitStatuses[lang].map((status) => (
                       <SelectItem key={status} value={status}>{status}</SelectItem>
                     ))}
                   </SelectContent>
@@ -294,9 +296,9 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
               <FormItem className="col-span-full">
                 <FormLabel>{lang === "ar" ? "الوصف" : "Description"}</FormLabel>
                 <FormControl>
-                  <Textarea 
-                    rows={4} 
-                    {...field} 
+                  <Textarea
+                    rows={4}
+                    {...field}
                     dir={lang === "ar" ? "rtl" : "ltr"}
                   />
                 </FormControl>
@@ -354,7 +356,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { lang: "ar" | "en"
               {lang === "ar" ? "إضافة مكان" : "Add Place"}
             </Button>
           </div>
-          
+
           {state.nearbyPlaces.map((_, index) => (
             <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg">
               <FormField
@@ -430,7 +432,7 @@ export default function AddUnit() {
       })
 
       if (!response.ok) throw new Error("Failed to add unit")
-      
+
       toast.success(lang === "ar" ? "تم إضافة الوحدة بنجاح" : "Unit added successfully")
       router.push(`/category/${params.categoryId}`)
     } catch (error) {
@@ -452,21 +454,21 @@ export default function AddUnit() {
           <CardContent>
             <TabComponent
               arabicContent={
-                <UnitForm 
-                  lang="ar" 
-                  form={forms.ar} 
-                  onSubmit={onSubmit} 
-                  state={state} 
-                  dispatch={dispatch} 
+                <UnitForm
+                  lang="ar"
+                  form={forms.ar}
+                  onSubmit={onSubmit}
+                  state={state}
+                  dispatch={dispatch}
                 />
               }
               englishContent={
-                <UnitForm 
-                  lang="en" 
-                  form={forms.en} 
-                  onSubmit={onSubmit} 
-                  state={state} 
-                  dispatch={dispatch} 
+                <UnitForm
+                  lang="en"
+                  form={forms.en}
+                  onSubmit={onSubmit}
+                  state={state}
+                  dispatch={dispatch}
                 />
               }
             />

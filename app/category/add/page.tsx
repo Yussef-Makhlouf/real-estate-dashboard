@@ -61,11 +61,10 @@ const CategoryForm = ({ lang, form, onSubmit, isLoading }: { lang: string; form:
           name="Image"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{lang === "ar" ? "صورة القسم" : "Category Image"}</FormLabel>
+              <FormLabel>{lang === "ar" ? "صورة المشروع" : "Category Image"}</FormLabel>
               <ImageUpload
                 maxImages={1}
                 onImagesChange={(files) => field.onChange(files[0])}
-
                 existingImages={[]} language={"ar"} />
             </FormItem>
           )}
@@ -77,7 +76,7 @@ const CategoryForm = ({ lang, form, onSubmit, isLoading }: { lang: string; form:
   name="title"
   render={({ field }) => (
     <FormItem>
-      <FormLabel>{lang === "ar" ? "عنوان القسم" : "Category Title"}</FormLabel>
+      <FormLabel>{lang === "ar" ? "عنوان المشروع" : "Category Title"}</FormLabel>
       <FormControl>
         <Input 
           {...field} 
@@ -218,7 +217,7 @@ const CategoryForm = ({ lang, form, onSubmit, isLoading }: { lang: string; form:
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {lang === "ar" ? "إضافة القسم" : "Add Category"}
+          {lang === "ar" ? "إضافة المشروع" : "Add Category"}
         </Button>
       </form>
     </Form>
@@ -274,7 +273,7 @@ export default function AddCategory() {
       
       if (!response.ok) throw new Error("Failed to add category")
 
-      toast.success(data.lang === "ar" ? "تم إضافة القسم بنجاح" : "Category added successfully")
+      toast.success(data.lang === "ar" ? "تم إضافة المشروع بنجاح" : "Category added successfully")
       router.push("/category")
     } catch (error) {
       toast.error(data.lang === "ar" ? "حدث خطأ أثناء الإضافة" : "Error adding category")

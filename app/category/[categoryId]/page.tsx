@@ -164,7 +164,7 @@ export default function UnitsPage() {
                 <CardTitle>
                   <div className="flex flex-col space-y-1">
                     <span className="text-lg font-bold">{unit.title}</span>
-                    <span className="text-sm text-gray-500">{unit.location}</span>
+                    {/* <span className="text-sm text-gray-500">{unit.location}</span> */}
                   </div>
                 </CardTitle>
               </CardHeader>
