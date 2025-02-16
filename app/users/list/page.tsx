@@ -34,7 +34,7 @@ function UsersListContent() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("http://localhost:8080/auth/users", {
+        const response = await fetch("https://tasis-al-bina.onrender.com/auth/users", {
         })
         const data = await response.json()
         

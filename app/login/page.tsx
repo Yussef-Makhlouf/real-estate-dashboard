@@ -34,7 +34,7 @@ export default function Login() {
     onSubmit: async (values) => {
       setIsLoading(true)
       try {
-        const response = await fetch('http://localhost:8080/auth/signIn', {
+        const response = await fetch('https://tasis-al-bina.onrender.com/auth/signIn', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ export default function Login() {
   
     setIsLoading(true)
     try {
-      await axios.post('http://localhost:8080/auth/sendEmail', {
+      await axios.post('https://tasis-al-bina.onrender.com/auth/sendEmail', {
         email: formik.values.email
       })
       

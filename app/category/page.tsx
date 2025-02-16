@@ -53,15 +53,15 @@ export default function Category() {
   
       switch (selectedLang) {
         case 'ar':
-          endpoint = `http://localhost:8080/category/getAllCategoryAR`;
+          endpoint = `https://tasis-al-bina.onrender.com/category/getAllCategoryAR`;
           break;
         case 'en':
-          endpoint = `http://localhost:8080/category/getAllCategory`;
+          endpoint = `https://tasis-al-bina.onrender.com/category/getAllCategory`;
           break;
         case 'all':
           const [arResponse, enResponse] = await Promise.all([
-            axios.get(`http://localhost:8080/category/getAllCategoryAR`),
-            axios.get(`http://localhost:8080/category/getAllCategoryEN`)
+            axios.get(`https://tasis-al-bina.onrender.com/category/getAllCategoryAR`),
+            axios.get(`https://tasis-al-bina.onrender.com/category/getAllCategoryEN`)
           ]);
   
           const combinedCategories = [...arResponse.data.category, ...enResponse.data.category];
@@ -96,7 +96,7 @@ export default function Category() {
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:8080/category/delete/${id}`)
+      await axios.delete(`https://tasis-al-bina.onrender.com/category/delete/${id}`)
       setCategories(prev => prev.filter(cat => cat._id !== id))
       toast({
         title: "تم الحذف بنجاح",

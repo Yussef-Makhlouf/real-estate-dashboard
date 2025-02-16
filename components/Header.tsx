@@ -51,13 +51,13 @@
 //     try {
 //       const token = localStorage.getItem("token")
 //       const [countResponse, subscriptionsResponse, interestedResponse] = await Promise.all([
-//         fetch("http://localhost:8080/newsletter/unread", {
+//         fetch("https://tasis-al-bina.onrender.com/newsletter/unread", {
 //           headers: { Authorization: `Bearer ${token}` }
 //         }),
-//         fetch("http://localhost:8080/newsletter", {
+//         fetch("https://tasis-al-bina.onrender.com/newsletter", {
 //           headers: { Authorization: `Bearer ${token}` }
 //         }),
-//         fetch("http://localhost:8080/interested", {
+//         fetch("https://tasis-al-bina.onrender.com/interested", {
 //           headers: { Authorization: `Bearer ${token}` }
 //         })
 //       ])
@@ -141,11 +141,11 @@
 //         <DropdownMenu onOpenChange={async (open) => {
 //           if (!open && (notifications > 0 || newInterests > 0)) {
 //             const token = localStorage.getItem("token")
-//             await fetch("http://localhost:8080/newsletter/markAsRead", {
+//             await fetch("https://tasis-al-bina.onrender.com/newsletter/markAsRead", {
 //               method: "POST",
 //               headers: { Authorization: `Bearer ${token}` }
 //             }),
-//             await fetch("http://localhost:8080/interested/markAsRead", {
+//             await fetch("https://tasis-al-bina.onrender.com/interested/markAsRead", {
 //               method: "POST",
 //               headers: { Authorization: `Bearer ${token}` }
 //             })
@@ -299,16 +299,16 @@ export function Header() {
     try {
       const token = localStorage.getItem("token")
       const [countResponse, subscriptionsResponse, interestedResponse,consultationsResponse] = await Promise.all([
-        fetch("http://localhost:8080/newsletter/unread", {
+        fetch("https://tasis-al-bina.onrender.com/newsletter/unread", {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch("http://localhost:8080/newsletter", {
+        fetch("https://tasis-al-bina.onrender.com/newsletter", {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch("http://localhost:8080/interested/findAllNotReaded", {
+        fetch("https://tasis-al-bina.onrender.com/interested/findAllNotReaded", {
           headers: { Authorization: `Bearer ${token}` }
         }),
-      fetch("http://localhost:8080/consultation/getAllUnReadConsultents", {
+      fetch("https://tasis-al-bina.onrender.com/consultation/getAllUnReadConsultents", {
         headers: { Authorization: `Bearer ${token}` }
       }) as Promise<Response>
       ])
@@ -401,15 +401,15 @@ export function Header() {
             if (!open && (notifications > 0 || newInterests > 0 || newConsultations > 0)) {
               const token = localStorage.getItem("token")
               await Promise.all([
-                fetch("http://localhost:8080/interested/markAsRead", {
+                fetch("https://tasis-al-bina.onrender.com/interested/markAsRead", {
                   method: "POST",
                   headers: { Authorization: `Bearer ${token}` }
                 }),
-                fetch("http://localhost:8080/newsletter/markAsRead", {
+                fetch("https://tasis-al-bina.onrender.com/newsletter/markAsRead", {
                   method: "POST",
                   headers: { Authorization: `Bearer ${token}` }
                 }),
-                fetch("http://localhost:8080/consultation/isRead", {
+                fetch("https://tasis-al-bina.onrender.com/consultation/isRead", {
                   method: "POST",
                   headers: { Authorization: `Bearer ${token}` }
                 })

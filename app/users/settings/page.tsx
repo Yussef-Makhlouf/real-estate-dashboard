@@ -44,7 +44,7 @@ export default function UserSettings() {
       if (!token) {
         throw new Error('No token found')
       }
-      const response = await fetch(`http://localhost:8080/auth/getOne`, {
+      const response = await fetch(`https://tasis-al-bina.onrender.com/auth/getOne`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -78,7 +78,7 @@ export default function UserSettings() {
     setIsLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch("http://localhost:8080/auth/update", {
+      const response = await fetch("https://tasis-al-bina.onrender.com/auth/update", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

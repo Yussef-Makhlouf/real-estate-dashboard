@@ -44,7 +44,7 @@ export default function InterestedPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:8080/interested/${id}`)
+      await axios.delete(`https://tasis-al-bina.onrender.com/interested/${id}`)
       setInterestedUsers(prev => prev.filter(user => user._id !== id))
       toast.success('تم حذف المستخدم بنجاح')
     } catch (error) {
@@ -69,7 +69,7 @@ export default function InterestedPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:8080/interested')
+        const response = await fetch('https://tasis-al-bina.onrender.com/interested')
         const data = await response.json()
         console.log(data);
         setInterestedUsers(data.interested)

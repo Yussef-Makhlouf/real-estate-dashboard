@@ -183,7 +183,7 @@ export default function AddBlogPost() {
       const token = localStorage.getItem("token")
       if (!token) throw new Error(lang === "ar" ? "يرجى تسجيل الدخول أولاً" : "Please login first")
 
-      const response = await fetch("http://localhost:8080/blog/create", {
+      const response = await fetch("https://tasis-al-bina.onrender.com/blog/create", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,

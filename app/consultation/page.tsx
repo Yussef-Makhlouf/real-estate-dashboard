@@ -32,7 +32,7 @@ const ConsultationPage = () => {
 
   const fetchConsultations = async () => {
     try {
-      const response = await fetch('http://localhost:8080/consultation/')
+      const response = await fetch('https://tasis-al-bina.onrender.com/consultation/')
       const data = await response.json()
       console.log(data);
       
@@ -52,7 +52,7 @@ const ConsultationPage = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:8080/consultation/${id}`, {
+      const response = await fetch(`https://tasis-al-bina.onrender.com/consultation/${id}`, {
         method: 'DELETE',
       })
       
@@ -68,7 +68,7 @@ const ConsultationPage = () => {
   }
   const handleMarkAsCompleted = async (id: string) => {
     try {
-        const response = await fetch(`http://localhost:8080/consultation/markAsCompleted/${id}`, {
+        const response = await fetch(`https://tasis-al-bina.onrender.com/consultation/markAsCompleted/${id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ const ConsultationPage = () => {
 
 const handleMarkAsCanceled = async (id: string) => {
     try {
-        const response = await fetch(`http://localhost:8080/consultation/markAsCanceled/${id}`, {
+        const response = await fetch(`https://tasis-al-bina.onrender.com/consultation/markAsCanceled/${id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',

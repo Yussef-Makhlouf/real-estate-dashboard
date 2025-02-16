@@ -83,7 +83,7 @@ export default function EditBlogPost() {
   useEffect(() => {
     const fetchBlogData = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/blog/findOne/${params.id}`, {
+        const response = await fetch(`https://tasis-al-bina.onrender.com/blog/findOne/${params.id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
         const data = await response.json()
@@ -132,7 +132,7 @@ export default function EditBlogPost() {
         formData.append("imageUrl", data.image)
       }
 
-      const response = await fetch(`http://localhost:8080/blog/update/${params.id}`, {
+      const response = await fetch(`https://tasis-al-bina.onrender.com/blog/update/${params.id}`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         body: formData,

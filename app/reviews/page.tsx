@@ -40,7 +40,7 @@ export default function Reviews() {
   const fetchReviews = async () => {
 
     try {
-      const response = await fetch("http://localhost:8080/review/");
+      const response = await fetch("https://tasis-al-bina.onrender.com/review/");
       const data = await response.json();
       if (data.message === "Done") {
         const reviewData = Array.isArray(data.reviews) ? data.reviews : [data.review];
@@ -71,7 +71,7 @@ const confirmDelete = async () => {
   if (reviewToDelete) {
     const deleteToast = toast.loading('جاري حذف الرأي...')
     try {
-      const response = await fetch(`http://localhost:8080/review/delete/${reviewToDelete}`, {
+      const response = await fetch(`https://tasis-al-bina.onrender.com/review/delete/${reviewToDelete}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`

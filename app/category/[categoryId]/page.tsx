@@ -51,11 +51,11 @@ export default function UnitsPage() {
       
       // Select endpoint based on language
       if (selectedLang === 'ar') {
-        endpoint = `http://localhost:8080/unit/getAllUnitByCategoryIdAR/${categoryId}`;
+        endpoint = `https://tasis-al-bina.onrender.com/unit/getAllUnitByCategoryIdAR/${categoryId}`;
       } else if (selectedLang === 'en') {
-        endpoint = `http://localhost:8080/unit/getAllUnitByCategoryIdEN/${categoryId}`;
+        endpoint = `https://tasis-al-bina.onrender.com/unit/getAllUnitByCategoryIdEN/${categoryId}`;
       } else {
-        endpoint = `http://localhost:8080/unit/getAllUnitByCategoryId/${categoryId}`;
+        endpoint = `https://tasis-al-bina.onrender.com/unit/getAllUnitByCategoryId/${categoryId}`;
       }
 
       const response = await axios.get(endpoint);
@@ -81,7 +81,7 @@ export default function UnitsPage() {
   const confirmDelete = async () => {
     if (propertyToDelete) {
       try {
-        await axios.delete(`http://localhost:8080/unit/delete/${propertyToDelete}`)
+        await axios.delete(`https://tasis-al-bina.onrender.com/unit/delete/${propertyToDelete}`)
         setUnits(prev => prev.filter(unit => unit._id !== propertyToDelete))
       } catch (err) {
         console.error("Error deleting unit:", err)

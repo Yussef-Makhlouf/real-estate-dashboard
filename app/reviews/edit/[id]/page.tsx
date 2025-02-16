@@ -151,7 +151,7 @@ export default function EditReview({ params }: { params: { id: string } }) {
         throw new Error('No authentication token found')
       }
 
-      const response = await fetch(`http://localhost:8080/review/findOne/${params.id}`, {
+      const response = await fetch(`https://tasis-al-bina.onrender.com/review/findOne/${params.id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -208,7 +208,7 @@ export default function EditReview({ params }: { params: { id: string } }) {
         formData.append("image", data.image)
       }
 
-      const response = await fetch(`http://localhost:8080/review/update/${params.id}`, {
+      const response = await fetch(`https://tasis-al-bina.onrender.com/review/update/${params.id}`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         body: formData
