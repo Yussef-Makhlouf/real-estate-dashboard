@@ -176,7 +176,7 @@ export default function InterestedPage() {
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 text-gray-600">
                               <Building className="h-4 w-4 text-primary" />
-                              {/* <span className="text-sm font-medium truncate">{user.categoryId.title}</span> */}
+                              <span className="text-sm font-medium truncate">{user.categoryId.title}</span>
                             </div>
                             <div className="flex items-center gap-2 text-gray-600">
                               <Home className="h-4 w-4 text-primary" />
@@ -197,7 +197,7 @@ export default function InterestedPage() {
 
                         <div className="mt-3 flex items-center gap-2 text-gray-600">
                           <MapPin className="h-4 w-4 text-primary shrink-0" />
-                          {/* <span className="text-sm truncate">{user.categoryId.location}</span> */}
+                          <span className="text-sm truncate">{user.categoryId.location}</span>
                         </div>
 
                         <Button

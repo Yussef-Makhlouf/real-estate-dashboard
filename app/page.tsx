@@ -5,62 +5,91 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Building,
   Users,
-  CreditCard,
-  TrendingUp,
-  ArrowUp,
-  ArrowDown,
   FileText,
   MessageSquare,
   PieChart,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react"
 import { useEffect, useState } from "react"
-import { Category } from "./types/category" // Assuming you have the Category interface defined
-import { Blog } from "./types/blog" // Assuming you have the Blog interface defined
-import {InterestedUser} from "./types/intersted" // Assuming you have the InterestedUser interface defined
-import { Consultation } from "./types/consultaions" // Assuming you have the Consultation interface defined
-const stats = [
-  {
-    title: "إجمالي المشاريع",
-    value: "1,234",
-    icon: Building,
-    change: "+5.25%",
-    trend: "up",
-  },
-  {
-    title: "المستخدمين النشطين",
-    value: "567",
-    icon: Users,
-    change: "+2.74%",
-    trend: "up",
-  },
-  {
-    title: "المقالات الجديدة",
-    value: "30",
-    icon: FileText,
-    change: "+3.15%",
-    trend: "up",
-  },
-  {
-    title: "عدد المهتمين",
-    value: "890",
-    icon: PieChart,
-    change: "+1.23%",
-    trend: "up",
-  },
-  {
-    title: "عدد الاستشارات",
-    value: "250",
-    icon: MessageSquare,
-    change: "+7.89%",
-    trend: "up",
-  },
-]
+import { Category } from "./types/category"
+import { Blog } from "./types/blog"
+import { InterestedUser } from "./types/intersted"
+import { Consultation } from "./types/consultaions"
+
+interface CategoryResponse {
+  message: string
+  returnedData: {
+    count: number
+    categories: Category[]
+  }
+}
+
+interface BlogResponse {
+  message: string
+  returnedData: {
+    count: number
+    blogs: Blog[]
+  }
+}
+
+interface InterestedResponse {
+  message: string
+  returnedData: {
+    intested: InterestedUser[]
+    count: number
+  }
+}
+
+interface ConsultationResponse {
+  message: string
+  returnedData: {
+    count: number
+    consultes: Consultation[]
+  }
+}
 
 export default function Dashboard() {
   const [categories, setCategories] = useState<Category[]>([])
   const [blogs, setBlogs] = useState<Blog[]>([])
   const [interestedUsers, setInterestedUsers] = useState<InterestedUser[]>([])
   const [consultations, setConsultations] = useState<Consultation[]>([])
+  const [categoryStats, setCategoryStats] = useState<CategoryResponse>()
+  const [blogStats, setBlogStats] = useState<BlogResponse>()
+  const [interestedStats, setInterestedStats] = useState<InterestedResponse>()
+  const [consultationStats, setConsultationStats] = useState<ConsultationResponse>()
+
+  const stats = [
+    {
+      title: "إجمالي المشاريع",
+      value: categoryStats?.returnedData?.count?.toString() || "0",
+      icon: Building,
+      change: "+5.25%",
+      trend: "up",
+    },
+    {
+      title: "المقالات الجديدة",
+      value: blogStats?.returnedData?.count?.toString() || "0",
+      icon: FileText,
+      change: "+3.15%",
+      trend: "up",
+    },
+    {
+      title: "عدد المهتمين",
+      value: interestedStats?.returnedData?.count?.toString() || "0",
+      icon: PieChart,
+      change: "+1.23%",
+      trend: "up",
+    },
+    {
+      title: "عدد الاستشارات",
+      value: consultationStats?.returnedData?.consultes?.length.toString() || "0",
+      icon: MessageSquare,
+      change: "+7.89%",
+      trend: "up",
+    }
+  ]
+  
 
   const getConsultationType = (type: string) => {
     const types = {
@@ -71,11 +100,38 @@ export default function Dashboard() {
     return types[type as keyof typeof types] || type
   }
 
+  const fetchStats = async () => {
+    try {
+      const [categoryRes, blogRes, interestedRes, consultationRes] = await Promise.all([
+        fetch('http://localhost:8080/category/getLastThreeCategoryForDashboard'),
+        fetch('http://localhost:8080/blog/getLastThreeBlogsforDashboard'),
+        fetch('http://localhost:8080/interested/getLastThreeIntersted'),
+        fetch('http://localhost:8080/consultation/getLastThreeConsultes')
+      ])
+
+      const categoryData = await categoryRes.json()
+      const blogData = await blogRes.json()
+      const interestedData = await interestedRes.json()
+      const consultationData = await consultationRes.json()
+
+      console.log(categoryData.returnedData.categories);
+      // console.log(blogData);
+      // console.log(interestedData);
+      // console.log(consultationData);
+      
+      setCategoryStats(categoryData)
+      setBlogStats(blogData)
+      setInterestedStats(interestedData)
+      setConsultationStats(consultationData)
+    } catch (error) {
+      console.error('Error fetching stats:', error)
+    }
+  }
+
   useEffect(() => {
-    
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:8080/category/getLastThreeCategory')
+        const response = await fetch('http://localhost:8080/category/getLastThreeCategoryForDashboard')
         const data = await response.json()
         setCategories(data.returnedData.categories)
       } catch (error) {
@@ -109,11 +165,14 @@ export default function Dashboard() {
         console.error('Error fetching consultations:', error)
       }
     }
+
+    fetchStats()
     fetchBlogs()
     fetchCategories()
     fetchConsultations()
     fetchInterestedUsers()
   }, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header />
@@ -122,7 +181,7 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">لوحة التحكم الرئيسية</h2>
           {/* Statistics Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {stats.map((stat) => (
               <Card key={stat.title} className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -194,7 +253,7 @@ export default function Dashboard() {
     <CardHeader>
       <CardTitle className="text-xl font-bold flex items-center">
         <FileText className="h-5 w-5 text-primary mr-2" />
-          اجمالي المقالات 
+             المقالات الجديدة
       </CardTitle>
     </CardHeader>
     <CardContent className="p-6">
