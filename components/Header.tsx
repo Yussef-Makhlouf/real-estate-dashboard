@@ -277,18 +277,28 @@ interface InterestedUser {
     status: string
   }
 }
+interface ConsultationUser {
+  _id: string
+  type: string
+  selectedDay: string
+  phone: string
+  email:string
+  status: string
+}
 
 export function Header() {
   const { toggle } = useSidebar()
   const [notifications, setNotifications] = useState(0)
   const [newInterests, setNewInterests] = useState(0)
+  const [newConsultations, setNewConsultations] = useState(0)
   const [interestedUsers, setInterestedUsers] = useState<InterestedUser[]>([])
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
-
+  const [consultations, setConsultations] = useState<ConsultationUser[]>([])
+  
   const fetchData = async () => {
     try {
       const token = localStorage.getItem("token")
-      const [countResponse, subscriptionsResponse, interestedResponse] = await Promise.all([
+      const [countResponse, subscriptionsResponse, interestedResponse,consultationsResponse] = await Promise.all([
         fetch("http://localhost:8080/newsletter/unread", {
           headers: { Authorization: `Bearer ${token}` }
         }),
@@ -297,16 +307,22 @@ export function Header() {
         }),
         fetch("http://localhost:8080/interested/findAllNotReaded", {
           headers: { Authorization: `Bearer ${token}` }
-        })
+        }),
+      fetch("http://localhost:8080/consultation/getAllUnReadConsultents", {
+        headers: { Authorization: `Bearer ${token}` }
+      }) as Promise<Response>
       ])
 
       const countData = await countResponse.json()
       const subsData = await subscriptionsResponse.json()
       const interestedData = await interestedResponse.json()
-
+      const consultationsData = await consultationsResponse.json()
+      
       setNotifications(countData.count)
       setSubscriptions(subsData.emailData || [])
       setInterestedUsers(interestedData.interested || [])
+      setConsultations(consultationsData.consultations || [])
+
     } catch (error) {
       console.error("Failed to fetch data:", error)
     }
@@ -321,6 +337,11 @@ export function Header() {
       fetchData()
     })
 
+    socket.on("new_consultation", () => {
+      setNewConsultations(prev => prev + 1)
+      fetchData()
+    })
+
     socket.on("intersted-featch", (data) => {
       setInterestedUsers(data)
     })
@@ -332,6 +353,11 @@ export function Header() {
     socket.on("notifications_read", () => {
       setNotifications(0)
       setSubscriptions([])
+    })
+
+    socket.on("consultation_read", () => {
+      setNewConsultations(0)
+      setConsultations([])
     })
 
     socket.on("intersted_read", () => {
@@ -372,7 +398,7 @@ export function Header() {
 
         <div className="flex items-center gap-4">
           <DropdownMenu onOpenChange={async (open) => {
-            if (!open && (notifications > 0 || newInterests > 0)) {
+            if (!open && (notifications > 0 || newInterests > 0 || newConsultations > 0)) {
               const token = localStorage.getItem("token")
               await Promise.all([
                 fetch("http://localhost:8080/interested/markAsRead", {
@@ -382,18 +408,24 @@ export function Header() {
                 fetch("http://localhost:8080/newsletter/markAsRead", {
                   method: "POST",
                   headers: { Authorization: `Bearer ${token}` }
+                }),
+                fetch("http://localhost:8080/consultation/isRead", {
+                  method: "POST",
+                  headers: { Authorization: `Bearer ${token}` }
                 })
               ])
               setNotifications(0)
               setNewInterests(0)
+              setNewConsultations(0)
+
             }
           }}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
-                {(notifications > 0 || newInterests > 0) && (
+                {(notifications > 0 || newInterests > 0 ||newConsultations > 0) && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
-                    {notifications + newInterests}
+                    {notifications + newInterests + newConsultations}
                   </span>
                 )}
               </Button>
@@ -425,6 +457,18 @@ export function Header() {
                   </div>
                 </DropdownMenuItem>
               ))}
+              {consultations.map((consultation) => (
+                <DropdownMenuItem key={consultation._id} className="p-4 hover:bg-gray-50">
+                  <div className="flex flex-col gap-2">
+                    <p className="font-medium">{consultation.email}</p>
+                    <p className="text-sm">نوع الاستشارة: {consultation.type}</p>
+                    <p className="text-sm">الهاتف: {consultation.phone}</p>
+                    <p className="text-sm">اليوم المحدد: {consultation.selectedDay}</p>
+                    <p className="text-sm">الحالة: {consultation.status}</p>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+
               <DropdownMenuItem asChild className="p-2">
                 <Link href="/notifications" className="w-full text-center text-primary hover:text-primary-dark">
                   عرض كل الإشعارات
