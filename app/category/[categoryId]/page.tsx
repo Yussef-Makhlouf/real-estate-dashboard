@@ -91,7 +91,21 @@ export default function UnitsPage() {
     setPropertyToDelete(null)
   }
 
-  if (loading) return <div className="text-center py-8">جاري التحميل...</div>
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="relative">
+          <div className="h-24 w-24 rounded-full border-t-4 border-b-4 border-primary animate-spin"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="h-16 w-16 rounded-full border-t-4 border-b-4 border-secondary animate-spin"></div>
+          </div>
+          <div className="mt-4 text-center text-gray-600 font-medium">
+            جاري التحميل...
+          </div>
+        </div>
+      </div>
+    )
+  }
   if (error) return <div className="text-red-500 text-center py-8">{error}</div>
   const filteredUnits = units.filter(unit => unit.lang === selectedLang)
 
@@ -100,25 +114,33 @@ export default function UnitsPage() {
         <Header />
         <Sidebar />
         <main className="pt-16 px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex gap-2">
-              <Button 
-                variant={selectedLang === 'ar' ? "default" : "outline"}
-                onClick={() => setSelectedLang('ar')}
-              >
-                العربية
-              </Button>
-              <Button 
-                variant={selectedLang === 'en' ? "default" : "outline"}
-                onClick={() => setSelectedLang('en')}
-              >
-                English
-              </Button>
-            </div>
-            <Link href={`/category/${categoryId}/add`}>
-              <Button>إضافة وحدة جديدة</Button>
-            </Link>
-          </div>
+        <div className="flex justify-between items-center my-8 px-4">
+  <div className="bg-card p-1 rounded-xl shadow-sm">
+    <div className="flex gap-1">
+      <Button
+        variant={selectedLang === 'ar' ? "default" : "ghost"}
+        onClick={() => setSelectedLang('ar')}
+        className="rounded-lg px-6 transition-all duration-200 hover:scale-105"
+      >
+        <span className="font-medium">العربية</span>
+      </Button>
+      <Button
+        variant={selectedLang === 'en' ? "default" : "ghost"}
+        onClick={() => setSelectedLang('en')}
+        className="rounded-lg px-6 transition-all duration-200 hover:scale-105"
+      >
+        <span className="font-medium">English</span>
+      </Button>
+    </div>
+  </div>
+  
+  <Link href={`/category/${categoryId}/add`}>
+    <Button className="bg-[#20284DE5] hover:bg-[#AA9554] text-primary-foreground shadow-lg transition-all duration-200 hover:scale-105 rounded-lg px-6 py-2">
+      <span className="font-medium ">إضافة وحدة جديدة</span>
+    </Button>
+  </Link>
+</div>
+
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {units.map((unit) => (
