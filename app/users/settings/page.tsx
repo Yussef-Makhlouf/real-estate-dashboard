@@ -113,7 +113,7 @@ export default function UserSettings() {
                     <Avatar className="h-24 w-24 ring-4 ring-white">
                       <AvatarImage src={userData?.avatar} />
                       <AvatarFallback className="bg-primary text-2xl">
-                        {userData?.firstName?.[0]}{userData?.lastName?.[0]}
+                        {userData?.firstName}
                       </AvatarFallback>
                     </Avatar>
                   </div>
@@ -129,19 +129,11 @@ export default function UserSettings() {
                           <Shield className="h-4 w-4 mr-1" />
                           {userData?.role}
                         </span>
-                        <span className="flex items-center">
-                          <Building className="h-4 w-4 mr-1" />
-                          {userData?.department}
-                        </span>
-                        <span className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          {new Date(userData?.joinDate).toLocaleDateString('ar-SA')}
-                        </span>
+                
+
                       </div>
                     </div>
-                    <Button variant="outline" className="hover:bg-primary/5">
-                      تغيير الصورة
-                    </Button>
+           
                   </div>
                 </CardContent>
               </Card>
@@ -260,33 +252,6 @@ export default function UserSettings() {
                         </div>
                       </div>
 
-                      {/* Work Information Section */}
-                      <div className="space-y-4">
-                        <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                          <Building className="h-5 w-5 text-primary" />
-                          <h3 className="text-lg font-semibold">معلومات العمل</h3>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                       
-                          <FormField
-                            control={form.control}
-                            name="joinDate"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>تاريخ الانضمام</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="date" 
-                                    className="h-11" 
-                                    {...field} 
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
 
                       <div className="flex justify-end space-x-4 rtl:space-x-reverse pt-6">
                         <Button 

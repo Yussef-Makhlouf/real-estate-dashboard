@@ -13,7 +13,7 @@ import Link from "next/link"
 import { SidebarProvider } from "@/components/SidebarProvider"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { useToast } from "@/components/ui/use-toast"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 
 
@@ -21,6 +21,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { userEditSchema } from "@/lib/schemas/user-schema"
 import type { z } from "zod"
+import { Select } from "@radix-ui/react-select"
+import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 type UserEditSchema = z.infer<typeof userEditSchema>
 
@@ -53,6 +55,7 @@ function UsersListContent() {
       middleName: "",
       lastName: "",
       phoneNumber: ""
+
     }
   })
     const fetchUsers = async () => {
@@ -105,7 +108,9 @@ function UsersListContent() {
       firstName: user.firstName,
       middleName: user.middleName,
       lastName: user.lastName,
-      phoneNumber: user.phone
+      phoneNumber: user.phone,
+      role: user.role,
+      email: user.email
     })
     setEditingUser(user)
     setEditDialogOpen(true)
@@ -330,7 +335,7 @@ function UsersListContent() {
                 <div className="max-w-xs truncate">{user.email}</div>
               </TableCell>
               <TableCell className="py-4 px-6 hidden md:table-cell text-gray-700">
-                <span className="font-medium">{user.phone}</span>
+                <span className="font-medium">{user.phoneNumber}</span>
               </TableCell>
               <TableCell className="py-4 px-6">
                 <span className={`
@@ -380,36 +385,101 @@ function UsersListContent() {
   </CardContent>
 </Card>
 <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>تعديل المستخدم</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              {/* Form fields */}
-              <div className="space-y-4">
-                <div>
-                  <Label>الاسم الأول</Label>
-                  <Input {...form.register("firstName")} />
-                </div>
-                <div>
-                  <Label>الاسم الأوسط</Label>
-                  <Input {...form.register("middleName")} />
-                </div>
-                <div>
-                  <Label>الاسم الأخير</Label>
-                  <Input {...form.register("lastName")} />
-                </div>
-                <div>
-                  <Label>رقم الهاتف</Label>
-                  <Input {...form.register("phoneNumber")} />
-                </div>
-              </div>
-              <DialogFooter className="mt-4">
-                <Button type="submit">حفظ التغييرات</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+  <DialogContent className="sm:max-w-[500px]">
+    <DialogHeader>
+      <DialogTitle className="text-2xl font-bold text-primary">تعديل المستخدم</DialogTitle>
+      <DialogDescription className="text-gray-500">
+        قم بتعديل معلومات المستخدم. اضغط حفظ عند الانتهاء.
+      </DialogDescription>
+    </DialogHeader>
+
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">الاسم الأول</Label>
+          <Input 
+            {...form.register("firstName")} 
+            className="w-full border rounded-md"
+            placeholder="أدخل الاسم الأول"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">الاسم الأوسط</Label>
+          <Input 
+            {...form.register("middleName")} 
+            className="w-full border rounded-md"
+            placeholder="أدخل الاسم الأوسط"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">الاسم الأخير</Label>
+          <Input 
+            {...form.register("lastName")} 
+            className="w-full border rounded-md"
+            placeholder="أدخل الاسم الأخير"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">رقم الهاتف</Label>
+          <Input 
+            {...form.register("phoneNumber")} 
+            className="w-full border rounded-md"
+            placeholder="أدخل رقم الهاتف"
+            dir="ltr"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">البريد الإلكتروني</Label>
+          <Input 
+            {...form.register("email")} 
+            type="email"
+            className="w-full border rounded-md"
+            placeholder="أدخل البريد الإلكتروني"
+            dir="ltr"
+            disabled
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">نوع المستخدم</Label>
+          <Select 
+            onValueChange={(value) => form.setValue("role", value)}
+            defaultValue={form.getValues("role")}
+          >
+            <SelectTrigger  className="w-full">
+              <SelectValue placeholder="اختر نوع المستخدم" />
+            </SelectTrigger>
+            <SelectContent>
+              
+              <SelectItem value="admin">مشرف</SelectItem>
+              <SelectItem value="superadmin">مدير</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <DialogFooter className="flex justify-between items-center mt-6 pt-4 border-t">
+        <Button 
+          type="button" 
+          variant="outline"
+          onClick={() => setEditDialogOpen(false)}
+        >
+          إلغاء
+        </Button>
+        <Button 
+          type="submit"
+          className="bg-primary hover:bg-primary/90"
+        >
+          حفظ التغييرات
+        </Button>
+      </DialogFooter>
+    </form>
+  </DialogContent>
+</Dialog>
 
         <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <DialogContent>

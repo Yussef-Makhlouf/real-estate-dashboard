@@ -273,9 +273,9 @@ const handleMarkAsCanceled = async (id: string) => {
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
                   <option value="all">جميع الحالات</option>
-                  <option value="pending">قيد الانتظار</option>
-                  <option value="completed">مكتملة</option>
-                  <option value="cancelled">ملغية</option>
+                  <option value="قيد الانتظار">قيد الانتظار</option>
+                  <option value="مكتملة">مكتملة</option>
+                  <option value="ملغية">ملغية</option>
                 </select>
               </div>
             </div>
