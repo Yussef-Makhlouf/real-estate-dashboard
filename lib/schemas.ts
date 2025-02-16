@@ -377,6 +377,7 @@ export const propertySchema = z.discriminatedUnion('lang', [
   })
 ]);
 
+
 export const categorySchema = z.discriminatedUnion('lang', [
   z.object({
     lang: z.literal('ar'),

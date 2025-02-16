@@ -295,7 +295,7 @@ export function Header() {
         fetch("http://localhost:8080/newsletter", {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch("http://localhost:8080/interested", {
+        fetch("http://localhost:8080/interested/findAllNotReaded", {
           headers: { Authorization: `Bearer ${token}` }
         })
       ])
@@ -375,11 +375,11 @@ export function Header() {
             if (!open && (notifications > 0 || newInterests > 0)) {
               const token = localStorage.getItem("token")
               await Promise.all([
-                fetch("http://localhost:8080/newsletter/markAsRead", {
+                fetch("http://localhost:8080/interested/markAsRead", {
                   method: "POST",
                   headers: { Authorization: `Bearer ${token}` }
                 }),
-                fetch("http://localhost:8080/interested/markAsRead", {
+                fetch("http://localhost:8080/newsletter/markAsRead", {
                   method: "POST",
                   headers: { Authorization: `Bearer ${token}` }
                 })

@@ -13,7 +13,11 @@ import {
   MessageSquare,
   PieChart,
 } from "lucide-react"
-
+import { useEffect, useState } from "react"
+import { Category } from "./types/category" // Assuming you have the Category interface defined
+import { Blog } from "./types/blog" // Assuming you have the Blog interface defined
+import {InterestedUser} from "./types/intersted" // Assuming you have the InterestedUser interface defined
+import { Consultation } from "./types/consultaions" // Assuming you have the Consultation interface defined
 const stats = [
   {
     title: "إجمالي المشاريع",
@@ -53,6 +57,63 @@ const stats = [
 ]
 
 export default function Dashboard() {
+  const [categories, setCategories] = useState<Category[]>([])
+  const [blogs, setBlogs] = useState<Blog[]>([])
+  const [interestedUsers, setInterestedUsers] = useState<InterestedUser[]>([])
+  const [consultations, setConsultations] = useState<Consultation[]>([])
+
+  const getConsultationType = (type: string) => {
+    const types = {
+      zoom: 'زووم',
+      google_meet: 'جوجل ميت',
+      whatsapp: 'واتساب'
+    }
+    return types[type as keyof typeof types] || type
+  }
+
+  useEffect(() => {
+    
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/category/getLastThreeCategory')
+        const data = await response.json()
+        setCategories(data.returnedData.categories)
+      } catch (error) {
+        console.error('Error fetching categories:', error)
+      }
+    }
+    const fetchBlogs = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/blog/getLastThreeBlogsforDashboard')
+        const data = await response.json()
+        setBlogs(data.returnedData.blogs)
+      } catch (error) {
+        console.error('Error fetching blogs:', error)
+      }
+    }
+    const fetchInterestedUsers = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/interested/getLastThreeIntersted')
+        const data = await response.json()
+        setInterestedUsers(data.returnedData.intested)
+      } catch (error) {
+        console.error('Error fetching interested users:', error)
+      }
+    }
+    const fetchConsultations = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/consultation/getLastThreeConsultes')
+        const data = await response.json()
+        setConsultations(data.returnedData.consultes)
+      } catch (error) {
+        console.error('Error fetching consultations:', error)
+      }
+    }
+    fetchBlogs()
+    fetchCategories()
+    fetchConsultations()
+    fetchInterestedUsers()
+  }, [])
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header />
@@ -92,124 +153,148 @@ export default function Dashboard() {
 
           {/* Latest Projects and Articles Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            {/* Latest Projects */}
-            <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold flex items-center">
-                  <Building className="h-5 w-5 text-primary mr-2" />
-                  المشاريع الجديدة
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                        <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
-                        <div>
-                          <div className="text-lg font-semibold text-gray-900">مشروع {i + 1}</div>
-                          <div className="text-sm text-gray-500">موقع المشروع: مدينة الرياض</div>
-                        </div>
-                      </div>
-                      <div className="text-lg font-semibold text-green-500">جديد</div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+ 
+  {/* Latest Projects */}
+  <Card className="hover:shadow-lg transition-shadow duration-300">
+    <CardHeader>
+      <CardTitle className="text-xl font-bold flex items-center">
+        <Building className="h-5 w-5 text-primary mr-2" />
+        المشاريع الجديدة
+      </CardTitle>
+    </CardHeader>
+    <CardContent className="p-6">
+      <div className="space-y-4">
+        {categories.map((category) => (
+          <div
+            key={category._id}
+            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-center space-x-4 rtl:space-x-reverse">
+              <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden">
+                <img 
+                  src={category.Image?.secure_url} 
+                  alt={category.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <div className="text-lg font-semibold text-gray-900">{category.title}</div>
+                <div className="text-sm text-gray-500">موقع المشروع: {category.location}</div>
+              </div>
+            </div>
+            <div className="text-lg font-semibold text-green-500">جديد</div>
+          </div>
+        ))}
+      </div>
+    </CardContent>
+  </Card>
 
             {/* Latest Articles */}
             <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold flex items-center">
-                  <FileText className="h-5 w-5 text-primary mr-2" />
-                  المقالات الجديدة
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                        <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
-                        <div>
-                          <div className="text-lg font-semibold text-gray-900">مقال {i + 1}</div>
-                          <div className="text-sm text-gray-500">كاتب المقال: أحمد علي</div>
-                        </div>
-                      </div>
-                      <div className="text-lg font-semibold text-green-500">جديد</div>
-                    </div>
-                  ))}
+    <CardHeader>
+      <CardTitle className="text-xl font-bold flex items-center">
+        <FileText className="h-5 w-5 text-primary mr-2" />
+          اجمالي المقالات 
+      </CardTitle>
+    </CardHeader>
+    <CardContent className="p-6">
+      <div className="space-y-4">
+        {blogs.map((blog) => (
+          <div
+            key={blog._id}
+            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-center space-x-4 rtl:space-x-reverse">
+              <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden">
+                <img 
+                  src={blog.Image.secure_url} 
+                  alt={blog.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <div className="text-lg font-semibold text-gray-900">{blog.title}</div>
+                <div className="text-sm text-gray-500">
+                  {new Date(blog.createdAt).toLocaleDateString('ar-SA')}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+            <div className="text-lg font-semibold text-green-500">جديد</div>
+          </div>
+        ))}
+      </div>
+    </CardContent>
+  </Card>
           </div>
 
           {/* User Interactions Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Interested Users */}
             <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold flex items-center">
-                  <Users className="h-5 w-5 text-primary mr-2" />
-                  المهتمون بالمشاريع
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-                        <div>
-                          <div className="text-lg font-semibold text-gray-900">مستخدم {i + 1}</div>
-                          <div className="text-sm text-gray-500">مدينة الرياض</div>
-                        </div>
-                      </div>
-                      <div className="text-lg font-semibold text-blue-500">متابع</div>
-                    </div>
-                  ))}
+      <CardHeader>
+        <CardTitle className="text-xl font-bold flex items-center">
+          <Users className="h-5 w-5 text-primary mr-2" />
+          المهتمون بالمشاريع
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6">
+        <div className="space-y-4">
+          {interestedUsers.map((user) => (
+            <div
+              key={user._id}
+              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors"
+            >
+              <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                  <Users className="h-5 w-5 text-gray-500" />
                 </div>
-              </CardContent>
-            </Card>
+                <div>
+                  <div className="text-lg font-semibold text-gray-900">{user.fullName}</div>
+                  <div className="text-sm text-gray-500">مهتم ب: {user.unitId.title}</div>
+                </div>
+              </div>
+              <div className="text-lg font-semibold text-blue-500">متابع</div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+
 
             {/* Consultations */}
             <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold flex items-center">
-                  <MessageSquare className="h-5 w-5 text-primary mr-2" />
-                  الاستشارات الأخيرة
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-                        <div>
-                          <div className="text-lg font-semibold text-gray-900">استشارة {i + 1}</div>
-                          <div className="text-sm text-gray-500">موضوع الاستشارة: شراء عقار</div>
-                        </div>
-                      </div>
-                      <div className="text-lg font-semibold text-orange-500">قيد المعالجة</div>
-                    </div>
-                  ))}
+      <CardHeader>
+        <CardTitle className="text-xl font-bold flex items-center">
+          <MessageSquare className="h-5 w-5 text-primary mr-2" />
+          الاستشارات الأخيرة
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6">
+        <div className="space-y-4">
+          {consultations.map((consultation) => (
+            <div
+              key={consultation._id}
+              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors"
+            >
+              <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                  <MessageSquare className="h-5 w-5 text-gray-500" />
                 </div>
-              </CardContent>
-            </Card>
+                <div>
+                  <div className="text-lg font-semibold text-gray-900">
+                    استشارة عبر {getConsultationType(consultation.type)}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    اليوم: {consultation.selectedDay} | هاتف: {consultation.phone}
+                  </div>
+                </div>
+              </div>
+              <div className="text-lg font-semibold text-orange-500">قيد المعالجة</div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
           </div>
         </div>
       </main>

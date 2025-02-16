@@ -39,11 +39,10 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     fetchData()
-    markAsRead()
 
     const socket = io("http://localhost:8080")
-    socket.on("emails_fetched", fetchData)
-    socket.on("new_intersted", fetchData)
+    socket.on("last-one-hour-newsletter", fetchData)
+    socket.on("last-one-hour-intersted", fetchData)
 
     return () => {
       socket.disconnect()
@@ -54,10 +53,10 @@ export default function NotificationsPage() {
     try {
       const token = localStorage.getItem("token")
       const [emailResponse, interestedResponse] = await Promise.all([
-        fetch("http://localhost:8080/newsletter", {
+        fetch("http://localhost:8080/newsletter/getAllLastHour", {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch("http://localhost:8080/interested", {
+        fetch("http://localhost:8080/interested/getAllLastOneHour", {
           headers: { Authorization: `Bearer ${token}` }
         })
       ])
@@ -65,8 +64,9 @@ export default function NotificationsPage() {
       const emailData = await emailResponse.json()
       const interestedData = await interestedResponse.json()
 
+      
       setSubscriptions(emailData.emailData || [])
-      setInterestedUsers(interestedData.interested || [])
+      setInterestedUsers(interestedData.interstedData || [])
     } catch (error) {
       console.error("Failed to fetch data:", error)
       setSubscriptions([])
@@ -74,17 +74,6 @@ export default function NotificationsPage() {
     }
   }
 
-  const markAsRead = async () => {
-    try {
-      const token = localStorage.getItem("token")
-      await fetch("http://localhost:8080/newsletter/markAsRead", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` }
-      })
-    } catch (error) {
-      console.error("Failed to mark as read:", error)
-    }
-  }
 
   return (
     <SidebarProvider>

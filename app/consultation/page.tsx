@@ -34,6 +34,8 @@ const ConsultationPage = () => {
     try {
       const response = await fetch('http://localhost:8080/consultation/')
       const data = await response.json()
+      console.log(data);
+      
       setConsultations(data.map((item: Consultation) => ({
         ...item,
         status: item.status || 'pending'
@@ -42,6 +44,7 @@ const ConsultationPage = () => {
       setIsLoading(false)
     }
   }
+
 
   useEffect(() => {
     fetchConsultations()
