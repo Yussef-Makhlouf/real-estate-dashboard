@@ -1,38 +1,40 @@
-import createNextIntlPlugin from 'next-intl/plugin'
-import withBundleAnalyzer from '@next/bundle-analyzer'
-
-const withNextIntl = createNextIntlPlugin()
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true
+    ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true
+    ignoreBuildErrors: true,
   },
   images: {
-    domains: ['ik.imagekit.io'],
     unoptimized: true,
     remotePatterns: [
       {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8080',
+        pathname: '/uploads/**',
+      },
+      {
         protocol: 'https',
-        hostname: '**',
+        hostname: 'tasis-al-bina.onrender.com',
       },
     ],
   },
   env: {
-    API_BASE_URL: process.env.API_BASE_URL,
+    API_BASE_URL: 'https://tasis-al-bina.onrender.com',
   },
-  poweredByHeader: false,
-  compress: true,
-  reactStrictMode: true,
-  swcMinify: true,
+  experimental: {
+    webpackBuildWorker: true,
+    parallelServerBuildTraces: true,
+    parallelServerCompiles: true,
+    missingSuspenseWithCSRBailout: false,
+  },
+  webpack: (config) => {
+    config.resolve.fallback = { fs: false }
+    return config
+  }
 }
-
-const analyzeBundleConfig = withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-})(nextConfig)
 
 // Load user config if exists
 const loadUserConfig = async () => {
@@ -63,5 +65,5 @@ const mergeConfig = (baseConfig, userConfig) => {
 // Export final config
 export default async () => {
   const userConfig = await loadUserConfig()
-  return withNextIntl(mergeConfig(analyzeBundleConfig, userConfig?.default))
+  return mergeConfig(nextConfig, userConfig?.default)
 }
