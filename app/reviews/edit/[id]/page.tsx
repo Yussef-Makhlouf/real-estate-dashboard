@@ -1,6 +1,6 @@
 "use client"
 import { useRouter } from 'next/navigation'
-import { useReducer, useEffect } from "react"
+import { useReducer, useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Star, Loader2 } from "lucide-react"
@@ -10,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { TabComponent } from "@/components/ui/tab-component"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { reviewSchema } from "@/lib/schemas"
 import toast, { Toaster } from 'react-hot-toast'
@@ -20,44 +19,67 @@ type FormData = z.infer<typeof reviewSchema>
 
 type State = {
   isLoading: { ar: boolean; en: boolean }
+  currentLang: "ar" | "en" | null
 }
 
-type Action = { type: "SET_LOADING"; lang: "ar" | "en"; value: boolean }
+type Action =
+  | { type: "SET_LOADING"; lang: "ar" | "en"; value: boolean }
+  | { type: "SET_LANGUAGE"; lang: "ar" | "en" }
 
-const Form = ({ lang, forms, onSubmit, state }: {
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case "SET_LOADING":
+      return { ...state, isLoading: { ...state.isLoading, [action.lang]: action.value } }
+    case "SET_LANGUAGE":
+      return { ...state, currentLang: action.lang }
+    default:
+      return state
+  }
+}
+
+const Form = ({ lang, form, onSubmit, state }: {
   lang: "ar" | "en"
-  forms: Record<"ar" | "en", ReturnType<typeof useForm<FormData>>>
+  form: ReturnType<typeof useForm<FormData>>
   onSubmit: (data: FormData, lang: "ar" | "en") => Promise<void>
   state: State
 }) => {
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = forms[lang]
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = form
   const rate = watch("rate")
 
   return (
-    <form onSubmit={handleSubmit((data) => onSubmit(data, lang))} className="space-y-6">
+    <form
+      onSubmit={handleSubmit((data) => onSubmit(data, lang))}
+      dir={lang === "ar" ? "rtl" : "ltr"} // ضبط اتجاه النموذج
+      className="space-y-6"
+    >
       <div className="space-y-4">
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "الاسم" : "Name"}</label>
-          <Input {...register("name")} className={errors.name ? "border-red-500" : ""} />
+          <Input
+            {...register("name")}
+            className={errors.name ? "border-red-500" : ""}
+            dir={lang === "ar" ? "rtl" : "ltr"} // ضبط اتجاه حقل الإدخال
+          />
           {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
         </div>
 
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "البلد" : "Country"}</label>
-          <Input {...register("country")} className={errors.country ? "border-red-500" : ""} />
+          <Input
+            {...register("country")}
+            className={errors.country ? "border-red-500" : ""}
+            dir={lang === "ar" ? "rtl" : "ltr"} // ضبط اتجاه حقل الإدخال
+          />
           {errors.country && <p className="text-red-500 text-sm">{errors.country.message}</p>}
         </div>
 
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "التعليق" : "Comment"}</label>
           <RichTextEditor
-            // key={`${lang}-${watch("description")}`}
-             content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
-             onChange={(content) => setValue("description", content.replace(/<[^>]*>/g, ''))}
+            content={watch("description")?.replace(/<[^>]*>/g, '') || ""}
+            onChange={(content) => setValue("description", content.replace(/<[^>]*>/g, ''))}
             language={lang}
           />
-
-
           {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
         </div>
 
@@ -80,21 +102,22 @@ const Form = ({ lang, forms, onSubmit, state }: {
         <div className="space-y-2">
           <label className="block text-sm font-medium">{lang === "ar" ? "الصورة" : "Image"}</label>
           <ImageUpload
-  language={lang}
-  onImagesChange={(images) => forms[lang].setValue("image", images[0])}
-  initialImages={[
-    forms[lang].watch("Image")?.secure_url ||
-    forms[lang].watch("image")?.secure_url ||
-    forms[lang].watch("Image") ||
-    forms[lang].watch("image")
-  ].filter(Boolean)}
-  maxImages={10}
-  existingImages={state.existingImages || []}
-/>
-
+            language={lang}
+            onImagesChange={(images) => form.setValue("image", images[0])}
+            initialImages={[
+              form.watch("Image")?.secure_url ||
+              form.watch("image")?.secure_url ||
+              form.watch("Image") ||
+              form.watch("image")
+            ].filter(Boolean)}
+            maxImages={10} existingImages={[]} />
         </div>
 
-        <Button type="submit" disabled={state.isLoading[lang]}>
+        <Button
+          type="submit"
+          disabled={state.isLoading[lang]}
+          className="w-full"
+        >
           {state.isLoading[lang] ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -108,21 +131,17 @@ const Form = ({ lang, forms, onSubmit, state }: {
     </form>
   )
 }
+
 export default function EditReview({ params }: { params: { id: string } }) {
   const router = useRouter()
-  const [state, dispatch] = useReducer((state: State, action: Action): State => {
-    if (action.type === "SET_LOADING") {
-      return { ...state, isLoading: { ...state.isLoading, [action.lang]: action.value } }
-    }
-    return state
-  }, {
-    isLoading: { ar: false, en: false }
+  const [state, dispatch] = useReducer(reducer, {
+    isLoading: { ar: false, en: false },
+    currentLang: null
   })
 
-  const forms = {
-    ar: useForm<FormData>({ resolver: zodResolver(reviewSchema), defaultValues: { lang: 'ar' } }),
-    en: useForm<FormData>({ resolver: zodResolver(reviewSchema), defaultValues: { lang: 'en' } })
-  }
+  const formAr = useForm<FormData>({ resolver: zodResolver(reviewSchema), defaultValues: { lang: 'ar' } })
+  const formEn = useForm<FormData>({ resolver: zodResolver(reviewSchema), defaultValues: { lang: 'en' } })
+
   const fetchReview = async () => {
     const loadingToast = toast.loading('جاري تحميل البيانات...')
 
@@ -149,17 +168,17 @@ export default function EditReview({ params }: { params: { id: string } }) {
         throw new Error('Invalid review data')
       }
 
-      const targetForm = forms[data.review.lang as keyof typeof forms]
-      if (targetForm) {
-        targetForm.reset({
-          lang: data.review.lang,
-          name: data.review.name,
-          country: data.review.country,
-          description: data.review.description,
-          rate: data.review.rate,
-          image: data.review.Image?.secure_url
-        })
-      }
+      const targetForm = data.review.lang === "ar" ? formAr : formEn
+      targetForm.reset({
+        lang: data.review.lang,
+        name: data.review.name,
+        country: data.review.country,
+        description: data.review.description,
+        rate: data.review.rate,
+        image: data.review.Image?.secure_url
+      })
+
+      dispatch({ type: "SET_LANGUAGE", lang: data.review.lang })
 
       toast.success('تم تحميل البيانات بنجاح', { id: loadingToast })
     } catch (error) {
@@ -169,12 +188,9 @@ export default function EditReview({ params }: { params: { id: string } }) {
     }
   }
 
-
   useEffect(() => {
     fetchReview()
   }, [params.id])
-
-
 
   const onSubmit = async (data: FormData, lang: "ar" | "en") => {
     const loadingToast = toast.loading('جاري حفظ التغييرات...')
@@ -210,6 +226,22 @@ export default function EditReview({ params }: { params: { id: string } }) {
     }
   }
 
+  if (!state.currentLang) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="relative">
+          <div className="h-24 w-24 rounded-full border-t-4 border-b-4 border-primary animate-spin"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="h-16 w-16 rounded-full border-t-4 border-b-4 border-secondary animate-spin"></div>
+          </div>
+          <div className="mt-4 text-center text-gray-600 font-medium">
+            جاري التحميل...
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -217,13 +249,16 @@ export default function EditReview({ params }: { params: { id: string } }) {
       <main className="pt-16 px-4 sm:px-6 lg:px-8">
         <Card>
           <CardHeader>
-            <CardTitle>تعديل المراجعة</CardTitle>
+            <CardTitle dir={state.currentLang === "ar" ? "rtl" : "ltr"}> {/* ضبط اتجاه العنوان */}
+              {state.currentLang === "ar" ? "تعديل المراجعة" : "Edit Review"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <TabComponent
-              arabicContent={<Form lang="ar" forms={forms} onSubmit={onSubmit} state={state} />}
-              englishContent={<Form lang="en" forms={forms} onSubmit={onSubmit} state={state} />}
-            />
+            {state.currentLang === "ar" ? (
+              <Form lang="ar" form={formAr} onSubmit={onSubmit} state={state} />
+            ) : (
+              <Form lang="en" form={formEn} onSubmit={onSubmit} state={state} />
+            )}
           </CardContent>
         </Card>
       </main>

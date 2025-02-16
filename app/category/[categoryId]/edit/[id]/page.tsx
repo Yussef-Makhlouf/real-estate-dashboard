@@ -1,545 +1,5 @@
-// "use client"
-// import { useReducer, useEffect, Key } from "react"
-// import { useForm } from "react-hook-form"
-// import { zodResolver } from "@hookform/resolvers/zod"
-// import { Loader2, Trash, Plus } from "lucide-react"
-// import { Header } from "@/components/Header"
-// import { Sidebar } from "@/components/Sidebar"
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { TabComponent } from "@/components/ui/tab-component"
-// import { ImageUpload } from "@/components/ui/image-upload"
-// import { toast } from "react-hot-toast"
-// import { useRouter, useParams } from 'next/navigation'
-// import * as z from "zod"
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select"
-// import { Textarea } from "@/components/ui/textarea"
-// import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-
-// const unitSchema = z.object({
-//   title: z.string().min(3, { message: "Title must be at least 3 characters" }),
-//   type: z.string().min(1, { message: "Please select a type" }),
-//   price: z.string().min(1, { message: "Price is required" }),
-//   area: z.string().min(1, { message: "Area is required" }),
-//   rooms: z.string().min(1, { message: "Number of rooms is required" }),
-//   bathrooms: z.string().min(1, { message: "Number of bathrooms is required" }),
-//   livingrooms: z.string().min(1, { message: "Number of living rooms is required" }),
-//   elevators: z.string().min(1, { message: "Number of elevators is required" }),
-//   parking: z.string().min(1, { message: "Parking spaces is required" }),
-//   guard: z.string().min(1, { message: "Number of guards is required" }),
-//   waterTank: z.string().min(1, { message: "Water tanks count is required" }),
-//   maidRoom: z.string().min(1, { message: "Maid rooms count is required" }),
-//   cameras: z.string().min(1, { message: "Number of cameras is required" }),
-//   floor: z.string().min(1, { message: "Floor number is required" }),
-//   location: z.string().min(3, { message: "Location must be at least 3 characters" }),
-//   coordinates: z.object({
-//     latitude: z.string().min(1, { message: "Latitude is required" }),
-//     longitude: z.string().min(1, { message: "Longitude is required" })
-//   }),
-//   description: z.string().min(10, { message: "Description must be at least 10 characters" }),
-//   status: z.string().min(1, { message: "Please select a status" }),
-//   nearbyPlaces: z.array(z.object({
-//     place: z.string().min(2, { message: "Place name is required" }),
-//     timeInMinutes: z.string().min(1, { message: "Time in minutes is required" })
-//   })).optional(),
-//   lang: z.string()
-// })
-
-// type FormData = z.infer<typeof unitSchema>
-
-// const unitTypes = [
-//   "Villa", "Apartment", "Duplex", "Penthouse", "Townhouse",
-//   "Studio", "Chalet", "Warehouse", "Office", "Shop"
-// ]
-
-// const unitStatuses = [
-//   "Available", "Sold", "Rented", "Reserved", "Under Maintenance"
-// ]
-
-// type ExistingImage = {
-//   url: string
-//   id: string
-// }
-
-// type State = {
-//   images: File[]
-//   existingImages: ExistingImage[]
-//   isLoading: { ar: boolean; en: boolean }
-//   nearbyPlaces: Array<{ place: string; timeInMinutes: number }>
-//   removedImages: string[]
-// }
-
-// type Action =
-//   | { type: "SET_IMAGES"; value: File[] }
-//   | { type: "SET_EXISTING_IMAGES"; value: ExistingImage[] }
-//   | { type: "REMOVE_EXISTING_IMAGE"; id: string }
-//   | { type: "SET_LOADING"; lang: "ar" | "en"; value: boolean }
-//   | { type: "SET_NEARBY_PLACES"; value: Array<{ place: string; timeInMinutes: number }> }
-//   | { type: "ADD_REMOVED_IMAGE"; id: string }
-
-// const reducer = (state: State, action: Action): State => {
-//   switch (action.type) {
-//     case "SET_IMAGES":
-//       return { ...state, images: action.value }
-//     case "SET_EXISTING_IMAGES":
-//       return { ...state, existingImages: action.value }
-//     case "ADD_REMOVED_IMAGE":
-//       return {
-//         ...state,
-//         removedImages: [...state.removedImages, action.id],
-//         existingImages: state.existingImages.filter(img => img.id !== action.id)
-//       }
-//     case "SET_LOADING":
-//       return { ...state, isLoading: { ...state.isLoading, [action.lang]: action.value } }
-//     case "SET_NEARBY_PLACES":
-//       return { ...state, nearbyPlaces: action.value }
-//     default:
-//       return state
-//   }
-// }
-
-// const UnitForm = ({ lang, form, onSubmit, state, dispatch }: { 
-//   lang: "ar" | "en", 
-//   form: any, 
-//   onSubmit: (data: FormData, lang: "ar" | "en") => void, 
-//   state: State, 
-//   dispatch: React.Dispatch<Action> 
-// }) => {
-//   const isRTL = lang === "ar"
-
-//   return (
-//     <Form {...form}>
-//       <form 
-//         onSubmit={form.handleSubmit((data: FormData) => onSubmit(data, lang))}
-//         className="space-y-8 bg-white p-6 rounded-lg shadow-sm"
-//         dir={isRTL ? "rtl" : "ltr"}
-//       >
-//         {/* Images Section */}
-//         <div className="space-y-4">
-//           <FormLabel className="text-lg font-semibold">
-//             {lang === "ar" ? "صور العقار *" : "Property Images *"}
-//           </FormLabel>
-          
-//           {state.existingImages.length > 0 && (
-//             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-//               {state.existingImages.map((image) => (
-//                 <div key={image.id} className="relative group">
-//                   <img
-//                     src={image.url}
-//                     alt="Property"
-//                     className="w-full h-40 object-cover rounded-lg border-2 border-gray-200"
-//                   />
-//                   <Button
-//                     type="button"
-//                     variant="destructive"
-//                     size="icon"
-//                     className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-//                     onClick={() => dispatch({ type: "ADD_REMOVED_IMAGE", id: image.id })}
-//                   >
-//                     <Trash className="h-4 w-4" />
-//                   </Button>
-//                 </div>
-//               ))}
-//             </div>
-//           )}
-
-//           <FormField
-//             control={form.control}
-//             name="images"
-//             render={({ field }) => (
-//               <FormItem>
-//                 <ImageUpload
-//                   maxImages={10 - state.existingImages.length}
-//                   onImagesChange={(files) => {
-//                     dispatch({ type: "SET_IMAGES", value: files })
-//                     field.onChange(files)
-//                   }}
-//                   language={lang}
-//                   existingImages={state.existingImages.map(img => img.url)}
-//                 />
-//                 <FormMessage className="text-red-500 text-sm" />
-//               </FormItem>
-//             )}
-//           />
-//         </div>
-
-//         {/* Basic Information Section */}
-//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-//           <FormField
-//             control={form.control}
-//             name="title"
-//             render={({ field }) => (
-//               <FormItem>
-//                 <FormLabel>{lang === "ar" ? "العنوان *" : "Title *"}</FormLabel>
-//                 <FormControl>
-//                   <Input
-//                     {...field}
-//                     placeholder={lang === "ar" ? "عنوان العقار..." : "Property title..."}
-//                   />
-//                 </FormControl>
-//                 <FormMessage />
-//               </FormItem>
-//             )}
-//           />
-
-//           <FormField
-//             control={form.control}
-//             name="type"
-//             render={({ field }) => (
-//               <FormItem>
-//                 <FormLabel>{lang === "ar" ? "النوع *" : "Type *"}</FormLabel>
-//                 <Select onValueChange={field.onChange} value={field.value}>
-//                   <FormControl>
-//                     <SelectTrigger>
-//                       <SelectValue placeholder={lang === "ar" ? "اختر النوع" : "Select type"} />
-//                     </SelectTrigger>
-//                   </FormControl>
-//                   <SelectContent>
-//                     {unitTypes.map((type) => (
-//                       <SelectItem key={type} value={type}>
-//                         {type}
-//                       </SelectItem>
-//                     ))}
-//                   </SelectContent>
-//                 </Select>
-//                 <FormMessage />
-//               </FormItem>
-//             )}
-//           />
-
-//           {[
-//             { name: "price", label: "السعر", enLabel: "Price" },
-//             { name: "area", label: "المساحة", enLabel: "Area" },
-//             { name: "rooms", label: "الغرف", enLabel: "Rooms" },
-//             { name: "bathrooms", label: "الحمامات", enLabel: "Bathrooms" },
-//             { name: "livingrooms", label: "الصالات", enLabel: "Living Rooms" },
-//             { name: "elevators", label: "المصاعد", enLabel: "Elevators" },
-//             { name: "parking", label: "المواقف", enLabel: "Parking" },
-//             { name: "guard", label: "الحراس", enLabel: "Guards" },
-//             { name: "waterTank", label: "خزانات المياه", enLabel: "Water Tanks" },
-//             { name: "maidRoom", label: "غرف الخدم", enLabel: "Maid Rooms" },
-//             { name: "cameras", label: "الكاميرات", enLabel: "Cameras" },
-//             { name: "floor", label: "الطابق", enLabel: "Floor" },
-//           ].map((field) => (
-//             <FormField
-//               key={field.name}
-//               control={form.control}
-//               name={field.name}
-//               render={({ field: innerField }) => (
-//                 <FormItem>
-//                   <FormLabel>
-//                     {lang === "ar" ? `${field.label} *` : `${field.enLabel} *`}
-//                   </FormLabel>
-//                   <FormControl>
-//                     <Input
-//                       {...innerField}
-//                       type="number"
-//                       placeholder={lang === "ar" ? field.label : field.enLabel}
-//                     />
-//                   </FormControl>
-//                   <FormMessage />
-//                 </FormItem>
-//               )}
-//             />
-//           ))}
-
-//           <FormField
-//             control={form.control}
-//             name="location"
-//             render={({ field }) => (
-//               <FormItem>
-//                 <FormLabel>{lang === "ar" ? "الموقع *" : "Location *"}</FormLabel>
-//                 <FormControl>
-//                   <Input
-//                     {...field}
-//                     placeholder={lang === "ar" ? "موقع العقار..." : "Property location..."}
-//                   />
-//                 </FormControl>
-//                 <FormMessage />
-//               </FormItem>
-//             )}
-//           />
-
-//           <FormField
-//             control={form.control}
-//             name="status"
-//             render={({ field }) => (
-//               <FormItem>
-//                 <FormLabel>{lang === "ar" ? "الحالة *" : "Status *"}</FormLabel>
-//                 <Select onValueChange={field.onChange} value={field.value}>
-//                   <FormControl>
-//                     <SelectTrigger>
-//                       <SelectValue placeholder={lang === "ar" ? "اختر الحالة" : "Select status"} />
-//                     </SelectTrigger>
-//                   </FormControl>
-//                   <SelectContent>
-//                     {unitStatuses.map((status) => (
-//                       <SelectItem key={status} value={status}>
-//                         {status}
-//                       </SelectItem>
-//                     ))}
-//                   </SelectContent>
-//                 </Select>
-//                 <FormMessage />
-//               </FormItem>
-//             )}
-//           />
-//         </div>
-
-//         {/* Coordinates Section */}
-//         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//           <FormField
-//             control={form.control}
-//             name="coordinates.latitude"
-//             render={({ field }) => (
-//               <FormItem>
-//                 <FormLabel>{lang === "ar" ? "خط العرض *" : "Latitude *"}</FormLabel>
-//                 <FormControl>
-//                   <Input
-//                     {...field}
-//                     type="number"
-//                     step="any"
-//                     placeholder={lang === "ar" ? "إحداثيات خط العرض..." : "Enter latitude..."}
-//                   />
-//                 </FormControl>
-//                 <FormMessage />
-//               </FormItem>
-//             )}
-//           />
-
-//           <FormField
-//             control={form.control}
-//             name="coordinates.longitude"
-//             render={({ field }) => (
-//               <FormItem>
-//                 <FormLabel>{lang === "ar" ? "خط الطول *" : "Longitude *"}</FormLabel>
-//                 <FormControl>
-//                   <Input
-//                     {...field}
-//                     type="number"
-//                     step="any"
-//                     placeholder={lang === "ar" ? "إحداثيات خط الطول..." : "Enter longitude..."}
-//                   />
-//                 </FormControl>
-//                 <FormMessage />
-//               </FormItem>
-//             )}
-//           />
-//         </div>
-
-//         {/* Description Section */}
-//         <FormField
-//           control={form.control}
-//           name="description"
-//           render={({ field }) => (
-//             <FormItem>
-//               <FormLabel>{lang === "ar" ? "الوصف *" : "Description *"}</FormLabel>
-//               <FormControl>
-//                 <Textarea
-//                   {...field}
-//                   rows={4}
-//                   placeholder={lang === "ar" ? "وصف تفصيلي للعقار..." : "Detailed property description..."}
-//                   className="resize-none"
-//                 />
-//               </FormControl>
-//               <FormMessage />
-//             </FormItem>
-//           )}
-//         />
-
-//         {/* Nearby Places Section */}
-//         <div className="space-y-4">
-//           <FormLabel className="text-lg font-semibold">
-//             {lang === "ar" ? "الأماكن القريبة" : "Nearby Places"}
-//           </FormLabel>
-          
-//           {[0, 1, 2].map((index) => (
-//             <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg">
-//               <FormField
-//                 control={form.control}
-//                 name={`nearbyPlaces.${index}.place`}
-//                 render={({ field }) => (
-//                   <FormItem>
-//                     <FormLabel>{lang === "ar" ? "اسم المكان" : "Place Name"}</FormLabel>
-//                     <FormControl>
-//                       <Input {...field} />
-//                     </FormControl>
-//                     <FormMessage />
-//                   </FormItem>
-//                 )}
-//               />
-//               <FormField
-//                 control={form.control}
-//                 name={`nearbyPlaces.${index}.timeInMinutes`}
-//                 render={({ field }) => (
-//                   <FormItem>
-//                     <FormLabel>{lang === "ar" ? "الوقت (دقيقة)" : "Time (minutes)"}</FormLabel>
-//                     <FormControl>
-//                       <Input type="number" {...field} />
-//                     </FormControl>
-//                     <FormMessage />
-//                   </FormItem>
-//                 )}
-//               />
-//             </div>
-//           ))}
-//         </div>
-
-//         <Button 
-//           type="submit" 
-//           className="w-full"
-//           disabled={state.isLoading[lang]}
-//         >
-//           {state.isLoading[lang] && (
-//             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-//           )}
-//           {lang === "ar" ? "حفظ التغييرات" : "Save Changes"}
-//         </Button>
-//       </form>
-//     </Form>
-//   )}
-
-// export default function EditUnit() {
-//   const [state, dispatch] = useReducer(reducer, {
-//     images: [],
-//     existingImages: [],
-//     isLoading: { ar: false, en: false },
-//     nearbyPlaces: [],
-//     removedImages: []
-//   })
-
-//   const router = useRouter()
-//   const params = useParams()
-
-//   const forms = {
-//     ar: useForm<FormData>({
-//       resolver: zodResolver(unitSchema),
-//       defaultValues: { lang: "ar" }
-//     }),
-//     en: useForm<FormData>({
-//       resolver: zodResolver(unitSchema),
-//       defaultValues: { lang: "en" }
-//     })
-//   }
-
-//   useEffect(() => {
-//     const fetchUnitData = async () => {
-//       try {
-//         const response = await fetch(`http://localhost:8080/unit/getunit/${params.id}`, {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("token")}`,
-//           },
-//         })
-//         const data = await response.json()
-        
-//         if (data.unit) {
-//           const unit = data.unit
-//           const form = unit.lang === "ar" ? forms.ar : forms.en
-          
-//           form.reset({
-//             ...unit,
-//             nearbyPlaces: unit.nearbyPlaces || [
-//               { place: "", timeInMinutes: "" },
-//               { place: "", timeInMinutes: "" },
-//               { place: "", timeInMinutes: "" }
-//             ]
-//           })
-
-//           if (unit.images) {
-//             dispatch({ type: "SET_EXISTING_IMAGES", value: unit.images })
-//           }
-//         }
-//       } catch (error) {
-//         toast.error("Failed to fetch unit data")
-//       }
-//     }
-
-//     if (params.id) fetchUnitData()
-//   }, [params.id])
-
-//   const onSubmit = async (data: FormData, lang: "ar" | "en") => {
-//     dispatch({ type: "SET_LOADING", lang, value: true })
-    
-//     try {
-//       const formData = new FormData()
-//       const payload = {
-//         ...data,
-//         removedImages: state.removedImages,
-//         existingImages: state.existingImages.map(img => img.id),
-//         lang
-//       }
-
-//       formData.append('data', JSON.stringify(payload))
-//       state.images.forEach(file => formData.append('images', file))
-
-//       const response = await fetch(`http://localhost:8080/unit/updateunit/${params.id}`, {
-//         method: "PUT",
-//         headers: {
-//           Authorization: `Bearer ${localStorage.getItem("token")}`,
-//         },
-//         body: formData
-//       })
-
-//       if (!response.ok) throw new Error("Update failed")
-      
-//       toast.success(lang === "ar" ? "تم التحديث بنجاح" : "Update successful")
-//       router.push(`/category/${params.categoryId}`)
-//     } catch (error) {
-//       toast.error(lang === "ar" 
-//         ? "خطأ في التحديث، يرجى المحاولة مرة أخرى" 
-//         : "Update failed, please try again")
-//     } finally {
-//       dispatch({ type: "SET_LOADING", lang, value: false })
-//     }
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-gray-100">
-//       <Header />
-//       <Sidebar />
-//       <main className="pt-16 px-4 sm:px-6 lg:px-8">
-//         <Card className="max-w-7xl mx-auto">
-//           <CardHeader>
-//             <CardTitle className={params.lang === "ar" ? "text-right" : "text-left"}>
-//               {params.lang === "ar" ? "تعديل الوحدة" : "Edit Unit"}
-//             </CardTitle>
-//           </CardHeader>
-//           <CardContent>
-//             <TabComponent
-//               arabicContent={
-//                 <UnitForm
-//                   lang="ar"
-//                   form={forms.ar}
-//                   onSubmit={onSubmit}
-//                   state={state}
-//                   dispatch={dispatch}
-//                 />
-//               }
-//               englishContent={
-//                 <UnitForm
-//                   lang="en"
-//                   form={forms.en}
-//                   onSubmit={onSubmit}
-//                   state={state}
-//                   dispatch={dispatch}
-//                 />
-//               }
-//             />
-//           </CardContent>
-//         </Card>
-//       </main>
-//     </div>
-//   )
-// }
-
 "use client"
+
 import { useReducer, useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -658,6 +118,7 @@ type State = {
   isLoading: { ar: boolean; en: boolean }
   nearbyPlaces: Array<{ place: string; timeInMinutes: number }>
   removedImages: string[]
+  currentLang: "ar" | "en" | null
 }
 
 type Action =
@@ -667,6 +128,7 @@ type Action =
   | { type: "SET_LOADING"; lang: "ar" | "en"; value: boolean }
   | { type: "SET_NEARBY_PLACES"; value: Array<{ place: string; timeInMinutes: number }> }
   | { type: "ADD_REMOVED_IMAGE"; id: string }
+  | { type: "SET_LANGUAGE"; lang: "ar" | "en" }
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -684,6 +146,8 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, isLoading: { ...state.isLoading, [action.lang]: action.value } }
     case "SET_NEARBY_PLACES":
       return { ...state, nearbyPlaces: action.value }
+    case "SET_LANGUAGE":
+      return { ...state, currentLang: action.lang }
     default:
       return state
   }
@@ -1218,7 +682,8 @@ export default function EditUnit() {
     existingImages: [],
     isLoading: { ar: false, en: false },
     nearbyPlaces: [],
-    removedImages: []
+    removedImages: [],
+    currentLang: null
   })
 
   const router = useRouter()
@@ -1262,6 +727,8 @@ export default function EditUnit() {
           if (unit.images) {
             dispatch({ type: "SET_EXISTING_IMAGES", value: unit.images })
           }
+
+          dispatch({ type: "SET_LANGUAGE", lang: unit.lang })
         }
       } catch (error) {
         toast.error("Failed to fetch unit data")
@@ -1307,6 +774,22 @@ export default function EditUnit() {
     }
   }
 
+  if (!state.currentLang){
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="relative">
+          <div className="h-24 w-24 rounded-full border-t-4 border-b-4 border-primary animate-spin"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="h-16 w-16 rounded-full border-t-4 border-b-4 border-secondary animate-spin"></div>
+          </div>
+          <div className="mt-4 text-center text-gray-600 font-medium">
+            جاري التحميل...
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -1314,31 +797,28 @@ export default function EditUnit() {
       <main className="pt-16 px-4 sm:px-6 lg:px-8">
         <Card className="max-w-7xl mx-auto">
           <CardHeader>
-            <CardTitle className={params.lang === "ar" ? "text-right" : "text-left"}>
-              {params.lang === "ar" ? "تعديل الوحدة" : "Edit Unit"}
+            <CardTitle dir={state.currentLang === "ar" ? "rtl" : "ltr"}>
+              {state.currentLang === "ar" ? "تعديل الوحدة" : "Edit Unit"}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <TabComponent
-              arabicContent={
-                <UnitForm
-                  lang="ar"
-                  form={forms.ar}
-                  onSubmit={onSubmit}
-                  state={state}
-                  dispatch={dispatch}
-                />
-              }
-              englishContent={
-                <UnitForm
-                  lang="en"
-                  form={forms.en}
-                  onSubmit={onSubmit}
-                  state={state}
-                  dispatch={dispatch}
-                />
-              }
-            />
+            {state.currentLang === "ar" ? (
+              <UnitForm
+                lang="ar"
+                form={forms.ar}
+                onSubmit={onSubmit}
+                state={state}
+                dispatch={dispatch}
+              />
+            ) : (
+              <UnitForm
+                lang="en"
+                form={forms.en}
+                onSubmit={onSubmit}
+                state={state}
+                dispatch={dispatch}
+              />
+            )}
           </CardContent>
         </Card>
       </main>

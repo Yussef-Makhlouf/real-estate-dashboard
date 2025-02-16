@@ -97,24 +97,25 @@ export default function Blog() {
   const BlogGrid = ({ posts }: { posts: BlogPost[] }) => (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" dir="rtl">
       {posts.map((post) => (
-        <Card key={post._id} className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
-          <div className="relative">
+        <Card key={post._id} className="group flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-lg border border-gray-200">
+          <div className="relative aspect-[16/9] overflow-hidden">
             <img
               src={post.Image?.secure_url}
               alt={post.title}
-              className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
-            <div className="absolute top-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm flex items-center">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-gray-800 px-3 py-1 rounded-full text-sm flex items-center">
               <Eye className="w-4 h-4 mr-1" />
               {post.views}
             </div>
           </div>
-
-          <CardHeader className="space-y-2">
-            <CardTitle className="text-xl font-bold line-clamp-2">
+  
+          <CardHeader className="space-y-2 flex-1">
+            <CardTitle className="text-xl font-bold line-clamp-2 hover:text-[#20284D] transition-colors">
               {post.title}
             </CardTitle>
-            <CardDescription className="flex items-center text-gray-500">
+            <CardDescription className="flex items-center text-gray-500 text-sm">
               <Calendar className="w-4 h-4 ml-2" />
               {new Date(post.createdAt).toLocaleDateString('ar-SA', {
                 year: 'numeric',
@@ -123,35 +124,45 @@ export default function Blog() {
               })}
             </CardDescription>
           </CardHeader>
-
-          <CardContent className="space-y-4">
+  
+          <CardContent className="flex-1 space-y-4">
             <div className="flex flex-wrap gap-2">
-              {post.Keywords.map((keyword, index) => (
+              {post.Keywords.slice(0, 3).map((keyword, index) => (
                 <span 
                   key={index} 
-                  className="inline-flex items-center bg-primary/10 text-primary px-3 py-1 rounded-full text-sm"
+                  className="inline-flex items-center bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-[#20284D] hover:text-white transition-colors"
                 >
                   <Tag className="w-3 h-3 ml-1" />
                   {keyword}
                 </span>
-             
               ))}
+              {post.Keywords.length > 3 && (
+                <span className="text-sm text-gray-500">+{post.Keywords.length - 3}</span>
+              )}
             </div>
-            <div>
-                  <p  className="text-gray-500">{post.description}</p>
-                </div>
-            <div className="flex justify-end space-x-2 rtl:space-x-reverse pt-4">
+            
+            <div className="prose prose-sm">
+              <p className="text-gray-600 line-clamp-3">
+                {post.description}
+              </p>
+            </div>
+  
+            <div className="flex justify-end space-x-2 rtl:space-x-reverse pt-4 border-t">
               <Link href={`/blog/edit/${post._id}`}>
-                <Button variant="outline" size="sm" className="hover:bg-primary/5">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="bg-[#20284DE5] text-white hover:bg-[#AA9554] transition-colors duration-300"
+                >
                   <Edit className="h-4 w-4 ml-2" />
                   تعديل
                 </Button>
               </Link>
               <Button
-                variant="destructive"
+                variant="outline"
                 size="sm"
                 onClick={() => handleDelete(post._id)}
-                className="hover:bg-red-600"
+                className="border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors duration-300"
               >
                 <Trash2 className="h-4 w-4 ml-2" />
                 حذف
@@ -160,9 +171,9 @@ export default function Blog() {
           </CardContent>
         </Card>
       ))}
-
+  
       {posts.length === 0 && (
-        <div className="col-span-full text-center py-12">
+        <div className="col-span-full text-center py-12 bg-gray-50 rounded-lg">
           <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900">لا توجد مقالات</h3>
           <p className="mt-2 text-gray-500">ابدأ بإضافة مقالات جديدة</p>
@@ -170,7 +181,7 @@ export default function Blog() {
       )}
     </div>
   )
-
+  
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">

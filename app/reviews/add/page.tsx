@@ -80,9 +80,8 @@ const Form = ({ lang, forms, onSubmit, state, dispatch }: {
           <label className="block text-sm font-medium">{lang === "ar" ? "الصورة" : "Image"}</label>
           <ImageUpload
             onImagesChange={(images) => setValue("image", images[0])}
-
-            language={lang}
-          />
+            maxImages={1}
+            language={lang} existingImages={[]} />
         </div>
 
         <Button type="submit" disabled={state.isLoading[lang]} className="w-full">

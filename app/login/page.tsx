@@ -48,7 +48,7 @@ export default function Login() {
           document.cookie = `auth-token=${data.token}; path=/; secure; samesite=strict`
           localStorage.setItem('token', data.userUpdated.token)
           toast.success("تم تسجيل الدخول بنجاح!")
-          router.push('/roles')
+          router.push('/')
         } else {
           throw new Error(data.message || "فشل تسجيل الدخول")
         }
@@ -92,7 +92,7 @@ export default function Login() {
                   alt="Logo"
                   fill
                   className="object-contain"
-                  priority
+                  style={{ objectFit: 'contain' }}
                 />
               </div>
               <h2 className="text-3xl font-bold text-gray-900">
