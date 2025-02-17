@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { faqSchema } from "@/lib/schemas"
-import { toast } from "react-hot-toast"
+import toast, { Toaster } from 'react-hot-toast'
 import { useRouter, useParams } from 'next/navigation'
 import type { z } from "zod"
 
@@ -256,6 +256,34 @@ export default function EditFAQ() {
           </CardContent>
         </Card>
       </main>
+      <Toaster
+  position="top-center"
+  toastOptions={{
+    duration: 3000,
+    style: {
+      background: '#333',
+      color: '#fff',
+      padding: '16px',
+      fontSize: '16px'
+    },
+    success: {
+      style: {
+        background: '#10B981'
+      }
+    },
+    error: {
+      style: {
+        background: '#EF4444'
+      }
+    },
+    loading: {
+      style: {
+        background: '#3B82F6'
+      }
+    }
+  }}
+/>
+
     </div>
   )
 }

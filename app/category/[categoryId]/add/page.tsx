@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { TabComponent } from "@/components/ui/tab-component"
 import { ImageUpload } from "@/components/ui/image-upload"
-import { toast } from "react-hot-toast"
+import toast, { Toaster } from 'react-hot-toast'
 import { useRouter, useParams } from 'next/navigation'
 import * as z from "zod"
 import {
@@ -475,6 +475,34 @@ export default function AddUnit() {
           </CardContent>
         </Card>
       </main>
+      <Toaster
+  position="top-center"
+  toastOptions={{
+    duration: 3000,
+    style: {
+      background: '#333',
+      color: '#fff',
+      padding: '16px',
+      fontSize: '16px'
+    },
+    success: {
+      style: {
+        background: '#10B981'
+      }
+    },
+    error: {
+      style: {
+        background: '#EF4444'
+      }
+    },
+    loading: {
+      style: {
+        background: '#3B82F6'
+      }
+    }
+  }}
+/>
+
     </div>
   )
 }
