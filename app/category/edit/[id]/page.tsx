@@ -100,7 +100,7 @@
 //       </div>
 //     )
 //   }
-  
+
 
 //   const formContent = language === "ar" ? (
 //     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -312,10 +312,10 @@ export default function EditProperty({ params }: { params: { id: string } }) {
 
   const onSubmit = async (data: FormData) => {
     const loadingToast = toast.loading(language === "ar" ? "جاري التحديث..." : "Updating...")
-    
+
     try {
       const formData = new FormData()
-      
+
       // Add text data
       formData.append("title", data.title)
       formData.append("location", data.location)
@@ -324,17 +324,17 @@ export default function EditProperty({ params }: { params: { id: string } }) {
       formData.append("coordinates", JSON.stringify(data.coordinates))
       formData.append("googleMapsLink", googleMapsLink)
       formData.append("lang", language)
-  
+
       // Add image if it exists and is a File
       if (data.image instanceof File) {
         formData.append("image", data.image)
       }
-  
+
       const response = await fetch(`https://tasis-al-bina.onrender.com/category/update/${params.id}`, {
         method: "PUT",
         body: formData // Don't set Content-Type header - browser will set it automatically with boundary
       })
-  
+
       if (response.ok) {
         toast.dismiss(loadingToast)
         toast.success(language === "ar" ? "تم تحديث المشروع بنجاح" : "Project updated successfully")
@@ -412,21 +412,28 @@ export default function EditProperty({ params }: { params: { id: string } }) {
         <div className="space-y-2">
           <label className="block text-sm font-medium">الصور</label>
           <ImageUpload
-  onImagesChange={(files) => setValue("image", files[0])}
-  maxImages={1}
-  language="ar"
-  initialImages={[
-    watch("image")?.secure_url ||
-    watch("image")?.secure_url ||
-    watch("image") ||
-    watch("image")
-  ].filter(Boolean)}
-  existingImages={[]}
-/>
+            onImagesChange={(files) => {
+              if (files[0]) {
+                setValue("image", files[0])
+                // Create preview URL for immediate display
+                const previewUrl = URL.createObjectURL(files[0])
+                setValue("imagePreview", previewUrl)
+              }
+            }}
+            maxImages={1}
+            language="ar"
+            initialImages={[
+              watch("imagePreview") || // Show preview for newly uploaded image
+              watch("image")?.secure_url || // Show existing image from API
+              (typeof watch("image") === "string" ? watch("image") : "") // Fallback for direct URLs
+            ].filter(Boolean)}
+            existingImages={[]}
+          />
+
 
         </div>
       </div>
-      <Button  type="submit" >حفظ التغييرات</Button>
+      <Button type="submit" >حفظ التغييرات</Button>
     </form>
   ) : (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -474,17 +481,24 @@ export default function EditProperty({ params }: { params: { id: string } }) {
         <div className="space-y-2">
           <label className="block text-sm font-medium">Images</label>
           <ImageUpload
-  onImagesChange={(files) => setValue("image", files[0])}
-  maxImages={1}
-  language="en"
-  initialImages={[
-    watch("image")?.secure_url ||
-    watch("image")?.secure_url ||
-    watch("image") ||
-    watch("image")
-  ].filter(Boolean)}
-  existingImages={[]}
-/>
+            onImagesChange={(files) => {
+              if (files[0]) {
+                setValue("image", files[0])
+                // Create preview URL for immediate display
+                const previewUrl = URL.createObjectURL(files[0])
+                setValue("imagePreview", previewUrl)
+              }
+            }}
+            maxImages={1}
+            language="en"
+            initialImages={[
+              watch("imagePreview") || // Show preview for newly uploaded image
+              watch("image")?.secure_url || // Show existing image from API
+              (typeof watch("image") === "string" ? watch("image") : "") // Fallback for direct URLs
+            ].filter(Boolean)}
+            existingImages={[]}
+          />
+
 
         </div>
       </div>
@@ -494,33 +508,33 @@ export default function EditProperty({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-gray-100">
-       <Toaster
-  position="top-center"
-  toastOptions={{
-    duration: 3000,
-    style: {
-      background: '#333',
-      color: '#fff',
-      padding: '16px',
-      fontSize: '16px'
-    },
-    success: {
-      style: {
-        background: '#10B981'
-      }
-    },
-    error: {
-      style: {
-        background: '#EF4444'
-      }
-    },
-    loading: {
-      style: {
-        background: '#3B82F6'
-      }
-    }
-  }}
-/>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#333',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '16px'
+          },
+          success: {
+            style: {
+              background: '#10B981'
+            }
+          },
+          error: {
+            style: {
+              background: '#EF4444'
+            }
+          },
+          loading: {
+            style: {
+              background: '#3B82F6'
+            }
+          }
+        }}
+      />
 
       <Header />
       <Sidebar />
