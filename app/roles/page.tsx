@@ -27,6 +27,7 @@ import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/compone
 type UserEditSchema = z.infer<typeof userEditSchema>
 
 interface User {
+  phoneNumber: string | undefined
   _id: string
   firstName: string
   middleName: string
@@ -54,7 +55,8 @@ function UsersListContent() {
       firstName: "",
       middleName: "",
       lastName: "",
-      phoneNumber: ""
+      phoneNumber: " ",
+      role: 'Admin', 
 
     }
   })
@@ -108,9 +110,9 @@ function UsersListContent() {
       firstName: user.firstName,
       middleName: user.middleName,
       lastName: user.lastName,
-      phoneNumber: user.phone,
+      phoneNumber: user.phoneNumber,
       role: user.role,
-      email: user.email
+      // email: user.email
     })
     setEditingUser(user)
     setEditDialogOpen(true)
@@ -432,22 +434,12 @@ function UsersListContent() {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">البريد الإلكتروني</Label>
-          <Input 
-            {...form.register("email")} 
-            type="email"
-            className="w-full border rounded-md"
-            placeholder="أدخل البريد الإلكتروني"
-            dir="ltr"
-            disabled
-          />
-        </div>
+   
 
         <div className="space-y-2">
           <Label className="text-sm font-medium">نوع المستخدم</Label>
           <Select 
-            onValueChange={(value) => form.setValue("role", value)}
+            onValueChange={(value: "Admin" | "SuperAdmin") => form.setValue("role", value)}
             defaultValue={form.getValues("role")}
           >
             <SelectTrigger  className="w-full">
@@ -455,8 +447,8 @@ function UsersListContent() {
             </SelectTrigger>
             <SelectContent>
               
-              <SelectItem value="admin">مشرف</SelectItem>
-              <SelectItem value="superadmin">مدير</SelectItem>
+              <SelectItem value="SuperAdmin">مشرف</SelectItem>
+              <SelectItem value="Admin">مدير</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -497,8 +489,7 @@ function UsersListContent() {
         </div>
       </main>
     </div>
-  )
-}
+  )}
 
 export default function UsersList() {
   return (

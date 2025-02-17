@@ -41,4 +41,7 @@ export const userEditSchema = z.object({
     .max(50, "الاسم الأخير طويل جداً"),
   phoneNumber: z.string()
     .regex(saudiPhoneRegex, "يجب إدخال رقم هاتف سعودي صالح"),
+    role: z.enum(["Admin", "SuperAdmin"], {
+      required_error: "يرجى اختيار نوع المستخدم",
+    }),
 });
