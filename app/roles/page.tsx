@@ -12,10 +12,10 @@ import { Search, Plus, UserPlus, Users, Shield, Settings, Edit, Trash2 } from "l
 import Link from "next/link"
 import { SidebarProvider } from "@/components/SidebarProvider"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
-import { useToast } from "@/components/ui/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 
+import toast, { Toaster } from 'react-hot-toast'
 
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -38,6 +38,7 @@ interface User {
 }
 
 function UsersListContent() {
+    const router = useRouter();
   const [users, setUsers] = useState<User[]>([])
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("")
@@ -45,9 +46,8 @@ function UsersListContent() {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
 
-  const { toast } = useToast()
+ 
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   const form = useForm<UserEditSchema>({
     resolver: zodResolver(userEditSchema),
@@ -119,6 +119,8 @@ function UsersListContent() {
   }
   
   const onSubmit = async (data: UserEditSchema) => {
+    const loadingToast = toast.loading("جاري تحديث البيانات...")
+    
     try {
       const token = localStorage.getItem('token')
       await axios.put(
@@ -134,70 +136,75 @@ function UsersListContent() {
       
       fetchUsers()
       setEditDialogOpen(false)
-      toast({
-        title: "تم التحديث بنجاح",
-        description: "تم تحديث بيانات المستخدم"
+      
+      toast.dismiss(loadingToast)
+      toast.success("تم تحديث البيانات بنجاح", {
+        style: {
+          direction: 'rtl'
+        }
       })
+  
     } catch (error) {
-      // Handle specific error cases
+      toast.dismiss(loadingToast)
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
-          router.push('/login');
+          toast.error("يرجى تسجيل الدخول أولاً", {
+            style: { direction: 'rtl' }
+          })
+          router.push('/login')
         }
-        // You can add toast notification here for user feedback
         if (error.response?.status === 403) {
-          toast({
-            variant: "destructive",
-            title: "غير مصرح",
-            description: "ليس لديك الصلاحية لحذف مستخدم"
+          toast.error("ليس لديك الصلاحية للتعديل", {
+            style: { direction: 'rtl' }
           })
         }
       }
-      
     }
   }
   
-
-
-
   const confirmDelete = async () => {
     if (UserToDelete) {
+      const loadingToast = toast.loading("جاري حذف المستخدم...")
+      
       try {
-        const token = localStorage.getItem('token');
-        
+        const token = localStorage.getItem('token')
         await axios.delete(`https://tasis-al-bina.onrender.com/auth/delete/${UserToDelete}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
-        });
+        })
   
-        // Only update UI after successful deletion
-        setUsers(users.filter(user => user._id !== UserToDelete));
-        fetchUsers(); // Refresh the list
+        setUsers(users.filter(user => user._id !== UserToDelete))
+        fetchUsers()
+        
+        toast.dismiss(loadingToast)
+        toast.success("تم حذف المستخدم بنجاح", {
+          style: { direction: 'rtl' }
+        })
   
       } catch (error) {
-        // Handle specific error cases
+        toast.dismiss(loadingToast)
         if (axios.isAxiosError(error)) {
           if (error.response?.status === 401) {
-            router.push('/login');
+            toast.error("يرجى تسجيل الدخول أولاً", {
+              style: { direction: 'rtl' }
+            })
+            router.push('/login')
           }
-          // You can add toast notification here for user feedback
           if (error.response?.status === 403) {
-            toast({
-              variant: "destructive",
-              title: "غير مصرح",
-              description: "ليس لديك الصلاحية لحذف مستخدم"
+            toast.error("ليس لديك الصلاحية للحذف", {
+              style: { direction: 'rtl' }
             })
           }
         }
-        
       } finally {
-        setDeleteDialogOpen(false);
-        setUserToDelete(null);
+        setDeleteDialogOpen(false)
+        setUserToDelete(null)
       }
     }
-  };
+  }
+  
   
 
   
@@ -488,6 +495,34 @@ function UsersListContent() {
           </div>
         </div>
       </main>
+      <Toaster
+  position="top-center"
+  toastOptions={{
+    duration: 3000,
+    style: {
+      background: '#333',
+      color: '#fff',
+      padding: '16px',
+      fontSize: '16px'
+    },
+    success: {
+      style: {
+        background: '#10B981'
+      }
+    },
+    error: {
+      style: {
+        background: '#EF4444'
+      }
+    },
+    loading: {
+      style: {
+        background: '#3B82F6'
+      }
+    }
+  }}
+/>
+
     </div>
   )}
 
