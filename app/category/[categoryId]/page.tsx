@@ -81,7 +81,7 @@ export default function UnitsPage() {
   const confirmDelete = async () => {
     if (propertyToDelete) {
       try {
-        await axios.delete(`https://tasis-al-bina.onrender.com/unit/delete/${propertyToDelete}`)
+        await axios.delete(`https://tasis-al-bina.onrender.com/unit/deleteunit/${propertyToDelete}`)
         setUnits(prev => prev.filter(unit => unit._id !== propertyToDelete))
       } catch (err) {
         console.error("Error deleting unit:", err)

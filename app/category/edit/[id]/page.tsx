@@ -234,10 +234,12 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { categorySchema } from "@/lib/schemas"
 import type { z } from "zod"
+import toast, { Toaster } from 'react-hot-toast';
 
 type FormData = z.infer<typeof categorySchema>
 
 export default function EditProperty({ params }: { params: { id: string } }) {
+
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [language, setLanguage] = useState<"ar" | "en">("ar")
@@ -325,10 +327,12 @@ export default function EditProperty({ params }: { params: { id: string } }) {
           lang: language,
         }),
       })
-      if (response.ok) {
-        router.push("/category")
+     if (response.ok) {
+        toast.success(language === "ar" ? "تم تحديث المشروع بنجاح" : "Project updated successfully");
+        router.push("/category");
       }
     } catch (error) {
+      toast.error(language === "ar" ? "حدث خطأ أثناء التحديث" : "Error updating project");
       console.error("Error updating category:", error)
     }
   }
@@ -409,7 +413,7 @@ export default function EditProperty({ params }: { params: { id: string } }) {
 
         </div>
       </div>
-      <Button type="submit">حفظ التغييرات</Button>
+      <Button  type="submit" >حفظ التغييرات</Button>
     </form>
   ) : (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -477,6 +481,7 @@ export default function EditProperty({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-gray-100">
+        <Toaster position="top-center" />
       <Header />
       <Sidebar />
       <main className="pt-16 px-4 sm:px-6 lg:px-8" dir={language === "ar" ? "rtl" : "ltr"}>

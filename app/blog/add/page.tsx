@@ -154,6 +154,7 @@ const reducer = (state: State, action: Action): State => {
 }
 
 export default function AddBlogPost() {
+  const router = useRouter();
   const [state, dispatch] = useReducer(reducer, {
     keywords: { ar: [], en: [] },
     newKeyword: { ar: "", en: "" },
@@ -196,8 +197,7 @@ export default function AddBlogPost() {
 
       console.log("Article published successfully:", result);
       toast.success(lang === "ar" ? "تم نشر المقال بنجاح" : "Article published successfully");
-
-      const router = useRouter();
+      
       router.push("/blog");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Error publishing article")
