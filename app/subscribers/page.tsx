@@ -52,9 +52,9 @@ function SubscribersContent() {
                       <TableHead className="w-1/3 p-4 text-right font-bold text-gray-700 border-b">
                         تاريخ الاشتراك
                       </TableHead>
-                      <TableHead className="w-1/3 p-4 text-right font-bold text-gray-700 border-b">
+                      {/* <TableHead className="w-1/3 p-4 text-right font-bold text-gray-700 border-b">
                         الحالة
-                      </TableHead>
+                      </TableHead> */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -69,7 +69,7 @@ function SubscribersContent() {
                         <TableCell className="p-4 text-right">
                           {new Date(subscriber.createdAt).toLocaleString('ar-SA')}
                         </TableCell>
-                        <TableCell className="p-4 text-right">
+                        {/* <TableCell className="p-4 text-right">
                           <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-medium ${
                             subscriber.isRead 
                               ? 'bg-green-100 text-green-800' 
@@ -77,7 +77,7 @@ function SubscribersContent() {
                           }`}>
                             {subscriber.isRead ? 'مقروء' : 'جديد'}
                           </span>
-                        </TableCell>
+                        </TableCell> */}
                       </TableRow>
                     ))}
                   </TableBody>
