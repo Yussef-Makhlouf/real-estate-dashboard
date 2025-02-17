@@ -311,30 +311,43 @@ export default function EditProperty({ params }: { params: { id: string } }) {
   }
 
   const onSubmit = async (data: FormData) => {
+    const loadingToast = toast.loading(language === "ar" ? "جاري التحديث..." : "Updating...")
+    
     try {
+      const formData = new FormData()
+      
+      // Add text data
+      formData.append("title", data.title)
+      formData.append("location", data.location)
+      formData.append("area", data.area.toString())
+      formData.append("description", data.description)
+      formData.append("coordinates", JSON.stringify(data.coordinates))
+      formData.append("googleMapsLink", googleMapsLink)
+      formData.append("lang", language)
+  
+      // Add image if it exists and is a File
+      if (data.image instanceof File) {
+        formData.append("image", data.image)
+      }
+  
       const response = await fetch(`https://tasis-al-bina.onrender.com/category/update/${params.id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: data.title,
-          location: data.location,
-          area: data.area,
-          description: data.description,
-          coordinates: data.coordinates,
-          googleMapsLink: googleMapsLink, // إضافة الرابط إلى البيانات المرسلة
-          lang: language,
-        }),
+        body: formData // Don't set Content-Type header - browser will set it automatically with boundary
       })
-     if (response.ok) {
-        toast.success(language === "ar" ? "تم تحديث المشروع بنجاح" : "Project updated successfully");
-        router.push("/category");
+  
+      if (response.ok) {
+        toast.dismiss(loadingToast)
+        toast.success(language === "ar" ? "تم تحديث المشروع بنجاح" : "Project updated successfully")
+        router.push("/category")
       }
     } catch (error) {
-      toast.error(language === "ar" ? "حدث خطأ أثناء التحديث" : "Error updating project");
+      toast.dismiss(loadingToast)
+      toast.error(language === "ar" ? "حدث خطأ أثناء التحديث" : "Error updating project")
       console.error("Error updating category:", error)
     }
+  }
+  const handleImageChange = (file: File) => {
+    setValue("image", file)
   }
 
   if (isLoading) {
@@ -403,9 +416,9 @@ export default function EditProperty({ params }: { params: { id: string } }) {
   maxImages={1}
   language="ar"
   initialImages={[
-    watch("Image")?.secure_url ||
     watch("image")?.secure_url ||
-    watch("Image") ||
+    watch("image")?.secure_url ||
+    watch("image") ||
     watch("image")
   ].filter(Boolean)}
   existingImages={[]}
@@ -465,9 +478,9 @@ export default function EditProperty({ params }: { params: { id: string } }) {
   maxImages={1}
   language="en"
   initialImages={[
-    watch("Image")?.secure_url ||
     watch("image")?.secure_url ||
-    watch("Image") ||
+    watch("image")?.secure_url ||
+    watch("image") ||
     watch("image")
   ].filter(Boolean)}
   existingImages={[]}

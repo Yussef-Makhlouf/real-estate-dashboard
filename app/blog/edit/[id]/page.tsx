@@ -66,14 +66,14 @@ const reducer = (state: any, action: any) => {
   }
 }
 export default function EditBlogPost() {
+  const router = useRouter()
   const [articleLanguage, setArticleLanguage] = useState<'ar' | 'en' | null>(null)
   const [state, dispatch] = useReducer(reducer, {
     keywords: { ar: [], en: [] },
     newKeyword: { ar: "", en: "" },
     isLoading: { ar: false, en: false },
   })
-
-  const router = useRouter()
+ 
   const params = useParams()
 
   const form = useForm({
@@ -259,7 +259,7 @@ export default function EditBlogPost() {
                     onImagesChange={(images) => form.setValue("image", images[0])}
                     initialImages={[
                       form.watch("Image")?.secure_url ||
-                      form.watch("image")?.secure_url ||
+                      form.watch("Image")?.secure_url ||
                       form.watch("Image") ||
                       form.watch("image")
                     ].filter(Boolean)}
