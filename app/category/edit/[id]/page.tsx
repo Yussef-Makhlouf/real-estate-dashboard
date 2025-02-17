@@ -481,7 +481,34 @@ export default function EditProperty({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-gray-100">
-        <Toaster position="top-center" />
+       <Toaster
+  position="top-center"
+  toastOptions={{
+    duration: 3000,
+    style: {
+      background: '#333',
+      color: '#fff',
+      padding: '16px',
+      fontSize: '16px'
+    },
+    success: {
+      style: {
+        background: '#10B981'
+      }
+    },
+    error: {
+      style: {
+        background: '#EF4444'
+      }
+    },
+    loading: {
+      style: {
+        background: '#3B82F6'
+      }
+    }
+  }}
+/>
+
       <Header />
       <Sidebar />
       <main className="pt-16 px-4 sm:px-6 lg:px-8" dir={language === "ar" ? "rtl" : "ltr"}>

@@ -197,7 +197,7 @@ export default function AddBlogPost() {
 
       console.log("Article published successfully:", result);
       toast.success(lang === "ar" ? "تم نشر المقال بنجاح" : "Article published successfully");
-      
+
       router.push("/blog");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Error publishing article")
@@ -209,7 +209,34 @@ export default function AddBlogPost() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Toaster position="top-center" />
+     <Toaster
+  position="top-center"
+  toastOptions={{
+    duration: 3000,
+    style: {
+      background: '#333',
+      color: '#fff',
+      padding: '16px',
+      fontSize: '16px'
+    },
+    success: {
+      style: {
+        background: '#10B981'
+      }
+    },
+    error: {
+      style: {
+        background: '#EF4444'
+      }
+    },
+    loading: {
+      style: {
+        background: '#3B82F6'
+      }
+    }
+  }}
+/>
+
 
       <Header />
       <Sidebar />

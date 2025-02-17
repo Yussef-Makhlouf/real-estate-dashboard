@@ -254,7 +254,34 @@ export default function Blog() {
         title="تأكيد الحذف"
         description="هل أنت متأكد من حذف هذا المقال؟ لا يمكن التراجع عن هذا الإجراء."
       />
-        <Toaster/>
+    <Toaster
+  position="top-center"
+  toastOptions={{
+    duration: 3000,
+    style: {
+      background: '#333',
+      color: '#fff',
+      padding: '16px',
+      fontSize: '16px'
+    },
+    success: {
+      style: {
+        background: '#10B981'
+      }
+    },
+    error: {
+      style: {
+        background: '#EF4444'
+      }
+    },
+    loading: {
+      style: {
+        background: '#3B82F6'
+      }
+    }
+  }}
+/>
+
     </div>
   )
 }
