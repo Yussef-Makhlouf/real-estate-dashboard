@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { toast } from "@/components/ui/use-toast"
+import toast, { Toaster } from 'react-hot-toast'
 import { Header } from "@/components/Header"
 import { Sidebar } from "@/components/Sidebar"
 import { SidebarProvider } from "@/components/SidebarProvider"
@@ -55,15 +55,15 @@ export default function UsersPage() {
   const sendVerificationCode = async () => {
     const email = form.getValues("email")
     if (!email) {
-      toast({
-        title: "تنبيه",
-        description: "يرجى إدخال البريد الإلكتروني أولاً",
-        variant: "destructive",
+      toast.error("يرجى إدخال البريد الإلكتروني أولاً", {
+        style: { direction: 'rtl' }
       })
       return
     }
-
+  
+    const loadingToast = toast.loading("جاري إرسال رمز التحقق...")
     setIsSendingCode(true)
+  
     try {
       const response = await fetch("https://tasis-al-bina.onrender.com/auth/sendEmailNew", {
         method: "POST",
@@ -72,32 +72,36 @@ export default function UsersPage() {
         },
         body: JSON.stringify({ email }),
       })
-
+  
       if (!response.ok) throw new Error("فشل في إرسال رمز التحقق")
-
-      toast({
-        title: "تم بنجاح",
-        description: "تم إرسال رمز التحقق إلى بريدك الإلكتروني",
+  
+      toast.dismiss(loadingToast)
+      toast.success("تم إرسال رمز التحقق إلى بريدك الإلكتروني", {
+        style: { direction: 'rtl' }
       })
     } catch (error) {
-      toast({
-        title: "خطأ",
-        description: "فشل في إرسال رمز التحقق",
-        variant: "destructive",
+      toast.dismiss(loadingToast)
+      toast.error("فشل في إرسال رمز التحقق", {
+        style: { direction: 'rtl' }
       })
     } finally {
       setIsSendingCode(false)
     }
   }
-
+  
   const onSubmit = async (data: any) => {
+    const loadingToast = toast.loading("جاري إضافة المستخدم...")
     setIsLoading(true)
+  
     try {
-      const token = localStorage.getItem("token");
-        if (!token) {
-          console.error("No token found!");
-          return;
-        }
+      const token = localStorage.getItem("token")
+      if (!token) {
+        toast.error("يرجى تسجيل الدخول أولاً", {
+          style: { direction: 'rtl' }
+        })
+        return
+      }
+  
       const response = await fetch("https://tasis-al-bina.onrender.com/auth/add", {
         method: "POST",
         headers: {
@@ -106,36 +110,32 @@ export default function UsersPage() {
         },
         body: JSON.stringify(data),
       })
-
-      console.log(data);
-      
-
+  
+      if (response?.status === 403) {
+        toast.dismiss(loadingToast)
+        toast.error("ليس لديك الصلاحية لإضافة مستخدم", {
+          style: { direction: 'rtl' }
+        })
+        return
+      }
+  
       if (!response.ok) throw new Error("فشل في إضافة المستخدم")
-
-        if(response?.status === 403) {
-          toast({
-            title: "خطأ",
-            description: "ليس لديك الصلاحية لإضافة مستخدم",
-            variant: "destructive",
-          })
-          return
-        } 
-
-      toast({
-        title: "تم بنجاح",
-        description: "تم إضافة المستخدم الجديد إلى النظام",
+  
+      toast.dismiss(loadingToast)
+      toast.success("تم إضافة المستخدم الجديد بنجاح", {
+        style: { direction: 'rtl' }
       })
       form.reset()
     } catch (error) {
-      toast({
-        title: "خطأ",
-        description: "فشل في إضافة المستخدم",
-        variant: "destructive",
+      toast.dismiss(loadingToast)
+      toast.error("فشل في إضافة المستخدم", {
+        style: { direction: 'rtl' }
       })
     } finally {
       setIsLoading(false)
     }
   }
+  
 
   return (
     <SidebarProvider>
@@ -318,6 +318,34 @@ export default function UsersPage() {
             </Card>
           </div>
         </main>
+        <Toaster
+  position="top-center"
+  toastOptions={{
+    duration: 3000,
+    style: {
+      background: '#333',
+      color: '#fff',
+      padding: '16px',
+      fontSize: '16px'
+    },
+    success: {
+      style: {
+        background: '#10B981'
+      }
+    },
+    error: {
+      style: {
+        background: '#EF4444'
+      }
+    },
+    loading: {
+      style: {
+        background: '#3B82F6'
+      }
+    }
+  }}
+/>
+
       </div>
     </SidebarProvider>
   )

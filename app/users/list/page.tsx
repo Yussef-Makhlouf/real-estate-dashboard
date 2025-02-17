@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Search, Plus } from "lucide-react"
 import Link from "next/link"
 import { SidebarProvider } from "@/components/SidebarProvider"
+import toast, { Toaster } from 'react-hot-toast'
 
 interface User {
   _id: string
