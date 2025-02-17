@@ -255,7 +255,7 @@ function UsersListContent() {
                     <div>
                       <p className="text-lg font-semibold">المشرفين</p>
                       <h3 className="text-3xl font-bold mt-2">
-                        {users.filter(u => u.role === "Admin").length}
+                        {users.filter(u => u.role === "SuperAdmin").length}
                       </h3>
                     </div>
                     <Shield className="h-12 w-12 opacity-80" />
@@ -267,9 +267,9 @@ function UsersListContent() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-lg font-semibold">المستخدمين النشطين</p>
+                      <p className="text-lg font-semibold"> المديرين</p>
                       <h3 className="text-3xl font-bold mt-2">
-                        {users.length}
+                      {users.filter(u => u.role === "Admin").length}
                       </h3>
                     </div>
                     <Settings className="h-12 w-12 opacity-80" />
