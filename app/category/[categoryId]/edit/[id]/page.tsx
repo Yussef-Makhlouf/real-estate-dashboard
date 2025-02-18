@@ -273,6 +273,8 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     type="number"
                     step="any"
                     placeholder="25.276987"
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+
                   />
                 </FormControl>
                 <FormMessage />
@@ -292,6 +294,9 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     type="number"
                     step="any"
                     placeholder="55.296249"
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                 
+
                   />
                 </FormControl>
                 <FormMessage />
@@ -362,7 +367,8 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     {...field}
                     type="number"
                     placeholder={lang === "ar" ? "أدخل السعر" : "Enter price"}
-                   
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+
                   />
                 </FormControl>
                 <FormMessage className="text-sm text-red-500" />
@@ -384,7 +390,8 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     {...field}
                     type="number"
                     placeholder={lang === "ar" ? "أدخل المساحة" : "Enter area"}
-                 
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+
                   />
                 </FormControl>
                 <FormMessage className="text-sm text-red-500" />
@@ -406,7 +413,8 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     {...field}
                     type="number"
                     placeholder={lang === "ar" ? "أدخل عدد الغرف" : "Enter number of rooms"}
-                  
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+
                   />
                 </FormControl>
                 <FormMessage className="text-sm text-red-500" />
@@ -428,7 +436,8 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     {...field}
                     type="number"
                     placeholder={lang === "ar" ? "أدخل عدد الحمامات" : "Enter number of bathrooms"}
-          
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+
                   />
                 </FormControl>
                 <FormMessage className="text-sm text-red-500" />
@@ -450,7 +459,8 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     {...field}
                     type="number"
                     placeholder={lang === "ar" ? "أدخل عدد الصالات" : "Enter number of living rooms"}
-                  
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+
                   />
                 </FormControl>
                 <FormMessage className="text-sm text-red-500" />
@@ -470,6 +480,8 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
             {...field}
             type="number"
             placeholder={lang === "ar" ? "عدد المصاعد" : "Number of elevators"}
+            onChange={(e) => field.onChange(Number(e.target.value))}
+
           />
         </FormControl>
         <FormMessage />
@@ -491,7 +503,8 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     {...field}
                     type="number"
                     placeholder={lang === "ar" ? "أدخل عدد المواقف" : "Enter number of parking spaces"}
-                   
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+
                   />
                 </FormControl>
                 <FormMessage className="text-sm text-red-500" />
@@ -513,6 +526,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     {...field}
                     type="number"
                     placeholder={lang === "ar" ? "أدخل عدد الحراس" : "Enter number of guards"}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
 
                   />
                 </FormControl>
@@ -535,7 +549,8 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     {...field}
                     type="number"
                     placeholder={lang === "ar" ? "أدخل عدد الخزانات" : "Enter number of water tanks"}
-            
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+
                   />
                 </FormControl>
                 <FormMessage className="text-sm text-red-500" />
@@ -557,7 +572,8 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     {...field}
                     type="number"
                     placeholder={lang === "ar" ? "أدخل عدد غرف الخدم" : "Enter number of maid rooms"}
-     
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+
                   />
                 </FormControl>
                 <FormMessage className="text-sm text-red-500" />
@@ -579,7 +595,8 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     {...field}
                     type="number"
                     placeholder={lang === "ar" ? "أدخل عدد الكاميرات" : "Enter number of cameras"}
-              
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+
                   />
                 </FormControl>
                 <FormMessage className="text-sm text-red-500" />
@@ -600,6 +617,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                   <Input
                     {...field}
                     type="number"
+                    onChange={(e) => field.onChange(Number(e.target.value))}
                     placeholder={lang === "ar" ? "أدخل رقم الطابق" : "Enter floor number"}
           
                   />
