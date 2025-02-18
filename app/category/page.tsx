@@ -53,15 +53,15 @@ export default function Category() {
   
       switch (selectedLang) {
         case 'ar':
-          endpoint = `https://tasis-al-bina.onrender.com/category/getAllCategoryAR`;
+          endpoint = `https://tasis-al-bina.onrender.com/category/getAllCategoryARForDashboard`;
           break;
         case 'en':
-          endpoint = `https://tasis-al-bina.onrender.com/category/getAllCategory`;
+          endpoint = `https://tasis-al-bina.onrender.com/category/getAllCategoryENForDashboard`;
           break;
         case 'all':
           const [arResponse, enResponse] = await Promise.all([
-            axios.get(`https://tasis-al-bina.onrender.com/category/getAllCategoryAR`),
-            axios.get(`https://tasis-al-bina.onrender.com/category/getAllCategoryEN`)
+            axios.get(`https://tasis-al-bina.onrender.com/category/getAllCategoryARForDashboard`),
+            axios.get(`https://tasis-al-bina.onrender.com/category/getAllCategoryENForDashboard`)
           ]);
   
           const combinedCategories = [...arResponse.data.category, ...enResponse.data.category];
