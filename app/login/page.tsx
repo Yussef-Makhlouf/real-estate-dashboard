@@ -88,7 +88,7 @@ export default function Login() {
             <div className="text-center">
               <div className="relative w-24 h-24 mx-auto mb-4">
                 <Image
-                  src="/Group.svg"
+                  src="/Group.jpg"
                   alt="Logo"
                   fill
                   className="object-contain"
