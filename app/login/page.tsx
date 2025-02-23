@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import Image from 'next/image'
+
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios'
 import { Loader2, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react'
@@ -86,14 +86,7 @@ export default function Login() {
         <div className="w-full max-w-md p-6">
           <div className="bg-white rounded-2xl shadow-2xl p-8 space-y-8">
             <div className="text-center">
-              <div className="relative w-24 h-24 mx-auto mb-4">
-                <Image
-                  src="/Group.jpg"
-                  alt="Logo"
-                  fill
-                  className="object-contain"
-                  style={{ objectFit: 'contain' }}
-                />
+         
               </div>
               <h2 className="text-3xl font-bold text-gray-900">
                 مرحباً بك
