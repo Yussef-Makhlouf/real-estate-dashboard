@@ -87,7 +87,7 @@ export default function Login() {
           <div className="bg-white rounded-2xl shadow-2xl p-8 space-y-8">
             <div className="text-center">
          
-              </div>
+      
               <h2 className="text-3xl font-bold text-gray-900">
                 مرحباً بك
               </h2>
