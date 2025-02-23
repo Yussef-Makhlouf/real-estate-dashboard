@@ -7,7 +7,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { toast } from 'react-toastify'
 import axios from 'axios'
 import { Loader2, Lock, KeyRound, ArrowRight, RefreshCw } from 'lucide-react'
-import Image from 'next/image'
+
 
 export default function ResetPassword() {
   const searchParams = useSearchParams()
@@ -89,15 +89,7 @@ export default function ResetPassword() {
       <div className="w-full max-w-md p-6">
         <div className="bg-white rounded-2xl shadow-2xl p-8 space-y-8">
           <div className="text-center">
-            <div className="relative w-24 h-24 mx-auto mb-4">
-              <Image
-                src="/logo.svg"
-                alt="Logo"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
+    
             <h2 className="text-3xl font-bold text-gray-900">
               إعادة تعيين كلمة المرور
             </h2>
