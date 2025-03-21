@@ -72,10 +72,10 @@ const createUnitSchema = (lang: 'ar' | 'en') => z.object({
     message: lang === 'ar' ? 'يجب إدخال الموقع' : 'Location is required'
   }),
   coordinates: z.object({
-    latitude: z.string().min(1, {
+    latitude: z.number().min(1, {
       message: lang === 'ar' ? 'يجب إدخال خط العرض' : 'Latitude is required'
     }),
-    longitude: z.string().min(1, {
+    longitude: z.number().min(1, {
       message: lang === 'ar' ? 'يجب إدخال خط الطول' : 'Longitude is required'
     })
   }),
@@ -273,7 +273,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     type="number"
                     step="any"
                     placeholder="25.276987"
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => setMapsUrl(e.target.value)}
 
                   />
                 </FormControl>
@@ -294,7 +294,7 @@ const UnitForm = ({ lang, form, onSubmit, state, dispatch }: {
                     type="number"
                     step="any"
                     placeholder="55.296249"
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => setMapsUrl(e.target.value)}
 
                   />
                 </FormControl>
