@@ -72,10 +72,10 @@ const createUnitSchema = (lang: 'ar' | 'en') => z.object({
     message: lang === 'ar' ? 'يجب إدخال الموقع' : 'Location is required'
   }),
   coordinates: z.object({
-    latitude: z.number().min(1, {
+    latitude: z.string().min(1, {
       message: lang === 'ar' ? 'يجب إدخال خط العرض' : 'Latitude is required'
     }),
-    longitude: z.number().min(1, {
+    longitude: z.string().min(1, {
       message: lang === 'ar' ? 'يجب إدخال خط الطول' : 'Longitude is required'
     })
   }),
